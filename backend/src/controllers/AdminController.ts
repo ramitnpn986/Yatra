@@ -777,7 +777,6 @@ export const getCompletedRides = async (req: Request, res: Response): Promise<Re
 }
 
 
-
 export const getDashboardStats = async (req: Request, res: Response): Promise<Response> => {
     try {
         //  const totalCustomers= await Customer.countDocuments();

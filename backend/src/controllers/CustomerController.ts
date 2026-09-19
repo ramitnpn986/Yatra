@@ -12,6 +12,7 @@ const generateOtp = () => {
 };
 
 
+
 export const registerCustomer = async (req: Request, res: Response) => {
     try {
 
@@ -153,7 +154,6 @@ export const logout = async (req: Request, res: Response) => {
     }
 }
 
-
 export const getCustomerProfile = async (req: Request, res: Response): Promise<Response> => {
     try {
         const customerId = req.user?.customerId;
@@ -230,7 +230,6 @@ export const changeCustomerPassword = async (req: Request, res: Response): Promi
 
 }
 
-
 export const updateCustomerProfile = async (req: Request, res: Response): Promise<Response> => {
     try {
 
@@ -263,7 +262,6 @@ export const updateCustomerProfile = async (req: Request, res: Response): Promis
     }
 
 }
-
 
 export const requestRide = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -390,9 +388,6 @@ export const requestRide = async (req: Request, res: Response): Promise<Response
 
         })
 
-
-
-
     } catch (err) {
         console.log(err)
         return res.status(500).json({
@@ -402,7 +397,6 @@ export const requestRide = async (req: Request, res: Response): Promise<Response
 
     }
 }
-
 
 export const cancelRideRequest = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -460,7 +454,6 @@ export const cancelRideRequest = async (req: Request, res: Response): Promise<Re
         });
     }
 }
-
 
 export const getRideRequestStatus = async (req: Request, res: Response): Promise<Response> => {
     try {

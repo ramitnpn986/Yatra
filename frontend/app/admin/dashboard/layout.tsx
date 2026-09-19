@@ -13,12 +13,12 @@ import {
 import { useRouter } from "next/navigation";
 
 const navItems = [
-  { label: "Overview", href: "/en/admin/dashboard", icon: LayoutDashboard },
-  { label: "Providers", href: "/en/admin/dashboard/providers", icon: Truck },
-  { label: "Customers", href: "/en/admin/dashboard/customers", icon: Users },
+  { label: "Overview", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Providers", href: "/admin/dashboard/providers", icon: Truck },
+  { label: "Customers", href: "/admin/dashboard/customers", icon: Users },
   { label: "Rides", href: "#", icon: Route, disabled: true },
-  { label: "Profile", href: "/en/admin/dashboard/profile", icon: UserCircle },
-  { label: "Password", href: "/en/admin/dashboard/profile/password-change", icon: Lock }
+  { label: "Profile", href: "/admin/dashboard/profile", icon: UserCircle },
+  { label: "Password", href: "/admin/dashboard/profile/password-change", icon: Lock }
 
 ];
 

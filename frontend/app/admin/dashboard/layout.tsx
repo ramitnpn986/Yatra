@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const data = await res.json();
 
       if (res.ok && data.success) {
-        router.push("/en/admin/login");
+        router.push("/admin/login");
         router.refresh();
       } else {
         console.error(data.message || "Logout failed");

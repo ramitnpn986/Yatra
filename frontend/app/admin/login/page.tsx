@@ -34,8 +34,7 @@ export default function AdminLogin() {
                 return
             }
 
-            console.log("login success: ", data);
-            router.push("/en/admin/dashboard");
+            router.push("/admin/dashboard");
             router.refresh();
 
         } catch (err) {

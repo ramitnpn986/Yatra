@@ -94,7 +94,7 @@ transporter(rider)
 
 -  Frontend portion for transporter is not created at only backend is implemented yet.  
 
--  basic backend logic is implemented like customer but other core functionalities are not implemented yet 
+-  basic backend logic is implemented like transporter but other core functionalities are not implemented yet 
 - backend logic for passenger created till now :
  
   register, login, logout, getProfile, updateAvailablity  

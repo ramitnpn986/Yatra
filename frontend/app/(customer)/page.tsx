@@ -77,7 +77,7 @@ export default function Home() {
           <div className="flex w-full max-w-4xl flex-col gap-6 md:flex-row">
   
             <Link
-              href="/en/transporter/register"
+              href="/transporter/register"
               className="flex-1 rounded-2xl border border-gray-100 p-6 text-center shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
             >
               <Car className="mx-auto mb-3 text-primary" size={32} />
@@ -87,7 +87,7 @@ export default function Home() {
 
   
             <Link
-              href="/en/register"
+              href="/register"
               className="flex-1 rounded-2xl border border-gray-100 p-6 text-center shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
             >
               <Package className="mx-auto mb-3 text-primary" size={32} />
@@ -97,7 +97,7 @@ export default function Home() {
 
   
             <Link
-              href="/en/transporter/register"
+              href="/transporter/register"
               className="flex-1 rounded-2xl border border-gray-100 p-6 text-center shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
             >
               <Truck className="mx-auto mb-3 text-primary" size={32} />

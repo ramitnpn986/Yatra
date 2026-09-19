@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <header>
       <nav className="flex items-center justify-between bg-[#0F172A] px-8 py-3">
-        <Link href="/en">
+        <Link href="/">
           <Image
             src="/logo.png"
             alt="Yatra"
@@ -25,7 +25,7 @@ export default function Navbar() {
 
         <div className="flex gap-3">
           <Link
-            href="/en/login"
+            href="/login"
             className="rounded border border-white px-4 py-2 text-[#60A5FA] transition hover:text-white"
           >
             Login
@@ -71,7 +71,7 @@ export default function Navbar() {
 
           <div className="grid gap-4">
             <Link
-              href="/en/register"
+              href="/register"
               onClick={closeMenu}
               className="group rounded-2xl  p-6 transition hover:border-blue-500 hover:bg-gray-100"
             >
@@ -87,7 +87,7 @@ export default function Navbar() {
 
 
             <Link
-              href="/en/transporter/register"
+              href="/transporter/register"
               onClick={closeMenu}
               className="group rounded-2xl  p-6 transition  hover:bg-gray-100"
             >
@@ -103,7 +103,7 @@ export default function Navbar() {
 
 
             <Link
-              href="/en/transporter/register"
+              href="/transporter/register"
               onClick={closeMenu}
               className="group rounded-2xl p-6 transition hover:border-blue-500 hover:bg-gray-100"
             >

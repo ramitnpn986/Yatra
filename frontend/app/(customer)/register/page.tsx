@@ -32,7 +32,7 @@ export default function RegisterPage() {
                 return
             }
 
-            router.push("/en/login")
+            router.push("/login")
 
         } catch (err) {
             console.log("Error at login logic :", err)

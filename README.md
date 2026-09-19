@@ -89,3 +89,4 @@ transporter(rider)
 - In next week, we will work on main core functionality of each user(admin, transporter/rider and passenger)
 - we will work on  automatic rideRequest dispatch algorithm by finding rider within 1-5km range and sending rideRequest to each and who accepts 
   then creating final ride.
+

@@ -9,7 +9,8 @@ import TransportRoutes from './src/routes/transporter.route.js'
 import AdminRoutes from './src/routes/admin.route.js'
 dotenv.config()
 
-const PORT = 8000
+const PORT = process.env.PORT || 5000;
+
 
 const app = express()
 app.use(cors());

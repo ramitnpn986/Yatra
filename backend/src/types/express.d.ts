@@ -7,6 +7,13 @@ declare global {
                 transporterId?: string;
                 role: "admin" | "customer" | "transporter";
             };
+
+            files?: {
+                citizenshipCard?: Express.Multer.File[];
+                drivingLicense?: Express.Multer.File[];
+                vehicleRegistration?: Express.Multer.File[];
+                vehiclePhoto?: Express.Multer.File[];
+            };
         }
     }
 }

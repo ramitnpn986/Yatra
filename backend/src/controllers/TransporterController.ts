@@ -1,16 +1,13 @@
+import { TransportProvider } from "../models/TransportProvider.js";
+import bcrypt from "bcryptjs";
+import jwt  from "jsonwebtoken";
+import {Request,Response} from "express";
+import { isAbaRouting } from "validator";
+import RideRequest from "../models/RideRequest.js";
 
-import { TransportProvider } from '../models/TransportProvider.js'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import { Request, Response } from "express";
-import { isAbaRouting } from 'validator';
-import RideRequest from '../models/RideRequest.js';
-
-const generateOtp = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+const generateOtp=()=>{
+    return Math.floor( 100000 +Math.random()*900000).toString();
 };
-
-
 interface TransportationCostParams {
     transporterLat: number;
     transporterLon: number;
@@ -122,8 +119,8 @@ export const loginTransporter = async (req: Request, res: Response) => {
 
         return res.status(200).cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: 'none',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }).json({
             message: "Login successful",
@@ -147,8 +144,8 @@ export const logout = async (req: Request, res: Response) => {
     try {
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+            secure: true,
+            sameSite: 'none',
             path: "/"
         });
 
@@ -168,7 +165,13 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
     try {
 
         const transporterId = req.user?.transporterId;
-        const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = req.files || {};
+        const files = req.files as {
+            citizenshipCard?: Express.Multer.File[];
+            drivingLicense?: Express.Multer.File[];
+            vehicleRegistration?: Express.Multer.File[];
+            vehiclePhoto?: Express.Multer.File[];
+        } | undefined;
+        const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = files || {};
         let { vehicleType, numberPlate, capacityKg, serviceAreas, pricePerKm } = req.body;
 
         if (!citizenshipCard || !drivingLicense || !vehicleRegistration || !vehiclePhoto || !vehicleType || !numberPlate || !capacityKg || !pricePerKm) {
@@ -345,6 +348,47 @@ export const updateAvailablity = async (req: Request, res: Response): Promise<Re
 
     } catch (err) {
         console.log(err)
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
+
+
+export const updateCurrentLocation = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const { coordinates } = req.body;
+
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+            return res.status(400).json({
+                message: "Valid coordinates [longitude, latitude] are required",
+                success: false
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId).select("-password");
+
+        if (!transporter) {
+            return res.status(404).json({
+                message: "Transporter not found",
+                success: false
+            });
+        }
+
+        transporter.currentLocation = {
+            type: "Point",
+            coordinates
+        };
+
+        await transporter.save();
+
+        return res.status(200).json({
+            message: "Current location updated successfully",
+            success: true,
+            currentLocation: transporter.currentLocation
+        });
+
+    } catch (err) {
+        console.log(err);
         return res.status(500).json({ message: "Internal Server Error", success: false });
     }
 }
@@ -789,6 +833,3 @@ const calculateTransportationCost = ({ transporterLat, transporterLon, pickupLat
 //         return res.status(500).json({ message: "Internal Server Error", success: false });
 //     }
 // }
-
-
-

@@ -10,6 +10,7 @@ export default function TransporterDashboard() {
     { customer: "Anita Sharma", pickup: "Baneshwor", drop: "Thamel", status: "Pending" },
     { customer: "Prakash KC", pickup: "Koteshwor", drop: "Patan", status: "Pending" },
     { customer: "Sunita Magar", pickup: "Balaju", drop: "Airport", status: "Pending" },
+    {customer:"shree shrestha",pickup:"butwal",drop:"bhairahawa",status:"Pending"},
   ];
 
   return (

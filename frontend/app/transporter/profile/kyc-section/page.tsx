@@ -2,21 +2,38 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
+import FileUploadField from "@/app/(customer)/components/FileUpload";
 
-type FileField= "citizenshipCard" | "drivingLicense"  | "vehicleRegistration"| "vehiclePhoto";
+type FileField = "citizenshipCard" | "drivingLicense" | "vehicleRegistration" | "vehiclePhoto";
+interface User {
+  isVerified: boolean;
+  verificationStatus: "approved" | "pending" | "rejected" | null;
+  isKycDataSubmitted: boolean;
+}
 
 const Page = () => {
 
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-
   const [formData, setFormData] = useState({
     citizenshipCard: null,
     drivingLicense: null,
     vehicleRegistration: null,
     vehiclePhoto: null,
+    vehicleType: "",
+    numberPlate: "",
+    capacityKg: "",
+    serviceAreas: "",
+    pricePerKm: "",
+  });
+
+  const [errors, setErrors] = useState({
+    citizenshipCard: "",
+    drivingLicense: "",
+    vehicleRegistration: "",
+    vehiclePhoto: "",
     vehicleType: "",
     numberPlate: "",
     capacityKg: "",
@@ -32,11 +49,8 @@ const Page = () => {
   });
 
   const validateField = (name, value) => {
-    let error = "";
+   
 
-    switch (name) {
-
-    }
 
   }
 
@@ -71,7 +85,7 @@ const Page = () => {
     setErrors((prev) => ({ ...prev, [fieldName]: "" }));
   };
 
-  const removeFile = (fieldName: string) => {
+  const removeFile = (fieldName: FileField) => {
     const preview = previews[fieldName];
 
     if (preview && preview !== "pdf-placeholder") {
@@ -82,35 +96,74 @@ const Page = () => {
     setPreviews((prev) => ({ ...prev, [fieldName]: null }))
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 
-
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: "" }))
+  }
 
   const handleSubmit = async () => {
 
   }
 
   return (
-    <div className='min-h-screen bg-white py-6 px-4'>
+    <div className='min-h-screen bg-white text-black py-5 px-4'>
       <div className='max-w-5xl mx-auto'>
-        <h1 className='my-4 text-gray-600 text-3xl font-semibold'>Kyc Verification</h1>
+        <h1 className='my-2 text-gray-600 text-2xl font-semibold'>Kyc Verification</h1>
 
-        <form onSubmit={handleSubmit} className='py-8'>
-          <div className="bg-white rounded-3xl p-8 shadow-sm">
-            <div className="flex items-center gap-3 mb-8 pb-4 ">
-              <h2 className="text-xl font-bold text-slate-800">Identity & Legal Documents</h2>
+        <form onSubmit={handleSubmit} className='py-8 grid grid-cols-1 gap-4'>
+          <div className="bg-white rounded-xl p-5 shadow-sm">
+            <div className="flex items-center gap-3 mb-6 pb-4 ">
+              <h2 className=" font-semibold text-slate-500">Identity & Legal Documents</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <FileUploadField label="Citizenship Card" name="citizenshipCard" />
-              <FileUploadField label="Driving License" name="drivingLicense" />
-              <FileUploadField label="Vehicle Registration" name="vehicleRegistration" />
-              <FileUploadField label="Vehicle Photo" name="vehiclePhoto" />
+              <FileUploadField
+                label="Citizenship Card"
+                name="citizenshipCard"
+                formData={formData}
+                errors={errors}
+                previews={previews}
+                changeFileHandler={changeFileHandler}
+                removeFile={removeFile}
+              />
+
+              <FileUploadField
+                label="Driving License"
+                name="drivingLicense"
+                formData={formData}
+                errors={errors}
+                previews={previews}
+                changeFileHandler={changeFileHandler}
+                removeFile={removeFile}
+              />
+
+              <FileUploadField
+                label="Vehicle Registration"
+                name="vehicleRegistration"
+                formData={formData}
+                errors={errors}
+                previews={previews}
+                changeFileHandler={changeFileHandler}
+                removeFile={removeFile}
+              />
+
+              <FileUploadField
+                label="Vehicle Photo"
+                name="vehiclePhoto"
+                formData={formData}
+                errors={errors}
+                previews={previews}
+                changeFileHandler={changeFileHandler}
+                removeFile={removeFile}
+              />
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm ">
-            <div className="flex items-center gap-3 mb-8 pb-2 ">
-              <h2 className="text-xl font-bold text-slate-800">Vehicle Details</h2>
+          <div className="bg-white rounded-xl p-4 shadow-sm ">
+            <div className="flex items-center gap-3 mb-6 pb-2 ">
+              <h2 className=" font-bold text-slate-500">Vehicle Details</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -120,7 +173,7 @@ const Page = () => {
                   name="vehicleType"
                   value={formData.vehicleType}
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border ${errors.vehicleType ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all`}
+                  className={`w-full bg-slate-50 border ${errors.vehicleType ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 outline-none transition-all`}
                 >
                   <option value="">Select Type</option>
                   {["Bus", "Truck", "Bike", "Car"].map(type => (
@@ -137,7 +190,7 @@ const Page = () => {
                   value={formData.numberPlate}
                   placeholder="BA 1 PA 1234"
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border ${errors.numberPlate ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all`}
+                  className={`w-full bg-slate-50 border ${errors.numberPlate ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3  outline-none transition-all`}
                 />
                 {errors.numberPlate && <p className="text-red-500 text-[10px] font-medium">{errors.numberPlate}</p>}
               </div>
@@ -150,7 +203,7 @@ const Page = () => {
                   value={formData.capacityKg}
                   placeholder="e.g. 1500"
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border ${errors.capacityKg ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all`}
+                  className={`w-full bg-slate-50 border ${errors.capacityKg ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3  outline-none transition-all`}
                 />
                 {errors.capacityKg && <p className="text-red-500 text-[10px] font-medium">{errors.capacityKg}</p>}
               </div>
@@ -158,8 +211,8 @@ const Page = () => {
           </div>
 
           <div className="bg-white rounded-3xl p-6 shadow-sm ">
-            <div className="flex items-center gap-3 mb-8 pb-2 ">
-              <h2 className="text-xl font-bold text-slate-800">Service Area</h2>
+            <div className="flex items-center gap-3 mb-6 pb-2 ">
+              <h2 className=" font-bold text-slate-500">Service Area</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,7 +223,7 @@ const Page = () => {
                   value={formData.serviceAreas}
                   placeholder="e.g. Kathmandu, Lalitpur, Bhaktapur"
                   onChange={handleChange}
-                  className={`w-full bg-slate-50 border ${errors.serviceAreas ? 'border-red-300' : 'border-slate-200'} rounded-xl px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all`}
+                  className={`w-full bg-slate-50 border ${errors.serviceAreas ? 'border-red-300' : ''} rounded-xl px-4 py-3 outline-none transition-all`}
                 />
                 {errors.serviceAreas && <p className="text-red-500 text-[10px] font-medium">{errors.serviceAreas}</p>}
               </div>
@@ -184,7 +237,7 @@ const Page = () => {
                     value={formData.pricePerKm}
                     placeholder="50"
                     onChange={handleChange}
-                    className={`w-full bg-slate-50 border ${errors.pricePerKm ? 'border-red-300' : 'border-slate-200'} rounded-xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none transition-all`}
+                    className={`w-full bg-slate-50  ${errors.pricePerKm ? 'border-red-300' : ''} rounded-xl pl-12 pr-4 py-3 outline-none  transition-all`}
                   />
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium ">Rs.</span>
                 </div>
@@ -201,7 +254,7 @@ const Page = () => {
             <button
               type="submit"
               disabled={loading || (user?.isVerified && user?.verificationStatus === "approved")}
-              className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-12 py-3.5 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none flex items-center gap-2"
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-12 py-3.5 rounded-2xl shadow-lg  transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none flex items-center gap-2"
             >
               {loading ? (
                 <>Processing... </>

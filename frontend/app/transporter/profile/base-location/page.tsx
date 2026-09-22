@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import LocationPicker from "@/app/(customer)/components/LocationPicker";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 type LocationData = {
@@ -208,8 +207,8 @@ const TransporterLocationSelection = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-4 font-sans">
-            <div className="max-w-7xl mx-auto mb-6 py-2 flex justify-end items-center">
+        <div className="min-h-screen p-2 lg:p-4 font-sans">
+            <div className="max-w-7xl mx-auto mb-6  flex justify-end items-center">
                 <div className="flex gap-3">
                     {isEditMode ? (
                         <button
@@ -285,8 +284,8 @@ const TransporterLocationSelection = () => {
                     </div>
                 </div>
 
-                <div className={`lg:col-span-8 bg-white p-3 rounded-[3rem] shadow-sm border transition-all h-[530px] relative overflow-hidden ${isEditMode ? 'border-orange-400 ring-4 ring-orange-50' : 'border-slate-200'}`}>
-                    <div className="w-full h-full rounded-[2.5rem] overflow-hidden bg-slate-50  shadow-inner">
+                <div className={`lg:col-span-8 bg-white p-4 rounded-2xl shadow-sm border transition-all h-[500px] relative overflow-hidden ${isEditMode ? 'border-orange-400 ring-4 ring-orange-50' : 'border-slate-200'}`}>
+                    <div className="w-full h-full overflow-hidden ">
                         <LocationPicker
                             key={`${location.latitude}-${location.longitude}`}
                             onSelect={handleLocationSelect}

@@ -51,7 +51,7 @@ const Page = ( { children }: LayoutProps) => {
                 <div className="flex flex-col gap-2 flex-1">
                     <NavButton onClick={() => router.push('/transporter/profile/dashboard')} icon={<LayoutDashboard size={18} />} label="Dashboard" />
                     <NavButton onClick={() => router.push("/transporter/profile/base-location")} icon={<MapPin size={18} />} label="Base Location" />
-                    <NavButton onClick={() => router.push("/transporter/profile/update")} icon={<Settings size={18} />} label="Account Settings" active />
+                    <NavButton onClick={() => router.push("/transporter/profile/update")} icon={<Settings size={18} />} label="Profile Settings"  />
                     <NavButton onClick={() => router.push("/transporter/profile/notification")} icon={<Bell size={18} />} label="Notifications" />
                     <NavButton onClick={() => router.push("/transporter/profile/kyc-section")} icon={<ShieldCheck size={18} />} label="Verification/KYC" />
                     <NavButton onClick={() => router.push("/transporter/profile/password-change")} icon={<Lock size={18} />} label="Security" />
@@ -68,10 +68,7 @@ const Page = ( { children }: LayoutProps) => {
 
 
 const NavButton = ({ icon, label, onClick, active = false, }: NavButtonProps) => (
-    <button  onClick={onClick}
-        className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-            }`}
-    >
+    <button  onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
         <div className="flex items-center gap-3">
             <span className={`${active ? 'text-orange-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{icon}</span>
             <span className="text-sm font-bold">{label}</span>

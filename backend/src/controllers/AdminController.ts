@@ -128,7 +128,8 @@ export const loginAdmin = async (req: Request, res: Response): Promise<Response>
         }).json({
             message: "Login successful",
             success: true,
-            customer: adminData
+            customer: adminData,
+            role:"admin"
         });
 
 

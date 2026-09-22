@@ -119,7 +119,8 @@ export const loginUser = async (req: Request, res: Response) => {
         }).json({
             message: "Login successful",
             success: true,
-            customer: customerData
+            customer: customerData,
+            role:"customer"
         });
 
 

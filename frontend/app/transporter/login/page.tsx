@@ -2,18 +2,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("passenger");
 
-  const routing = role === "passenger" ? "passenger" : "transporter";
+  const router = useRouter();
+
 
   const handleLogin = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
-      const res = await fetch(`/api/${routing}/login`, {
+      const res = await fetch(`/api/transporter/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,8 +32,8 @@ export default function LoginPage() {
         console.log(data.message);
         return
       }
+      router.push("/transporter/profile")
 
-      console.log("login success: ", data);
 
     } catch (err) {
       console.log("Error at login logic :", err)
@@ -66,14 +68,13 @@ export default function LoginPage() {
           onChange={(e) => setRole(e.target.value)}
           className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
         >
-          <option value="passenger">Passenger</option>
           <option value="rider">Rider</option>
           <option value="booking_partner">Booking Partner</option>
         </select>
 
         <p className="text-sm text-gray-600 text-center">
           Don't have an account? {""}
-          <Link href="/en/register" className="text-primary font-semibold">
+          <Link href="/transporter/register" className="text-primary font-semibold">
             Register
           </Link>
         </p>

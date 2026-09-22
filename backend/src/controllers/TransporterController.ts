@@ -125,7 +125,8 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }).json({
             message: "Login successful",
             success: true,
-            transporter: transporterData
+            transporter: transporterData,
+            role:"transporter"
         });
 
 

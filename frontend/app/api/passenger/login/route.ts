@@ -3,20 +3,28 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const res = await fetch(`process.env.CUSTOMER_URL/login`, {
+        const res = await fetch(`${process.env.CUSTOMER_URL}/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-
             },
             body: JSON.stringify(body)
         })
 
         const data = await res.json();
 
-        return NextResponse.json(data, {
+        const response = NextResponse.json(data, {
             status: res.status,
         });
+
+        const setCookie = res.headers.get("set-cookie");
+
+        if (setCookie) {
+            response.headers.set("set-cookie", setCookie);
+        }
+
+        return response;
+
 
     } catch (err) {
         console.log(err)
@@ -29,3 +37,4 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+

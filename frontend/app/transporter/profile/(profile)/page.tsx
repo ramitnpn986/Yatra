@@ -1,0 +1,181 @@
+"use client"
+import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star } from 'lucide-react'
+import { User } from "lucide-react";
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+
+interface User {
+    name: string;
+    phone: number;
+    isAvailable: boolean;
+    verificationStatus: string;
+    profileImage?: {
+        url?: string;
+        public_id?: string;
+    }
+    rating?: number;
+    totalDeliveries?: number;
+    location?: {
+        address?: string;
+        coordinates?: [number, number];
+    }
+    vehicle?: {
+        type?: string;
+        numberPlate?: string;
+        capacityKg?: number;
+    };
+    pricePerKm?: number;
+    serviceAreas?: string[];
+
+}
+
+const Page = () => {
+
+    const [user, setUser] = useState<User>()
+
+    useEffect(() => {
+
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch("/api/transporter/profile", { method: "GET",  credentials: "include"})
+                const data = await res.json();
+                if (res.ok) {
+                    setUser(data.transporter)
+                }
+            } catch (err) {
+                console.log(err)
+            }
+        }
+
+        fetchProfile();
+
+    }, [])
+
+
+
+    const router = useRouter();
+    return (
+        <div className='min-h-screen bg-white flex flex-col lg:flex-row'>
+       
+            <main className="flex-1 p-4 py-8">
+                <div className="max-w-5xl  space-y-6 ">
+
+                    <section className=" rounded-[2.5rem] p-2 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                        <div className="relative group">
+                            <div className="h-28 w-28 rounded-lg overflow-hidden bg-slate-100 border-4 border-white shadow-xl">
+                                {user?.profileImage?.url ? (
+                                    <img src={user?.profileImage?.url || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=10b981&color=fff`} alt="Profile" className="h-full w-full object-cover" />
+                                ) : (
+                                    <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={40} /></div>
+                                )}
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white text-white p-1.5 rounded-full">
+                                <CheckCircle2 size={16} />
+                            </div>
+                        </div>
+
+                        <div className="flex-1 text-center md:text-left">
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 ">
+                                <h1 className="text-3xl font-black text-slate-900 ">{user?.name}</h1>
+                                <span className="px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-black  border border-orange-200">
+                                    {user?.verificationStatus}
+                                </span>
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-1 space-y-6">
+                            <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                                <p className="text-[10px] font-bold text-slate-400  mb-6">Efficiency Profile</p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-slate-500 text-sm">Rating</span>
+                                        <span className="font-black text-lg flex items-center gap-1">{user?.rating} <Star size={16} className="fill-amber-400 text-amber-400" /></span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-slate-500 text-sm">Completed Jobs</span>
+                                        <span className="font-black text-lg">{user?.totalDeliveries}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-900 p-6 rounded text-white shadow-xl shadow-slate-200">
+                                <p className="text-[14px] font-bold  text-orange-400 mb-2">Service area</p>
+                                <p className="text-slate-300 font-medium text-lg italic"> {user?.location?.address}</p>
+                            </div>
+                        </div>
+
+
+                        <div className="md:col-span-2 space-y-6">
+                            <div className="bg-white p-6 rounded-lg shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div className="space-y-6">
+                                    <h3 className="text-sm font-black  text-slate-800">Vehicle Logistics</h3>
+                                    <div className="space-y-3">
+
+                                        <div>
+                                            <p className="text-[12px] font-bold text-slate-400  mb-1" >vehicle Type</p>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700">{user?.vehicle?.type} </div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-[12px] font-bold text-slate-400  mb-1" >Number Plate</p>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {user?.vehicle?.numberPlate} </div>
+                                        </div>
+
+                                        <div>
+                                            <p className="text-[12px] font-bold text-slate-400  mb-1" >Payload Capacity</p>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {`${user?.vehicle?.capacityKg} KG`} </div>
+                                        </div>
+
+                                        <p className="text-[14px] font-bold text-slate-500 ">Pricing </p>
+                                        <p className="text-2xl font-black text-orange-500">Rs. {user?.pricePerKm}</p>
+                                        <p className="text-xs text-slate-400 font-medium">Standard rate per Kilometer</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-sm font-black  text-slate-800">Contact Details</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-[12px] font-bold text-slate-400  mb-1" >Phone </p>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700">  {user?.phone} </div>
+                                        </div>
+                                        <div className="pt-2">
+                                            <p className="text-[12px] font-bold text-slate-400  mb-2">Active Service Zones</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {user?.serviceAreas?.map(area => (
+                                                    <span key={area} className="px-2 py-1 bg-slate-50 border border-slate-200 rounded text-[10px] font-bold text-slate-600">{area}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    )
+}
+
+
+const NavButton = ({ icon, label, onClick, active = false, }) => (
+    <button  onClick={onClick}
+        className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+            }`}
+    >
+        <div className="flex items-center gap-3">
+            <span className={`${active ? 'text-orange-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{icon}</span>
+            <span className="text-sm font-bold">{label}</span>
+        </div>
+    </button>
+);
+
+
+
+
+export default Page

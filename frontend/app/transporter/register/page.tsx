@@ -34,7 +34,7 @@ export default function RegisterPage() {
 
             }
             console.log("register success: ", data);
-            router.push("/en/login")
+            router.push("/transporter/login")
 
         } catch (err) {
             console.log("Error at login logic :", err)

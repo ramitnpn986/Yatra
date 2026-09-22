@@ -354,6 +354,61 @@ export const updateAvailablity = async (req: Request, res: Response): Promise<Re
 }
 
 
+
+export const setLocation = async (  req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+
+        const { location } = req.body;
+
+        if ( !location || !location.coordinates || location.coordinates.length !== 2) {
+            return res.status(400).json({
+                message: "Location data required with a valid coordinate set",
+                success: false,
+            });
+        }
+
+        const transporter = await TransportProvider.findById( transporterId).select("-password");
+
+        if (!transporter) {
+            return res.status(404).json({
+                message: "Transporter not found",
+                success: false,
+            });
+        }
+
+        transporter.location = {
+            type: "Point",
+            coordinates: [
+                Number(location.coordinates[0]),
+                Number(location.coordinates[1]),
+            ],
+            address: location.address,
+            province: location.province,
+            district: location.district,
+            municipality: location.municipality,
+            ward: location.ward,
+        };
+
+        await transporter.save();
+
+        return res.status(200).json({
+            message: "Location updated successfully",
+            success: true,
+            location: transporter.location,
+        });
+    } catch (err) {
+        console.error("Set location error:", err);
+
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
+    }
+};
+
+
+
 export const updateCurrentLocation = async (req: Request, res: Response): Promise<Response> => {
     try {
         const transporterId = req.user?.transporterId;
@@ -393,6 +448,7 @@ export const updateCurrentLocation = async (req: Request, res: Response): Promis
         return res.status(500).json({ message: "Internal Server Error", success: false });
     }
 }
+
 
 
 

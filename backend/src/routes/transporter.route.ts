@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { registerTransporter, loginTransporter, logout, getTransporterProfile,
-     changeTransporterPassword, updateAvailablity, updateCurrentLocation,
+import { registerTransporter, loginTransporter,setLocation, logout, getTransporterProfile,
+     changeTransporterPassword, updateAvailablity, updateCurrentLocation
+
  } from "../controllers/TransporterController.js";
 import upload from "../middleware/upload.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
@@ -13,7 +14,8 @@ router.post("/logout",logout);
 router.get("/get-profile",isAuthenticated, getTransporterProfile);
 router.post("/change-password",isAuthenticated, changeTransporterPassword);
 router.patch("/update-availability",isAuthenticated, updateAvailablity);
-router.patch("/update-location",isAuthenticated, updateCurrentLocation);
+router.post("/change-current-location",isAuthenticated, updateCurrentLocation)
+router.post("/change-location",isAuthenticated, setLocation)
 
 // router.post("/submit-kyc", isAuthenticated, upload.fields([
 //         { name: "citizenshipCard", maxCount: 1 },

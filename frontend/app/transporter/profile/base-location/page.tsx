@@ -1,17 +1,28 @@
 "use client";
 
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import LocationPicker from "@/app/(customer)/components/LocationPicker";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+type LocationData = {
+    latitude: number;
+    longitude: number;
+    address: string;
+    province: string;
+    district: string;
+    municipality: string;
+    ward: string;
+};
+
+
+
 const TransporterLocationSelection = () => {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [addressLoading, setAddressLoading] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
-    const [savedLocation, setSavedLocation] = useState(null);
+    const [savedLocation, setSavedLocation] = useState<LocationData | null>(null);
     const [location, setLocation] = useState({
         latitude: 27.7172,
         longitude: 85.3240,
@@ -24,26 +35,39 @@ const TransporterLocationSelection = () => {
 
     useEffect(() => {
         const fetchExistingLocation = async () => {
-            try {
-                // setAddressLoading(true);
-                // const res = await fetch(`${TRANSPORTER_API_END_POINT}/profile`, { : true });
-                // if (res.data.success && res.data.transporter?.location) {
-                //   const loc = res.data.transporter.location;
-                //   const initialData = {
-                //     latitude: loc?.coordinates?.[1] ?? 27.7172,
-                //     longitude: loc?.coordinates?.[0] ?? 85.3240,
-                //     address: loc?.address || "not available",
-                //     province: loc?.province || "N/A",
-                //     district: loc?.district || "N/A",
-                //     municipality: loc?.municipality || "N/A",
-                //     ward: loc?.ward || "N/A"
-                //   };
+            setAddressLoading(true);
 
-                //   setLocation(initialData);
-                //   setSavedLocation(initialData);
-                // }
+            try {
+                const res = await fetch("/api/transporter/profile", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || "Failed to fetch profile");
+                }
+
+                if (data.success && data.transporter?.location) {
+                    const loc = data.transporter.location;
+
+                    const initialData = {
+                        latitude: loc?.coordinates?.[1] ?? 27.7172,
+                        longitude: loc?.coordinates?.[0] ?? 85.3240,
+                        address: loc?.address || "Not available",
+                        province: loc?.province || "N/A",
+                        district: loc?.district || "N/A",
+                        municipality: loc?.municipality || "N/A",
+                        ward: loc?.ward || "N/A",
+                    };
+
+                    setLocation(initialData);
+                    setSavedLocation(initialData);
+                }
             } catch (err) {
-                console.error("Error fetching location:", err);
+                console.error("Failed to fetch transporter profile:", err);
+                toast.error(err instanceof Error? err.message: "Failed to load location");
             } finally {
                 setAddressLoading(false);
             }
@@ -157,14 +181,27 @@ const TransporterLocationSelection = () => {
                 }
             };
 
-            //   const res = await fetch(`${TRANSPORTER_API_END_POINT}/setlocation`, payload, { withCredentials: true });
-            //   if (res.data.success) {
-            //     toast.success("Location updated successfully!");
-            //     setSavedLocation(location);
-            //     setIsEditMode(false);
-            //   }
+            const res = await fetch(`/api/transporter/setlocation`, {
+                method: "PUT",
+                headers: {
+                    "Content-type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to update location");
+            }
+
+            toast.success("Location updated successfully!");
+            setSavedLocation(location);
+            setIsEditMode(false);
         } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to update");
+            const message = err instanceof Error ? err.message : "Failed to update";
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -172,23 +209,21 @@ const TransporterLocationSelection = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-4 lg:p-4 font-sans">
-
             <div className="max-w-7xl mx-auto mb-6 py-2 flex justify-end items-center">
-
                 <div className="flex gap-3">
                     {isEditMode ? (
                         <button
                             onClick={cancelEdit}
                             className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-xl border border-red-100 text-red-600 hover:bg-red-50 transition-all shadow-sm text-sm font-black uppercase tracking-tighter"
                         >
-                         Discard Changes
+                            Discard Changes
                         </button>
                     ) : (
                         <button
                             onClick={toggleEditMode}
                             className="flex items-center gap-2 bg-orange-600 px-5 py-2.5 rounded-xl text-white hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 text-sm font-black uppercase tracking-tighter"
                         >
-                         Update Service Area
+                            Update Service Area
                         </button>
                     )}
                 </div>

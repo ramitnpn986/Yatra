@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import LocationPicker from "@/app/(customer)/components/LocationPicker";
 import { toast } from "sonner";
 
@@ -22,6 +23,7 @@ const TransporterLocationSelection = () => {
     const [isEditMode, setIsEditMode] = useState(false);
 
     const [savedLocation, setSavedLocation] = useState<LocationData | null>(null);
+    const router = useRouter();
     const [location, setLocation] = useState({
         latitude: 27.7172,
         longitude: 85.3240,
@@ -45,6 +47,10 @@ const TransporterLocationSelection = () => {
                 const data = await res.json();
 
                 if (!res.ok) {
+                    if ([401, 403, 404].includes(res.status)) {
+                        router.replace("/transporter/login");
+                        return;
+                    }
                     throw new Error(data.message || "Failed to fetch profile");
                 }
 

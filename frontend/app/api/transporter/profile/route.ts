@@ -10,9 +10,13 @@ export async function GET(req: NextRequest) {
 
         const data = await res.json();
 
-        return NextResponse.json(data, {
-            status: res.status,
-        });
+        const response = NextResponse.json(data, { status: res.status });
+
+        if ([401, 403, 404].includes(res.status)) {
+            response.cookies.delete("token");
+        }
+
+        return response;
 
     } catch (err) {
         console.log(err)

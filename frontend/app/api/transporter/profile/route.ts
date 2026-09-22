@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const transporterUrl = () => process.env.TRANSPORTER_URL?.trim();
+
+const backendResponse = async (res: Response) => {
+    const text = await res.text();
+    try {
+        return NextResponse.json(JSON.parse(text), { status: res.status });
+    } catch {
+        return NextResponse.json(
+            { success: false, message: `Backend returned ${res.status}: ${text || "empty response"}` },
+            { status: res.status }
+        );
+    }
+};
+
 export async function GET(req: NextRequest) {
     try {
       
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/get-profile`, {
+        const res = await fetch(`${transporterUrl()}/get-profile`, {
             method: "GET",
             headers: { Cookie: req.headers.get("cookie") || ""},
         })
@@ -33,21 +47,22 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.formData();
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/update-profile`, {
+        const res = await fetch(`${transporterUrl()}/update-profile`, {
             method: "POST",
             headers: { Cookie: req.headers.get("cookie") || "" },
             body,
         });
 
-        return NextResponse.json(await res.json(), { status: res.status });
-    } catch {
+        return backendResponse(res);
+    } catch (error) {
+        console.error("Transporter profile update failed:", error);
         return NextResponse.json({ success: false, message: "Unable to connect to backend" }, { status: 500 });
     }
 }
 
 export async function PATCH(req: NextRequest) {
     try {
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/update-availability`, {
+        const res = await fetch(`${transporterUrl()}/update-availability`, {
             method: "PATCH",
             headers: {
                 Cookie: req.headers.get("cookie") || "",
@@ -56,8 +71,9 @@ export async function PATCH(req: NextRequest) {
             body: JSON.stringify(await req.json()),
         });
 
-        return NextResponse.json(await res.json(), { status: res.status });
-    } catch {
+        return backendResponse(res);
+    } catch (error) {
+        console.error("Transporter availability update failed:", error);
         return NextResponse.json({ success: false, message: "Unable to connect to backend" }, { status: 500 });
     }
 }

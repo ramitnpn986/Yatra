@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import LocationPicker from "@/app/(customer)/components/LocationPicker";
+=======
+>>>>>>> 47afa41 (transporter profile change feature implemented)
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+const LocationPicker = dynamic(() => import("@/app/(customer)/components/LocationPicker"), {  ssr: false });
 
 type LocationData = {
     latitude: number;
@@ -14,7 +20,6 @@ type LocationData = {
     municipality: string;
     ward: string;
 };
-
 
 
 const TransporterLocationSelection = () => {
@@ -226,7 +231,7 @@ const TransporterLocationSelection = () => {
                     ) : (
                         <button
                             onClick={toggleEditMode}
-                            className="flex items-center gap-2 bg-orange-600 px-5 py-2.5 rounded-xl text-white hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 text-sm font-black uppercase tracking-tighter"
+                            className="flex items-center gap-2 bg-orange-600 px-5 py-2.5 rounded-xl text-white hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 text-sm font-semibold"
                         >
                             Update Service Area
                         </button>

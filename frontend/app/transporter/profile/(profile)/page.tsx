@@ -1,8 +1,12 @@
 "use client"
+<<<<<<< HEAD
 import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star, Camera, Save } from 'lucide-react'
+=======
+import {  CheckCircle2, Star } from 'lucide-react'
+>>>>>>> 47afa41 (transporter profile change feature implemented)
 import { User } from "lucide-react";
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import  { useEffect, useState } from 'react'
 
 interface User {
     name: string;
@@ -29,7 +33,7 @@ interface User {
 
 }
 
-const Page = () => {
+export default function Page() {
 
     const [user, setUser] = useState<User>()
     const [name, setName] = useState("")
@@ -101,8 +105,6 @@ const Page = () => {
     }
 
 
-
-    const router = useRouter();
     return (
         <div className='min-h-screen bg-white flex flex-col lg:flex-row'>
        
@@ -238,6 +240,7 @@ const Page = () => {
 }
 
 
+<<<<<<< HEAD
 interface NavButtonProps {
     icon: React.ReactNode;
     label: string;
@@ -250,6 +253,11 @@ const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => 
         className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
             }`}
     >
+=======
+const NavButton = ({ icon, label, onClick, active = false, }) => (
+    <button  onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' 
+    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
+>>>>>>> 47afa41 (transporter profile change feature implemented)
         <div className="flex items-center gap-3">
             <span className={`${active ? 'text-orange-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{icon}</span>
             <span className="text-sm font-bold">{label}</span>
@@ -260,4 +268,3 @@ const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => 
 
 
 
-export default Page

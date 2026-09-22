@@ -103,7 +103,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { transporterId: transporter._id, role: 'transporter' },
+            { transporterId: transporter._id.toString(), role: 'transporter' },
             JWT_SECRET,
             { expiresIn: '7d' }
         )
@@ -262,6 +262,45 @@ export const getTransporterProfile = async (req: Request, res: Response): Promis
         return res.status(500).send("Internal Server Error");
     }
 }
+
+export const updateTransporterProfile = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const { name } = req.body;
+
+        if (!name || name.trim().length < 4) {
+            return res.status(400).json({
+                success: false,
+                message: "Name must contain at least 4 characters",
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId).select("-password");
+
+        if (!transporter) {
+            return res.status(404).json({ success: false, message: "Transporter not found" });
+        }
+
+        transporter.name = name.trim();
+        if (req.file) {
+            transporter.profileImage = {
+                url: req.file.path,
+                public_id: req.file.filename,
+            };
+        }
+
+        await transporter.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            transporter,
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
 
 
 export const changeTransporterPassword = async (req: Request, res: Response): Promise<Response> => {

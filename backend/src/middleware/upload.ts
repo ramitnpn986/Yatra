@@ -10,3 +10,5 @@ export const kycUpload = upload.fields([
     { name: "vehicleRegistration", maxCount: 1 },
     { name: "vehiclePhoto", maxCount: 1 },
 ]);
+
+export const profileUpload = upload.single("profileImage");

@@ -1,5 +1,5 @@
 "use client"
-import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star } from 'lucide-react'
+import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star, Camera, Save } from 'lucide-react'
 import { User } from "lucide-react";
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -32,6 +32,12 @@ interface User {
 const Page = () => {
 
     const [user, setUser] = useState<User>()
+    const [name, setName] = useState("")
+    const [profileImage, setProfileImage] = useState<File | null>(null)
+    const [editing, setEditing] = useState(false)
+    const [saving, setSaving] = useState(false)
+    const [updatingAvailability, setUpdatingAvailability] = useState(false)
+    const [message, setMessage] = useState("")
 
     useEffect(() => {
 
@@ -41,6 +47,7 @@ const Page = () => {
                 const data = await res.json();
                 if (res.ok) {
                     setUser(data.transporter)
+                    setName(data.transporter.name)
                 }
             } catch (err) {
                 console.log(err)
@@ -50,6 +57,48 @@ const Page = () => {
         fetchProfile();
 
     }, [])
+
+    const saveProfile = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        setSaving(true)
+        setMessage("")
+
+        const formData = new FormData()
+        formData.append("name", name)
+        if (profileImage) formData.append("profileImage", profileImage)
+
+        const res = await fetch("/api/transporter/profile", {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+        })
+        const data = await res.json()
+
+        if (res.ok) {
+            setUser(data.transporter)
+            setName(data.transporter.name)
+            setProfileImage(null)
+            setEditing(false)
+        }
+        setMessage(data.message || "Profile update failed")
+        setSaving(false)
+    }
+
+    const toggleAvailability = async () => {
+        if (!user) return
+        setUpdatingAvailability(true)
+        const nextStatus = user.isAvailable ? "unavailable" : "available"
+        const res = await fetch("/api/transporter/profile", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ status: nextStatus }),
+        })
+        const data = await res.json()
+        if (res.ok) setUser((current) => current ? { ...current, isAvailable: data.isAvailable } : current)
+        setMessage(data.message || "Availability update failed")
+        setUpdatingAvailability(false)
+    }
 
 
 
@@ -64,7 +113,7 @@ const Page = () => {
                         <div className="relative group">
                             <div className="h-28 w-28 rounded-lg overflow-hidden bg-slate-100 border-4 border-white shadow-xl">
                                 {user?.profileImage?.url ? (
-                                    <img src={user?.profileImage?.url || `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=10b981&color=fff`} alt="Profile" className="h-full w-full object-cover" />
+                                    <img src={user.profileImage.url} alt="Profile" className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={40} /></div>
                                 )}
@@ -81,9 +130,35 @@ const Page = () => {
                                     {user?.verificationStatus}
                                 </span>
                             </div>
+                            <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
+                                <button type="button" onClick={() => setEditing((value) => !value)} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600">
+                                    {editing ? "Cancel edit" : "Edit profile"}
+                                </button>
+                                <button type="button" onClick={toggleAvailability} disabled={updatingAvailability} className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable ? "bg-green-600 hover:bg-green-700" : "bg-slate-500 hover:bg-slate-600"}`}>
+                                    {updatingAvailability ? "Updating..." : user?.isAvailable ? "Available" : "Unavailable"}
+                                </button>
+                            </div>
                         </div>
 
                     </section>
+
+                    {editing && (
+                        <form onSubmit={saveProfile} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                            <h2 className="text-lg font-black text-slate-800">Edit profile</h2>
+                            <label className="block text-sm font-bold text-slate-600">
+                                Name
+                                <input value={name} onChange={(event) => setName(event.target.value)} minLength={4} required className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-medium outline-none focus:border-orange-500" />
+                            </label>
+                            <label className="block text-sm font-bold text-slate-600">
+                                Profile image
+                                <input type="file" accept="image/*" onChange={(event) => setProfileImage(event.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
+                            </label>
+                            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
+                                <Save size={16} /> {saving ? "Saving..." : "Save changes"}
+                            </button>
+                        </form>
+                    )}
+                    {message && <p className="text-sm font-semibold text-slate-600">{message}</p>}
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1 space-y-6">
@@ -163,7 +238,14 @@ const Page = () => {
 }
 
 
-const NavButton = ({ icon, label, onClick, active = false, }) => (
+interface NavButtonProps {
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+    active?: boolean;
+}
+
+const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => (
     <button  onClick={onClick}
         className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
             }`}

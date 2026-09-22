@@ -1,21 +1,25 @@
 import { Router } from "express";
 import { registerTransporter, loginTransporter,setLocation, logout, getTransporterProfile,
-     changeTransporterPassword, updateAvailablity, updateCurrentLocation
+    changeTransporterPassword, updateAvailablity, updateCurrentLocation, updateTransporterProfile
 
  } from "../controllers/TransporterController.js";
-import upload from "../middleware/upload.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
+import isTransporter from "../middleware/isTransporter.js";
+import { profileUpload } from "../middleware/upload.js";
 
 const router = Router();
 
 router.post("/register",registerTransporter);
 router.post("/login",loginTransporter);
 router.post("/logout",logout);
-router.get("/get-profile",isAuthenticated, getTransporterProfile);
-router.post("/change-password",isAuthenticated, changeTransporterPassword);
-router.patch("/update-availability",isAuthenticated, updateAvailablity);
-router.post("/change-current-location",isAuthenticated, updateCurrentLocation)
-router.post("/change-location",isAuthenticated, setLocation)
+const transporterAuth = [isAuthenticated, isTransporter];
+
+router.get("/get-profile", ...transporterAuth, getTransporterProfile);
+router.post("/update-profile", ...transporterAuth, profileUpload, updateTransporterProfile);
+router.post("/change-password", ...transporterAuth, changeTransporterPassword);
+router.patch("/update-availability", ...transporterAuth, updateAvailablity);
+router.post("/change-current-location", ...transporterAuth, updateCurrentLocation)
+router.post("/change-location", ...transporterAuth, setLocation)
 
 // router.post("/submit-kyc", isAuthenticated, upload.fields([
 //         { name: "citizenshipCard", maxCount: 1 },

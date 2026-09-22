@@ -284,7 +284,7 @@ export const updateTransporterProfile = async (req: Request, res: Response): Pro
         transporter.name = name.trim();
         if (req.file) {
             transporter.profileImage = {
-                url: req.file.path,
+                url: `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
                 public_id: req.file.filename,
             };
         }

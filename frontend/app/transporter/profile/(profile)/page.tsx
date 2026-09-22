@@ -1,16 +1,10 @@
 "use client"
-<<<<<<< HEAD
-import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star, Camera, Save } from 'lucide-react'
-=======
-import {  CheckCircle2, Star } from 'lucide-react'
->>>>>>> 47afa41 (transporter profile change feature implemented)
-import { User } from "lucide-react";
-import { useRouter } from 'next/navigation'
-import  { useEffect, useState } from 'react'
+import { CheckCircle2, Save, Star, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface User {
     name: string;
-    phone: number;
+    phone: string;
     isAvailable: boolean;
     verificationStatus: string;
     profileImage?: {
@@ -47,14 +41,17 @@ export default function Page() {
 
         const fetchProfile = async () => {
             try {
-                const res = await fetch("/api/transporter/profile", { method: "GET",  credentials: "include"})
+                const res = await fetch("/api/transporter/profile", { method: "GET", credentials: "include" })
                 const data = await res.json();
                 if (res.ok) {
                     setUser(data.transporter)
-                    setName(data.transporter.name)
+                    setName(data.transporter?.name || "")
+                } else {
+                    setMessage(data.message || "Unable to load profile")
                 }
             } catch (err) {
-                console.log(err)
+                console.error("Failed to fetch transporter profile:", err)
+                setMessage("Unable to connect to backend")
             }
         }
 
@@ -67,41 +64,64 @@ export default function Page() {
         setSaving(true)
         setMessage("")
 
-        const formData = new FormData()
-        formData.append("name", name)
-        if (profileImage) formData.append("profileImage", profileImage)
+        try {
+            const formData = new FormData()
+            formData.append("name", name.trim())
+            if (profileImage) formData.append("profileImage", profileImage)
 
-        const res = await fetch("/api/transporter/profile", {
-            method: "POST",
-            credentials: "include",
-            body: formData,
-        })
-        const data = await res.json()
+            const res = await fetch("/api/transporter/profile", {
+                method: "POST",
+                credentials: "include",
+                body: formData,
+            })
+            const data = await res.json()
 
-        if (res.ok) {
+            if (!res.ok) {
+                setMessage(data.message || "Profile update failed")
+                return
+            }
+
             setUser(data.transporter)
-            setName(data.transporter.name)
+            setName(data.transporter?.name || name.trim())
             setProfileImage(null)
             setEditing(false)
+            setMessage(data.message || "Profile updated successfully")
+        } catch (err) {
+            console.error("Failed to update transporter profile:", err)
+            setMessage("Unable to connect to backend")
+        } finally {
+            setSaving(false)
         }
-        setMessage(data.message || "Profile update failed")
-        setSaving(false)
     }
 
     const toggleAvailability = async () => {
         if (!user) return
         setUpdatingAvailability(true)
-        const nextStatus = user.isAvailable ? "unavailable" : "available"
-        const res = await fetch("/api/transporter/profile", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ status: nextStatus }),
-        })
-        const data = await res.json()
-        if (res.ok) setUser((current) => current ? { ...current, isAvailable: data.isAvailable } : current)
-        setMessage(data.message || "Availability update failed")
-        setUpdatingAvailability(false)
+        setMessage("")
+
+        try {
+            const nextStatus = user.isAvailable ? "unavailable" : "available"
+            const res = await fetch("/api/transporter/profile", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ status: nextStatus }),
+            })
+            const data = await res.json()
+
+            if (!res.ok) {
+                setMessage(data.message || "Availability update failed")
+                return
+            }
+
+            setUser((current) => current ? { ...current, isAvailable: data.isAvailable } : current)
+            setMessage(data.message || "Availability updated successfully")
+        } catch (err) {
+            console.error("Failed to update availability:", err)
+            setMessage("Unable to connect to backend")
+        } finally {
+            setUpdatingAvailability(false)
+        }
     }
 
 
@@ -120,7 +140,7 @@ export default function Page() {
                                     <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={40} /></div>
                                 )}
                             </div>
-                            <div className="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white text-white p-1.5 rounded-full">
+                            <div className={`absolute -bottom-2 -right-2 border-4 border-white text-white p-1.5 rounded-full ${user?.isAvailable ? "bg-green-500" : "bg-slate-500"}`}>
                                 <CheckCircle2 size={16} />
                             </div>
                         </div>
@@ -149,7 +169,7 @@ export default function Page() {
                             <h2 className="text-lg font-black text-slate-800">Edit profile</h2>
                             <label className="block text-sm font-bold text-slate-600">
                                 Name
-                                <input value={name} onChange={(event) => setName(event.target.value)} minLength={4} required className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-medium outline-none focus:border-orange-500" />
+                                <input type="text" value={name} onChange={(event) => setName(event.target.value)} minLength={4} required className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-medium outline-none focus:border-orange-500" />
                             </label>
                             <label className="block text-sm font-bold text-slate-600">
                                 Profile image
@@ -169,18 +189,18 @@ export default function Page() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <span className="text-slate-500 text-sm">Rating</span>
-                                        <span className="font-black text-lg flex items-center gap-1">{user?.rating} <Star size={16} className="fill-amber-400 text-amber-400" /></span>
+                                        <span className="font-black text-lg flex items-center gap-1">{user?.rating ?? "N/A"} <Star size={16} className="fill-amber-400 text-amber-400" /></span>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-slate-500 text-sm">Completed Jobs</span>
-                                        <span className="font-black text-lg">{user?.totalDeliveries}</span>
+                                        <span className="font-black text-lg">{user?.totalDeliveries ?? 0}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="bg-slate-900 p-6 rounded text-white shadow-xl shadow-slate-200">
                                 <p className="text-[14px] font-bold  text-orange-400 mb-2">Service area</p>
-                                <p className="text-slate-300 font-medium text-lg italic"> {user?.location?.address}</p>
+                                <p className="text-slate-300 font-medium text-lg italic"> {user?.location?.address || "Not set"}</p>
                             </div>
                         </div>
 
@@ -193,21 +213,21 @@ export default function Page() {
 
                                         <div>
                                             <p className="text-[12px] font-bold text-slate-400  mb-1" >vehicle Type</p>
-                                            <div className="flex items-center gap-2 font-bold text-slate-700">{user?.vehicle?.type} </div>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700">{user?.vehicle?.type || "Not set"} </div>
                                         </div>
 
                                         <div>
                                             <p className="text-[12px] font-bold text-slate-400  mb-1" >Number Plate</p>
-                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {user?.vehicle?.numberPlate} </div>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {user?.vehicle?.numberPlate || "Not set"} </div>
                                         </div>
 
                                         <div>
                                             <p className="text-[12px] font-bold text-slate-400  mb-1" >Payload Capacity</p>
-                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {`${user?.vehicle?.capacityKg} KG`} </div>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700"> {user?.vehicle?.capacityKg != null ? `${user.vehicle.capacityKg} KG` : "Not set"} </div>
                                         </div>
 
                                         <p className="text-[14px] font-bold text-slate-500 ">Pricing </p>
-                                        <p className="text-2xl font-black text-orange-500">Rs. {user?.pricePerKm}</p>
+                                        <p className="text-2xl font-black text-orange-500">Rs. {user?.pricePerKm ?? "N/A"}</p>
                                         <p className="text-xs text-slate-400 font-medium">Standard rate per Kilometer</p>
                                     </div>
                                 </div>
@@ -216,7 +236,7 @@ export default function Page() {
                                     <div className="space-y-4">
                                         <div>
                                             <p className="text-[12px] font-bold text-slate-400  mb-1" >Phone </p>
-                                            <div className="flex items-center gap-2 font-bold text-slate-700">  {user?.phone} </div>
+                                            <div className="flex items-center gap-2 font-bold text-slate-700">  {user?.phone || "Not set"} </div>
                                         </div>
                                         <div className="pt-2">
                                             <p className="text-[12px] font-bold text-slate-400  mb-2">Active Service Zones</p>
@@ -240,7 +260,6 @@ export default function Page() {
 }
 
 
-<<<<<<< HEAD
 interface NavButtonProps {
     icon: React.ReactNode;
     label: string;
@@ -253,11 +272,6 @@ const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => 
         className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
             }`}
     >
-=======
-const NavButton = ({ icon, label, onClick, active = false, }) => (
-    <button  onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' 
-    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
->>>>>>> 47afa41 (transporter profile change feature implemented)
         <div className="flex items-center gap-3">
             <span className={`${active ? 'text-orange-600' : 'text-slate-400 group-hover:text-slate-600'}`}>{icon}</span>
             <span className="text-sm font-bold">{label}</span>

@@ -2,8 +2,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Camera, CheckCircle2, ImagePlus, Save, UserRound } from "lucide-react";
-import Image from "next/image";
+import { ImagePlus, UserRound } from "lucide-react";
 
 const ProfileUpdatePage = () => {
     const [name, setName] = useState("");
@@ -118,11 +117,11 @@ const ProfileUpdatePage = () => {
 
                                     <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full bg-slate-100">
                                         {preview ? (
-                                            <Image src={preview} alt="Profile preview" className="h-full w-full object-cover" />
+                                            <img src={preview} alt="Profile preview" className="h-full w-full object-cover" />
                                         ) : (<UserRound size={48} className="text-slate-300" />)}
                                     </div>
 
-                                    <div className="flex min-h-28 flex-1 items-center rounded-2xl  border-slate-200 bg-slate-50 px-5">
+                                    <label htmlFor="profile-image" className="flex min-h-28 flex-1 cursor-pointer items-center rounded-2xl border-slate-200 bg-slate-50 px-5">
                                         <div className="flex items-center gap-4">
                                             <div className="flex h-11 w-11  items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition hover:text-orange-600">
                                                 <ImagePlus size={21} />
@@ -133,12 +132,12 @@ const ProfileUpdatePage = () => {
                                             </div>
                                         </div>
 
-                                        <input type="file"
+                                        <input id="profile-image" type="file"
                                             accept="image/png,image/jpeg,image/webp"
                                             onChange={(event) => handleImageChange(event.target.files?.[0] || null)}
                                             className="hidden"
                                         />
-                                    </div>
+                                    </label>
                                 </div>
                             </div>
 

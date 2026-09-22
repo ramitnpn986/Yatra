@@ -48,12 +48,6 @@ const Page = () => {
     vehiclePhoto: null
   });
 
-  const validateField = (name, value) => {
-   
-
-
-  }
-
   const changeFileHandler = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     const file = e.target.files?.[0];
 

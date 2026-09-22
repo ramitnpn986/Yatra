@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { useRouter } from "next/navigation";
-import LocationPicker from "@/app/(customer)/components/LocationPicker";
-=======
->>>>>>> 47afa41 (transporter profile change feature implemented)
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
-const LocationPicker = dynamic(() => import("@/app/(customer)/components/LocationPicker"), {  ssr: false });
+const LocationPicker = dynamic(
+    () => import("@/app/(customer)/components/LocationPicker"),
+    { ssr: false }
+);
 
 type LocationData = {
     latitude: number;

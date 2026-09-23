@@ -302,6 +302,50 @@ export const updateTransporterProfile = async (req: Request, res: Response): Pro
     }
 };
 
+export const setLocation = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const { coordinates, address, province, district, municipality, ward } = req.body;
+
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+            return res.status(400).json({
+                message: "Valid coordinates [longitude, latitude] are required",
+                success: false
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId).select("-password");
+
+        if (!transporter) {
+            return res.status(404).json({
+                message: "Transporter not found",
+                success: false
+            });
+        }
+
+        transporter.location = {
+            type: "Point",
+            coordinates,
+            address,
+            province,
+            district,
+            municipality,
+            ward
+        };
+
+        await transporter.save();
+
+        return res.status(200).json({
+            message: "Base location updated successfully",
+            success: true,
+            location: transporter.location
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
 
 export const changeTransporterPassword = async (req: Request, res: Response): Promise<Response> => {
     try {

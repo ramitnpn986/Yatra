@@ -19,9 +19,12 @@ const ChangeView = ({ center }: ChangeViewProps) => {
     const map = useMap();
     useEffect(() => {
         map.setView(center);
-        setTimeout(() => {
-            map.invalidateSize();
+        const timer = setTimeout(() => {
+            if (map && map.getContainer()) {
+                map.invalidateSize();
+            }
         }, 100);
+        return () => clearTimeout(timer);
     }, [center, map]);
     return null;
 };

@@ -69,7 +69,7 @@ export default function RegisterPage() {
                 </button>
                 <p className="text-sm text-gray-600 text-center">
                     Already have an account?{" "}
-                    <Link href="/en/login" className="text-primary font-semibold"> Login </Link>
+                    <Link href="/login" className="text-primary font-semibold"> Login </Link>
                 </p>
 
             </form>

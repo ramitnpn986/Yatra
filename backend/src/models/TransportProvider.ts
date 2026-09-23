@@ -169,4 +169,3 @@ transportProviderSchema.index({
 });
 
 export const TransportProvider = mongoose.model("TransportProvider", transportProviderSchema);
-

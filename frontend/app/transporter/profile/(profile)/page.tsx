@@ -1,5 +1,10 @@
 "use client"
-import { CheckCircle2, Save, Star, User } from 'lucide-react'
+
+
+import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star, Camera, Save } from 'lucide-react'
+import { User } from "lucide-react";
+import Image from 'next/image';
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 interface User {
@@ -127,39 +132,50 @@ export default function Page() {
 
     return (
         <div className='min-h-screen bg-white flex flex-col lg:flex-row'>
-       
+
             <main className="flex-1 p-4 py-8">
                 <div className="max-w-5xl  space-y-6 ">
 
-                    <section className=" rounded-[2.5rem] p-2 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-8">
-                        <div className="relative group">
-                            <div className="h-28 w-28 rounded-lg overflow-hidden bg-slate-100 border-4 border-white shadow-xl">
-                                {user?.profileImage?.url ? (
-                                    <img src={user.profileImage.url} alt="Profile" className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={40} /></div>
-                                )}
+                    <section className=" rounded-[1.5rem] p-2 px-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className='flex  items-center gap-8'>
+                            <div className="relative group">
+                                <div className="h-28 w-28 rounded-lg overflow-hidden bg-slate-100 border-4 border-white shadow-xl">
+                                    {user?.profileImage?.url ? (
+                                        <Image
+                                            src={user.profileImage.url}
+                                            alt="Profile"
+                                            width={100}
+                                            height={100}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="h-full w-full flex items-center justify-center text-slate-300"></div>
+                                    )}
+                                </div>
                             </div>
+
                             <div className={`absolute -bottom-2 -right-2 border-4 border-white text-white p-1.5 rounded-full ${user?.isAvailable ? "bg-green-500" : "bg-slate-500"}`}>
                                 <CheckCircle2 size={16} />
+
+                            <div className="flex-1 text-center md:text-left">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 ">
+                                    <h1 className="text-3xl font-black text-slate-900 ">{user?.name}</h1>
+                                    <span className="px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-black  border border-orange-200">
+                                        {user?.verificationStatus}
+                                    </span>
+                                </div>
                             </div>
+
                         </div>
 
-                        <div className="flex-1 text-center md:text-left">
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 ">
-                                <h1 className="text-3xl font-black text-slate-900 ">{user?.name}</h1>
-                                <span className="px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-black  border border-orange-200">
-                                    {user?.verificationStatus}
-                                </span>
-                            </div>
-                            <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
-                                <button type="button" onClick={() => setEditing((value) => !value)} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600">
-                                    {editing ? "Cancel edit" : "Edit profile"}
-                                </button>
-                                <button type="button" onClick={toggleAvailability} disabled={updatingAvailability} className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable ? "bg-green-600 hover:bg-green-700" : "bg-slate-500 hover:bg-slate-600"}`}>
-                                    {updatingAvailability ? "Updating..." : user?.isAvailable ? "Available" : "Unavailable"}
-                                </button>
-                            </div>
+
+                        <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
+                            <button type="button" onClick={() => setEditing((value) => !value)} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600">
+                                {editing ? "Cancel edit" : "Edit profile"}
+                            </button>
+                            <button type="button" onClick={toggleAvailability} disabled={updatingAvailability} className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable ? "bg-green-600 hover:bg-green-700" : "bg-slate-500 hover:bg-slate-600"}`}>
+                                {updatingAvailability ? "Updating..." : user?.isAvailable ? "Available" : "Unavailable"}
+                            </button>
                         </div>
 
                     </section>
@@ -260,6 +276,9 @@ export default function Page() {
 }
 
 
+
+
+
 interface NavButtonProps {
     icon: React.ReactNode;
     label: string;
@@ -268,8 +287,9 @@ interface NavButtonProps {
 }
 
 const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => (
-    <button  onClick={onClick}
-        className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+    <button onClick={onClick}
+        className={`w-full flex items-center justify-between px-4 py-3.5 rounded transition-all  ${active ? 'bg-orange-50 text-orange-700'
+            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
             }`}
     >
         <div className="flex items-center gap-3">

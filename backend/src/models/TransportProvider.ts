@@ -1,4 +1,4 @@
-import  validator  from 'validator';
+import validator from 'validator';
 import mongoose from "mongoose";
 
 
@@ -33,25 +33,27 @@ const transportProviderSchema = new mongoose.Schema(
                 default: "",
             },
         },
-        role:{
+
+        role: {
             type: String,
-            enum: ["rider","booking-partner"],
+            enum: ["rider", "booking-partner"],
             default: "rider"
         },
-        location:  {
+
+        location: {   // this is the transporter registered / base location 
             type: {
                 type: String,
                 enum: ["Point"],
                 default: "Point",
             },
             coordinates: {
-                type: [Number],  // [longitude, latitude]
+                type: [Number], 
                 required: true,
             },
 
-            address: { type: String,  },
-            province: { type: String,  },
-            district: { type: String,  },
+            address: { type: String, },
+            province: { type: String, },
+            district: { type: String, },
             municipality: { type: String, },
             ward: { type: String, }
         },
@@ -115,7 +117,7 @@ const transportProviderSchema = new mongoose.Schema(
             required: false,
         },
 
-        currentLocation: {
+        currentLocation: {     //    where the transporter was last seen 
             type: {
                 type: String,
                 enum: ["Point"],
@@ -124,6 +126,10 @@ const transportProviderSchema = new mongoose.Schema(
             coordinates: {
                 type: [Number],
                 default: [85.3240, 27.7172],
+            },
+            lastUpdatedAt: {
+                type: Date,
+                default: Date.now,
             },
         },
 
@@ -153,12 +159,11 @@ const transportProviderSchema = new mongoose.Schema(
 
 
 transportProviderSchema.pre("save", async function () {
-
     if (this.isNew && this.location?.coordinates) {
-
         this.currentLocation = {
             type: "Point",
             coordinates: this.location.coordinates,
+            lastUpdatedAt: new Date(),
         };
     }
 });

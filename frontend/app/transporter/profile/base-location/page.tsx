@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
-const LocationPicker = dynamic(
-    () => import("@/app/(customer)/components/LocationPicker"),
-    { ssr: false }
-);
+const LocationPicker = dynamic(() => import("@/app/(customer)/components/LocationPicker"), { ssr: false });
 
 type LocationData = {
     latitude: number;
@@ -76,7 +73,7 @@ const TransporterLocationSelection = () => {
                 }
             } catch (err) {
                 console.error("Failed to fetch transporter profile:", err);
-                toast.error(err instanceof Error? err.message: "Failed to load location");
+                toast.error(err instanceof Error ? err.message : "Failed to load location");
             } finally {
                 setAddressLoading(false);
             }
@@ -297,7 +294,6 @@ const TransporterLocationSelection = () => {
                 <div className={`lg:col-span-8 bg-white p-4 rounded-2xl shadow-sm border transition-all h-[500px] relative overflow-hidden ${isEditMode ? 'border-orange-400 ring-4 ring-orange-50' : 'border-slate-200'}`}>
                     <div className="w-full h-full overflow-hidden ">
                         <LocationPicker
-                            key={`${location.latitude}-${location.longitude}`}
                             onSelect={handleLocationSelect}
                             currentCoords={[location.latitude, location.longitude]}
                             isEditable={isEditMode}

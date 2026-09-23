@@ -1,7 +1,7 @@
 "use client"
 
 
-import { Bell, Car, CheckCircle2, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, Star, Camera, Save } from 'lucide-react'
+import { CheckCircle2, Star, Save } from 'lucide-react'
 import { User } from "lucide-react";
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'
@@ -30,6 +30,13 @@ interface User {
     pricePerKm?: number;
     serviceAreas?: string[];
 
+}
+
+interface NavButtonProps {
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+    active?: boolean;
 }
 
 export default function Page() {
@@ -136,48 +143,57 @@ export default function Page() {
             <main className="flex-1 p-4 py-8">
                 <div className="max-w-5xl  space-y-6 ">
 
-                    <section className=" rounded-[1.5rem] p-2 px-4 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className='flex  items-center gap-8'>
-                            <div className="relative group">
+                    <section className="rounded-[1.5rem] border border-slate-200 p-2 px-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+
+                            <div className="relative">
                                 <div className="h-28 w-28 rounded-lg overflow-hidden bg-slate-100 border-4 border-white shadow-xl">
                                     {user?.profileImage?.url ? (
                                         <Image
                                             src={user.profileImage.url}
                                             alt="Profile"
-                                            width={100}
-                                            height={100}
+                                            width={112}
+                                            height={112}
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <div className="h-full w-full flex items-center justify-center text-slate-300"></div>
+                                        <div className="h-full w-full flex items-center justify-center text-slate-300" />
                                     )}
                                 </div>
                             </div>
 
-                            <div className={`absolute -bottom-2 -right-2 border-4 border-white text-white p-1.5 rounded-full ${user?.isAvailable ? "bg-green-500" : "bg-slate-500"}`}>
-                                <CheckCircle2 size={16} />
-
                             <div className="flex-1 text-center md:text-left">
-                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 ">
-                                    <h1 className="text-3xl font-black text-slate-900 ">{user?.name}</h1>
-                                    <span className="px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-black  border border-orange-200">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                    <h1 className="text-3xl font-black text-slate-900">
+                                        {user?.name}
+                                    </h1>
+
+                                    <span className="px-2 py-0.5 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-black">
                                         {user?.verificationStatus}
                                     </span>
+                                </div>
+
+           
+                                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditing((value) => !value)}
+                                        className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600"
+                                    >
+                                        {editing ? "Cancel edit" : "Edit profile"}
+                                    </button>
+
+                                    <button type="button" onClick={toggleAvailability}  disabled={updatingAvailability}  className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable
+                                                ? "bg-green-600 hover:bg-green-700"
+                                                : "bg-slate-500 hover:bg-slate-600"
+                                            }`}
+                                    >
+                                        {updatingAvailability ? "Updating...": user?.isAvailable? "Available": "Unavailable"}
+                                    </button>
                                 </div>
                             </div>
 
                         </div>
-
-
-                        <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
-                            <button type="button" onClick={() => setEditing((value) => !value)} className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600">
-                                {editing ? "Cancel edit" : "Edit profile"}
-                            </button>
-                            <button type="button" onClick={toggleAvailability} disabled={updatingAvailability} className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable ? "bg-green-600 hover:bg-green-700" : "bg-slate-500 hover:bg-slate-600"}`}>
-                                {updatingAvailability ? "Updating..." : user?.isAvailable ? "Available" : "Unavailable"}
-                            </button>
-                        </div>
-
                     </section>
 
                     {editing && (
@@ -279,12 +295,7 @@ export default function Page() {
 
 
 
-interface NavButtonProps {
-    icon: React.ReactNode;
-    label: string;
-    onClick: () => void;
-    active?: boolean;
-}
+
 
 const NavButton = ({ icon, label, onClick, active = false }: NavButtonProps) => (
     <button onClick={onClick}

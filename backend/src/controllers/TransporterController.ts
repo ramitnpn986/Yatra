@@ -174,7 +174,9 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
             vehicleRegistration?: Express.Multer.File[];
             vehiclePhoto?: Express.Multer.File[];
         } | undefined;
+
         const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = files || {};
+
         let { vehicleType, numberPlate, capacityKg, serviceAreas, pricePerKm } = req.body;
 
         if (!citizenshipCard || !drivingLicense || !vehicleRegistration || !vehiclePhoto || !vehicleType || !numberPlate || !capacityKg || !pricePerKm) {
@@ -204,17 +206,23 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
             });
         }
 
+        const citizenshipRes = await uploadImage(citizenshipCard[0].buffer, "Yatra/kyc/citizenship");
+        const drivingLicenseRes = await uploadImage(    drivingLicense[0].buffer, "Yatra/kyc/driving-license")
+        const vehicleRegistrationRes = await uploadImage(  vehicleRegistration[0].buffer, "Yatra/kyc/vehicle-registration");
+        const vehiclePhotoRes = await uploadImage( vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
+  
+       
         transporter.documents = {
-            citizenshipCard: citizenshipCard[0].path,
-            drivingLicense: drivingLicense[0].path,
-            vehicleRegistration: vehicleRegistration[0].path,
+            citizenshipCard: citizenshipRes.secure_url,
+            drivingLicense: drivingLicenseRes.secure_url,
+            vehicleRegistration: vehicleRegistrationRes.secure_url,
         }
 
         transporter.vehicle = {
             type: vehicleType,
             numberPlate,
             capacityKg,
-            vehiclePhoto: vehiclePhoto[0].path
+            vehiclePhoto: vehiclePhotoRes.secure_url,
         };
 
         transporter.serviceAreas = serviceAreas || [];
@@ -312,10 +320,13 @@ export const updateTransporterProfile = async (req: Request, res: Response): Pro
     }
 };
 
-export const setLocation = async (req: Request, res: Response): Promise<Response> => {
+export const setBaseLocation = async (req: Request, res: Response): Promise<Response> => {
     try {
         const transporterId = req.user?.transporterId;
-        const { coordinates, address, province, district, municipality, ward } = req.body;
+        const { location } = req.body;
+        const { coordinates, address, province, district, municipality, ward } = location || {};
+
+        console.log(coordinates, address, province, district, municipality, ward);
 
         if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
             return res.status(400).json({

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerTransporter, loginTransporter,setLocation, logout, getTransporterProfile,
+import { registerTransporter, loginTransporter,setBaseLocation, logout, getTransporterProfile,
     changeTransporterPassword, updateAvailablity, updateCurrentLocation, updateTransporterProfile,
     submitKyc
 
@@ -20,7 +20,7 @@ router.post("/update-profile", ...transporterAuth, uploadImage.single("profileIm
 router.post("/change-password", ...transporterAuth, changeTransporterPassword);
 router.patch("/update-availability", ...transporterAuth, updateAvailablity);
 router.post("/change-current-location", ...transporterAuth, updateCurrentLocation)
-router.post("/change-location", ...transporterAuth, setLocation)
+router.put("/change-location", ...transporterAuth, setBaseLocation)
 
 router.post("/submit-kyc", isAuthenticated, uploadImage.fields([
         { name: "citizenshipCard", maxCount: 1 },

@@ -105,6 +105,7 @@ const Page = () => {
     <div className='min-h-screen bg-white text-black py-5 px-4'>
       <div className='max-w-5xl mx-auto'>
         <h1 className='my-2 text-gray-600 text-2xl font-semibold'>Kyc Verification</h1>
+        <p className='text-gray-500  font-semibold text-xs'>Fill all the fields  with valid information </p>
 
         <form onSubmit={handleSubmit} className='py-8 grid grid-cols-1 gap-4'>
           <div className="bg-white rounded-xl p-5 shadow-sm">
@@ -155,7 +156,7 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 shadow-sm ">
+          <div className=" rounded p-4 shadow-sm ">
             <div className="flex items-center gap-3 mb-6 pb-2 ">
               <h2 className=" font-bold text-slate-500">Vehicle Details</h2>
             </div>
@@ -204,7 +205,7 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm ">
+          <div className="bg-white rounded p-6 shadow-sm ">
             <div className="flex items-center gap-3 mb-6 pb-2 ">
               <h2 className=" font-bold text-slate-500">Service Area</h2>
             </div>

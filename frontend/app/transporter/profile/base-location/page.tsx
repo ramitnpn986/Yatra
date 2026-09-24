@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
@@ -187,7 +187,7 @@ const TransporterLocationSelection = () => {
                 }
             };
 
-            const res = await fetch(`/api/transporter/setlocation`, {
+            const res = await fetch(`/api/transporter/set-location`, {
                 method: "PUT",
                 headers: {
                     "Content-type": "application/json"
@@ -212,6 +212,11 @@ const TransporterLocationSelection = () => {
             setLoading(false);
         }
     };
+
+    const mapCoordinates = useMemo(
+        () => [location.latitude, location.longitude] as [number, number],
+        [location.latitude, location.longitude]
+    );
 
     return (
         <div className="min-h-screen p-2 lg:p-4 font-sans">
@@ -295,7 +300,7 @@ const TransporterLocationSelection = () => {
                     <div className="w-full h-full overflow-hidden ">
                         <LocationPicker
                             onSelect={handleLocationSelect}
-                            currentCoords={[location.latitude, location.longitude]}
+                            currentCoords={mapCoordinates}
                             isEditable={isEditMode}
                         />
                     </div>

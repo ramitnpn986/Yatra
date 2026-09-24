@@ -72,6 +72,7 @@ export const registerTransporter = async (req: Request, res: Response) => {
 export const loginTransporter = async (req: Request, res: Response) => {
     try {
         const { phone, password } = req.body;
+        console.log(phone, password )
 
         if (!phone || !password) {
             return res.status(400).json({
@@ -374,6 +375,9 @@ export const changeTransporterPassword = async (req: Request, res: Response): Pr
         const transporterId = req.user?.transporterId;
 
         const { oldPassword, newPassword } = req.body;
+
+        console.log(oldPassword, newPassword);
+
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: "All fields are required", success: false });
         }

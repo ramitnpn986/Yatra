@@ -94,15 +94,15 @@ const Page = () => {
 
             if (res.success) {
                 toast.success(res.message || "Password changed successfully");
-                await fetch("/api/admin/logout", {
+                await fetch("/api/logout", {
                     method: "POST",
                     credentials: "include",
                 });
 
-                router.push("/admin/login");
+                router.push("/transporter/login");
             }
         } catch (error: unknown) {
-            console.error("Admin password change error:", error);
+            console.error("Transporter password change error:", error);
         } finally {
             setLoading(false);
         }

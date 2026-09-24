@@ -1,5 +1,5 @@
 "use client"
-import { Bell, Car, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck } from 'lucide-react'
+import { Bell, Car, LayoutDashboard, Lock, MapPin, Settings, ShieldCheck, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { ReactNode } from "react";
 
@@ -49,6 +49,7 @@ const Page = ( { children }: LayoutProps) => {
                 </div>
 
                 <div className="flex flex-col gap-2 flex-1">
+                    <NavButton onClick={() => router.push('/transporter/profile')} icon={<User size={18} />} label="Profile" />
                     <NavButton onClick={() => router.push('/transporter/profile/dashboard')} icon={<LayoutDashboard size={18} />} label="Dashboard" />
                     <NavButton onClick={() => router.push("/transporter/profile/base-location")} icon={<MapPin size={18} />} label="Base Location" />
                     <NavButton onClick={() => router.push("/transporter/profile/update")} icon={<Settings size={18} />} label="Profile Settings"  />

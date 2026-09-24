@@ -12,33 +12,53 @@ export default function LoginPage() {
   const router = useRouter();
 
 
-  const handleLogin = async (e: React.FormEvent) => {
-    try {
-      e.preventDefault();
-      const res = await fetch(`/api/transporter/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          phone,
-          password
-        })
-      })
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      const data = await res.json();
-      if (!res.ok) {
-        console.log(data.message);
-        return
-      }
-      router.push("/transporter/profile")
+  const startTime = performance.now();
 
+  try {
+    console.log("1. Login request started");
 
-    } catch (err) {
-      console.log("Error at login logic :", err)
+    const res = await fetch("/api/transporter/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        phone,
+        password,
+      }),
+    });
+
+    console.log(
+      "2. Login response received:",
+      `${(performance.now() - startTime).toFixed(0)}ms`
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.log(data.message);
+      return;
     }
+
+    console.log(
+      "3. Before navigation:",
+      `${(performance.now() - startTime).toFixed(0)}ms`
+    );
+
+    router.push("/transporter/profile");
+
+    console.log(
+      "4. Navigation triggered:",
+      `${(performance.now() - startTime).toFixed(0)}ms`
+    );
+  } catch (err) {
+    console.log("Error at login logic:", err);
   }
+};
 
   return (
     <div className="flex min-h-screen items-center p-4 justify-center bg-white">

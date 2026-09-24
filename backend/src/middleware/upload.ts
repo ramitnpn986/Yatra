@@ -1,14 +1,13 @@
 import multer from "multer";
 
-const upload = multer({
-    dest: "uploads/",
-});
+const storage = multer.memoryStorage();
 
-export const kycUpload = upload.fields([
-    { name: "citizenshipCard", maxCount: 1 },
-    { name: "drivingLicense", maxCount: 1 },
-    { name: "vehicleRegistration", maxCount: 1 },
-    { name: "vehiclePhoto", maxCount: 1 },
-]);
+const fileFilter: multer.Options["fileFilter"] = ( req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+    } else {
+        cb(new Error("Only image files are allowed"));
+    }
+};
 
-export const profileUpload = upload.single("profileImage");
+export const uploadImage = multer({ storage,  fileFilter, limits: { fileSize: 5 * 1024 * 1024 }});

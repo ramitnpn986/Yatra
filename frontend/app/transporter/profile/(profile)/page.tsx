@@ -48,6 +48,7 @@ export default function Page() {
     const [saving, setSaving] = useState(false)
     const [updatingAvailability, setUpdatingAvailability] = useState(false)
     const [message, setMessage] = useState("")
+    const router = useRouter()
 
     useEffect(() => {
 
@@ -177,10 +178,10 @@ export default function Page() {
                                 <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-3">
                                     <button
                                         type="button"
-                                        onClick={() => setEditing((value) => !value)}
+                                        onClick={() => router.push("/transporter/profile/update")  }
                                         className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600"
                                     >
-                                        {editing ? "Cancel edit" : "Edit profile"}
+                                     Edit profile
                                     </button>
 
                                     <button type="button" onClick={toggleAvailability}  disabled={updatingAvailability}  className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${user?.isAvailable
@@ -196,24 +197,7 @@ export default function Page() {
                         </div>
                     </section>
 
-                    {editing && (
-                        <form onSubmit={saveProfile} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-                            <h2 className="text-lg font-black text-slate-800">Edit profile</h2>
-                            <label className="block text-sm font-bold text-slate-600">
-                                Name
-                                <input type="text" value={name} onChange={(event) => setName(event.target.value)} minLength={4} required className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 font-medium outline-none focus:border-orange-500" />
-                            </label>
-                            <label className="block text-sm font-bold text-slate-600">
-                                Profile image
-                                <input type="file" accept="image/*" onChange={(event) => setProfileImage(event.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
-                            </label>
-                            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-60">
-                                <Save size={16} /> {saving ? "Saving..." : "Save changes"}
-                            </button>
-                        </form>
-                    )}
-                    {message && <p className="text-sm font-semibold text-slate-600">{message}</p>}
-
+                   
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="md:col-span-1 space-y-6">
                             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">

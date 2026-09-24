@@ -45,7 +45,6 @@ const ProfileUpdatePage = () => {
         setProfileImage(file);
         setSuccess(false);
         setMessage("");
-
         if (file) {
             const imageUrl = URL.createObjectURL(file);
             setPreview(imageUrl);
@@ -61,12 +60,12 @@ const ProfileUpdatePage = () => {
 
         try {
             const formData = new FormData();
-            formData.append("name", name);
+            formData.append("name", name.trim());
             if (profileImage) {
                 formData.append("profileImage", profileImage);
             }
 
-            const response = await fetch("/api/transporter/profile", {
+            const response = await fetch("/api/transporter/edit", {
                 method: "POST",
                 credentials: "include",
                 body: formData,

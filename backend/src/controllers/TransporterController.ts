@@ -4,6 +4,8 @@ import jwt  from "jsonwebtoken";
 import {Request,Response} from "express";
 import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
+import { deleteImage, uploadImage } from "../utils/cloudinary.js";
+import { upload } from "../middleware/upload.js";
 
 const generateOtp=()=>{
     return Math.floor( 100000 +Math.random()*900000).toString();
@@ -282,11 +284,19 @@ export const updateTransporterProfile = async (req: Request, res: Response): Pro
         }
 
         transporter.name = name.trim();
+
         if (req.file) {
+            if(transporter.profileImage?.public_id){
+                await deleteImage(transporter.profileImage.public_id);
+            }
+
+            const result = await uploadImage(req.file.buffer, "Yatra/transporters");
+            
             transporter.profileImage = {
-                url: `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`,
-                public_id: req.file.filename,
+                url: result.secure_url,
+                public_id: result.public_id,
             };
+          
         }
 
         await transporter.save();

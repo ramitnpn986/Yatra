@@ -2,7 +2,6 @@
 
 import { Socket } from "socket.io" // this is just Typescript type for one connected Socket.IO client
 import jwt from 'jsonwebtoken'    // normaly to verify 
-import { parse } from 'cookie'    //  converts a raw cookiew header string to a javascript object
 import { AuthenticatedSocket, SocketRole } from "./socketTypes.js"
 
 interface JwtPayload {    // expectted information inside our jwt
@@ -29,13 +28,15 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
             return next(new Error("Authentication Required"));
         }
 
-        const parsedCookies = parse(cookies);       // convert the cookie header into an object 
-        const token = parsedCookies.token;          
-
+        const token = cookies
+            .split(";")
+            .map((cookie) => cookie.trim())
+            .find((cookie) => cookie.startsWith("token="))
+            ?.split("=")[1];
 
         // if the cookie exists but doesn't contain 'token' the socket connection can not be authenticated 
 
-        if (!token) {         
+        if (!token) {
             return next(new Error("Authentication token missing"));
         }
 
@@ -79,9 +80,7 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
             role,
         };
 
-
         next();
-
 
     } catch (err) {
         console.log("Socket authentication error: ", err);

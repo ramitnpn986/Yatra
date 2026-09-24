@@ -1,4 +1,4 @@
-import {  FileText,  Upload,  X} from "lucide-react";
+import { FileText, Upload, X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -25,7 +25,7 @@ interface FileUploadFieldProps {
     removeFile: (fieldName: FileField) => void;
 }
 
-const FileUploadField = ({ label, name, errors, previews, changeFileHandler, removeFile}: FileUploadFieldProps) => {
+const FileUploadField = ({ label, name, errors, previews, changeFileHandler, removeFile }: FileUploadFieldProps) => {
     return (
         <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
@@ -33,10 +33,9 @@ const FileUploadField = ({ label, name, errors, previews, changeFileHandler, rem
             </label>
 
             <div className={`relative  rounded-2xl h-44 flex flex-col items-center justify-center overflow-hidden
-                ${
-                    errors[name]
-                        ? "border-red-300 bg-red-50"
-                        : previews[name]
+                ${errors[name]
+                    ? "border-red-300 bg-red-50"
+                    : previews[name]
                         ? "border-orange-500 bg-orange-50"
                         : "border-slate-200 hover:border-orange-400 hover:bg-slate-50"
                 }`}
@@ -50,9 +49,11 @@ const FileUploadField = ({ label, name, errors, previews, changeFileHandler, rem
                             </div>
                         ) : (
                             <Image
-                                src={previews[name] as string}
-                                alt={`${label} preview`}
-                                className="w-full h-full object-cover"
+                                src={previews[name]!}
+                                alt={label}
+                                width={300}
+                                height={200}
+                                className="w-full h-40 object-cover rounded-xl"
                             />
                         )}
 
@@ -66,7 +67,7 @@ const FileUploadField = ({ label, name, errors, previews, changeFileHandler, rem
                             <Upload size={24} />
                         </div>
                         <span className="text-xs font-medium text-slate-500 mt-2"> Click to upload </span>
-                        <input  type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => changeFileHandler(e, name) }/>
+                        <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => changeFileHandler(e, name)} />
                     </label>
                 )}
             </div>

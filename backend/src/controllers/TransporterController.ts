@@ -5,7 +5,7 @@ import {Request,Response} from "express";
 import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
-import { upload } from "../middleware/upload.js";
+
 
 const generateOtp=()=>{
     return Math.floor( 100000 +Math.random()*900000).toString();
@@ -67,6 +67,7 @@ export const registerTransporter = async (req: Request, res: Response) => {
     }
 
 }
+
 
 
 export const loginTransporter = async (req: Request, res: Response) => {
@@ -180,12 +181,12 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
         let { vehicleType, numberPlate, capacityKg, serviceAreas, pricePerKm } = req.body;
 
-        if (!citizenshipCard || !drivingLicense || !vehicleRegistration || !vehiclePhoto || !vehicleType || !numberPlate || !capacityKg || !pricePerKm) {
-            return res.status(400).json({
-                success: false,
-                message: " All fields are required"
-            })
-        }
+         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !numberPlate || !capacityKg || !pricePerKm) {
+           return res.status(400).json({
+              success: false,
+               message: "All fields are required",
+           }); 
+          } 
 
         if (typeof (serviceAreas) === "string") {
             serviceAreas = serviceAreas.split(',').map((area) => area.trim()).filter(area => area.length > 3);
@@ -422,8 +423,6 @@ export const changeTransporterPassword = async (req: Request, res: Response): Pr
     }
 
 }
-
-
 
 export const updateAvailablity = async (req: Request, res: Response): Promise<Response> => {
     try {

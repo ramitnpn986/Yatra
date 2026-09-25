@@ -1,6 +1,14 @@
+
 "use client";
 
-import { Phone, Calendar, Edit3 } from "lucide-react";
+import {
+    Phone,
+    CalendarDays,
+    ShieldCheck,
+    Pencil,
+    LockKeyhole,
+    UserRound,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -16,6 +24,7 @@ interface AdminData {
 
 const AdminProfile = () => {
     const router = useRouter();
+
     const [admin, setAdmin] = useState<AdminData | null>(null);
     const [message, setMessage] = useState("");
 
@@ -26,6 +35,7 @@ const AdminProfile = () => {
                     method: "GET",
                     credentials: "include",
                 });
+
                 const data = await res.json();
 
                 if (res.ok) {
@@ -43,79 +53,111 @@ const AdminProfile = () => {
     }, []);
 
     return (
-        <div className="min-h-screen text-[#0A0A0A] bg-gray-100 pb-12 pt-6">
-            <div className="max-w-5xl mx-auto px-4 flex justify-start items-center">
+        <div className="min-h-screen bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-5xl">
+                <div className="mb-6">
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-600">
+                        Admin Profile
+                    </h1>
+                </div>
 
-                <div className="bg-[#ffffff] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl w-full">
-                    <div className="p-8 pb-10">
+                {message && (
+                    <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        {message}
+                    </div>
+                )}
 
-                        {message && (
-                            <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-                                {message}
-                            </div>
-                        )}
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-                        <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
-                            <Image
-                                src={admin?.profileImage?.url || "/user.avif"}
-                                alt="Admin Profile"
-                                width={160}
-                                height={160}
-                                className="w-40 h-40 rounded-[2rem] object-cover shadow"
-                            />
 
-                            <div className="flex-1 text-center md:text-left">
-                                <h2 className="text-3xl font-bold uppercase">
-                                    {admin?.name || "Loading..."}
-                                </h2>
-                            </div>
+                    <div className="relative px-6 pb-6 sm:px-8">
 
-                            <div className="flex flex-col gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/admin/dashboard/profile/update")}
-                                    className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-2xl text-sm font-semibold hover:bg-orange-600 transition"
-                                >
-                                    <Edit3 size={14} />
-                                    Edit Profile
-                                </button>
+                        <div className="flex flex-col gap-5 sm:flex-row justify-between sm:items-end">
 
-                                <button
-                                    type="button"
-                                    onClick={() => router.push("/admin/dashboard/profile/password-change")}
-                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-sm font-semibold hover:bg-blue-700 transition"
-                                >
-                                    <Edit3 size={14} />
-                                    Update Credentials
-                                </button>
-                            </div>
-                        </div>
+                            <div className="mt-5 flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:gap-5">
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/2 border border-white/5">
-                                <Phone size={20} className="text-blue-500" />
-                                <div>
-                                    <p className="text-sm text-gray-500 mb-1">Phone</p>
-                                    <p className="text-sm font-bold text-gray-600">
-                                        {admin?.phone || "Not Available"}
+                         
+                                <div className="shrink-0">
+                                    <div className="rounded-full border-4 border-white bg-white shadow-lg">
+                                        <Image
+                                            src={admin?.profileImage?.url || "/user.avif"}
+                                            alt="Admin Profile"
+                                            width={128}
+                                            height={128}
+                                            className="h-28 w-28 rounded-full object-cover sm:h-32 sm:w-32"
+                                        />
+                                    </div>
+                                </div>
+
+                         
+                                <div className="flex-1 pb-1 text-center sm:text-left">
+                                    <h2 className="text-2xl font-bold capitalize text-gray-900 sm:text-3xl">
+                                        {admin?.name || "Loading..."}
+                                    </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Yatra Administrator
                                     </p>
                                 </div>
                             </div>
 
-                            {admin?.createdAt && (
-                                <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/2 border border-white/5">
-                                    <Calendar size={20} className="text-blue-500" />
-                                    <div>
-                                        <p className="text-sm text-gray-500 mb-1">Enlisted Since</p>
-                                        <p className="text-sm font-bold text-gray-600">
-                                            {new Date(admin.createdAt).toLocaleDateString("en-US", {
+                            <div className="flex gap-2 pb-1">
+                                <button type="button"
+                                    onClick={() => router.push("/admin/dashboard/profile/update")}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+                                >
+                                    Edit Profile
+                                </button>
+
+                                <button type="button"
+                                    onClick={() => router.push("/admin/dashboard/profile/password-change")}
+                                    className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800"
+                                >
+                                    Security
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 sm:p-8">
+
+                        <div className="mb-5">
+                            <h3 className="text-base font-semibold text-gray-900">  Account Information </h3>
+                            <p className="mt-1 text-sm text-gray-500">  Your administrator account details. </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+                            <div className=" rounded-xl  bg-[#eee8e8] p-5  text-black ">
+                                <div className="flex flex-col items-start gap-1 ">
+                                    <p className="text-xs font-semibold">  Phone Number  </p>
+                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">  {admin?.phone || "Not Available"} </p>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl bg-[#eee8e8] p-5 text-black">
+                                <div className="flex flex-col items-start gap-1">
+                                    <p className="text-xs font-semibold">Member Since</p>
+                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">
+                                        {admin?.createdAt ? new Date(admin.createdAt).toLocaleDateString(
+                                            "en-US",
+                                            {
                                                 month: "long",
                                                 year: "numeric",
-                                            })}
-                                        </p>
-                                    </div>
+                                            }
+                                        )
+                                            : "Not Available"}
+                                    </p>
+
                                 </div>
-                            )}
+                            </div>
+
+                            <div className="rounded-xl bg-[#eee8e8] p-5 text-black">
+                                <div className="flex flex-col items-start gap-1">
+                                    <p className="text-xs font-semibold"> Role </p>
+                                    <p className="mt-1 text-sm font-semibold text-[#534c4c]"> Administrator </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

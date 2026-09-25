@@ -99,11 +99,8 @@ const AdminProfileUpdatePage = () => {
         <div className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl">
                 <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 bg-gradient-to-r from-orange-50 to-white px-6 py-6 sm:px-8">
-                        <div className="flex items-center gap-3">
-                            <UserRound size={22} className="text-gray-700" />
-                            <h2 className="font-bold text-slate-900"> Personal Information </h2>
-                        </div>
+                    <div className="bg-black px-6 py-6 sm:px-8">
+                        <h2 className="font-bold text-white"> Personal Information </h2>
                     </div>
 
                     <form onSubmit={handleSubmit}>
@@ -144,7 +141,7 @@ const AdminProfileUpdatePage = () => {
                                     minLength={4}
                                     required
                                     placeholder="Enter your full name"
-                                    className="w-full rounded-xl p-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-orange-500 bg-orange-100"
+                                    className="w-full rounded-xl p-3 text-sm font-medium text-slate-800 outline-none bg-gray-50 transition placeholder:text-slate-400  "
                                 />
                             </div>
 
@@ -156,7 +153,7 @@ const AdminProfileUpdatePage = () => {
                         </div>
 
                         <div className="flex justify-end items-center m-4 sm:6 lg:8">
-                            <button type="submit" disabled={saving} className="rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60">
+                            <button type="submit" disabled={saving} className="rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60">
                                 {saving ? "Saving changes..." : "Save changes"}
                             </button>
                         </div>

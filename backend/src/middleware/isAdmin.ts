@@ -3,9 +3,10 @@ import type { NextFunction, Request, Response } from "express";
 
 const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        console.log(req.user?.role);
         if (req.user?.role !== "admin") {
             return res.status(403).json({
-                message: "Buyer access only",
+                message: "Admin access only",
                 success: false,
             });
         }

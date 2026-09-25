@@ -9,13 +9,14 @@ import {
 
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isAdmin from "../middleware/isAdmin.js";
+import { uploadImage } from "../middleware/upload.js";
 const router = Router();
 
 router.post("/add-admin", registerAdmin);
 router.post("/enter-admin", loginAdmin);
 router.post("/logout", logout);
 router.get("/get-profile", isAuthenticated, isAdmin, getAdminProfile);
-router.post("/update-profile", isAuthenticated, isAdmin, updateAdminProfile);
+router.post("/update-profile", isAuthenticated, isAdmin, uploadImage.single("profileImage"), updateAdminProfile);
 router.post("/change-password", isAuthenticated, isAdmin, changeAdminPassword);
 
 router.get("/transport-providers", isAuthenticated, isAdmin, getAllTransportersVerified);

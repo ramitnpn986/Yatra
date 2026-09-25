@@ -12,7 +12,6 @@ const rideSchema = new mongoose.Schema({
     customer: {
         type: Schema.Types.ObjectId,
         ref: "Customer",
-        unique: true,
         required: true
     },
 
@@ -28,6 +27,11 @@ const rideSchema = new mongoose.Schema({
             requred: true,
             trim: true
         },
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
+        },
         coordinates: {
             type: [Number],
             required: true,
@@ -39,6 +43,11 @@ const rideSchema = new mongoose.Schema({
             required: true,
             trim: true,
         },
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point"
+        },
 
         coordinates: {
             type: [Number],
@@ -48,6 +57,13 @@ const rideSchema = new mongoose.Schema({
 
     distanceKm: {
         type: Number,
+        required: true,
+        min: 0,
+    },
+
+    estimatedFare: {
+        type: Number,
+        required: true,
         min: 0,
     },
 
@@ -58,8 +74,9 @@ const rideSchema = new mongoose.Schema({
     vehicleType: {
         type: String,
         enum: ["Bike", "Car", "Truck", "Bus"],
+        required: true
     },
-    passengerCont: {
+    passengerCount: {
         type: Number,
         min: 1,
         default: 1
@@ -71,6 +88,7 @@ const rideSchema = new mongoose.Schema({
             "driver_arriving",
             "driver_arrived",
             "started",
+            "arrived_destination",
             "completed",
             "cancelled"
         ],
@@ -94,6 +112,9 @@ const rideSchema = new mongoose.Schema({
     },
 
     startedAt: {
+        type: Date,
+    },
+    arrivedDestinationAt: {
         type: Date,
     },
 

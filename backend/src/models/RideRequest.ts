@@ -49,6 +49,7 @@ const RideRequestSchema = new mongoose.Schema(
 
         distanceKm: {
             type: Number,
+            required: true,
             min: 0,
         },
 
@@ -56,6 +57,7 @@ const RideRequestSchema = new mongoose.Schema(
             type: Number,
             min: 0,
         },
+
 
         vehicleType: {
             type: String,

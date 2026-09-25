@@ -76,13 +76,12 @@ export const registerTransporter = async (req: Request, res: Response) => {
 }
 
 
-
 export const loginTransporter = async (req: Request, res: Response) => {
     try {
 
         console.log("i am hitted");
         const { phone, password } = req.body;
-        console.log(phone, password )
+  
 
         if (!phone || !password) {
             return res.status(400).json({

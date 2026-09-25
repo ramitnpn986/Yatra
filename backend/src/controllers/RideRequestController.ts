@@ -1,8 +1,12 @@
+
 import { Request, Response } from "express";
 import RideRequest from "../models/RideRequest.js";
 import { Ride } from "../models/Ride.js";
 import { TransportProvider } from "../models/TransportProvider.js";
 import Customer from "../models/Customer.js";
+import mongoose from 'mongoose';
+
+
 
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
@@ -137,3 +141,165 @@ export const createRideRequest = async (req: Request, res: Response) => {
 
     }
 }
+
+
+export const acceptRideRequest = async (req: Request, res: Response) => {
+    const session = await mongoose.startSession();
+
+    try {
+        if (!req.user?.transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        const transporterId = req.user.transporterId;
+        const rideRequestId = String(req.params.rideRequestId);
+
+        if (!mongoose.Types.ObjectId.isValid(rideRequestId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid ride request ID",
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId);
+
+        if (!transporter) {
+            return res.status(404).json({
+                success: false,
+                message: "Transporter not found",
+            });
+        }
+
+        if (transporter.verificationStatus !== "approved") {
+            return res.status(403).json({
+                success: false,
+                message: "Your KYC is not verified",
+            });
+        }
+
+        if (!transporter.isAvailable) {
+            return res.status(400).json({
+                success: false,
+                message: "You are currently unavailable",
+            });
+        }
+
+        if (transporter.isBlocked) {
+            return res.status(400).json({
+                success: false,
+                message: "You are currently not able to accept this request",
+            });
+        }
+
+        const rideRequest = await RideRequest.findOne({
+            _id: rideRequestId,
+            status: "pending",
+            expiresAt: { $gt: new Date() },
+            acceptedBy: null,
+        });
+
+        if (!rideRequest) {
+            return res.status(409).json({
+                success: false,
+                message: "Ride request is no longer available",
+            });
+        }
+
+        if (transporter.vehicle !== rideRequest.vehicleType) {
+            return res.status(403).json({
+                success: false,
+                message: "Your vehicle type does not match this ride",
+            });
+        }
+
+        const acceptedAt = new Date();
+
+        session.startTransaction();
+        const acceptedRequest =
+            await RideRequest.findOneAndUpdate(
+                {
+                    _id: rideRequestId,
+                    status: "pending",
+                    expiresAt: { $gt: acceptedAt },
+                    acceptedBy: null,
+                    vehicleType: transporter.vehicle,
+                },
+                {
+                    $set: {
+                        status: "accepted",
+                        acceptedBy: transporterId,
+                        acceptedAt,
+                    },
+                },
+                {
+                    new: true,
+                    session,
+                }
+            );
+
+        if (!acceptedRequest) {
+            await session.abortTransaction();
+
+            return res.status(409).json({
+                success: false,
+                message: "Ride request is no longer available",
+            });
+        }
+
+
+        const ride = new Ride({
+            rideRequest: acceptedRequest._id,
+            customer: acceptedRequest.customer,
+            transporter: transporterId,
+            pickupLocation: acceptedRequest.pickupLocation,
+            dropoffLocation: acceptedRequest.dropoffLocation,
+            distanceKm: acceptedRequest.distanceKm,
+            estimatedFare: acceptedRequest.estimatedFare,
+            vehicleType: acceptedRequest.vehicleType,
+            passengerCount: acceptedRequest.passengerCount,
+            status: "confirmed",
+            requestedAt: acceptedRequest.createdAt,
+            acceptedAt,
+        });
+
+        await ride.save({ session });
+
+
+        await TransportProvider.findByIdAndUpdate( transporterId,{ isAvailable: false},{ session });
+
+        await session.commitTransaction();
+
+        const io = req.app.get("io");
+
+        if (io) {
+            io.to(`customer:${acceptedRequest.customer}`).emit(
+                "ride_accepted",
+                {
+                    rideId: ride._id,
+                    rideRequestId: acceptedRequest._id,
+                    status: ride.status,
+                }
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Ride accepted successfully",
+            ride,
+        });
+
+    } catch (err) {
+        await session.abortTransaction();
+        console.error("Accept ride error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    } finally {
+        await session.endSession();
+    }
+};

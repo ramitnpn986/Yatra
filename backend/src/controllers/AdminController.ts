@@ -1,3 +1,4 @@
+import {deleteImage,uploadImage} from "../utils/cloudinary.js";
 import { Request, Response } from 'express';
 import Admin from '../models/Admin.js'
 import bcrypt from 'bcryptjs'
@@ -119,11 +120,12 @@ export const loginAdmin = async (req: Request, res: Response): Promise<Response>
             profileImage: admin.profileImage?.url,
         }
 
+        const isProduction = process.env.NODE_ENV === 'production';
 
         return res.status(200).cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         }).json({
             message: "Login successful",
@@ -145,10 +147,12 @@ export const loginAdmin = async (req: Request, res: Response): Promise<Response>
 
 export const logout = async (req: Request, res: Response): Promise<Response> => {
     try {
+        const isProduction = process.env.NODE_ENV === 'production';
+
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+            secure: isProduction,
+            sameSite: isProduction ? 'strict' : 'lax',
             path: "/"
         });
 
@@ -192,6 +196,20 @@ export const updateAdminProfile = async (req: Request, res: Response): Promise<R
         }
 
         if (name) admin.name = name.trim();
+
+        if (req.file) {
+            if (admin.profileImage?.public_id) {
+                await deleteImage(admin.profileImage.public_id);
+            }
+
+            const result = await uploadImage(req.file.buffer, "Yatra/admins");
+
+            admin.profileImage = {
+                url: result.secure_url,
+                public_id: result.public_id,
+            };
+        }
+
         await admin.save();
 
         return res.status(200).json({
@@ -780,20 +798,12 @@ export const getCompletedRides = async (req: Request, res: Response): Promise<Re
 
 export const getDashboardStats = async (req: Request, res: Response): Promise<Response> => {
     try {
-        //  const totalCustomers= await Customer.countDocuments();
-        //  const totalTransporters = await TransportProvider.countDocuments();
-        //  const kycPending= await TransportProvider.countDocuments({kycStatus: "pending"});
-        //  const activeRides= await Ride.countDocuments({status:"active"});
-
         const [  totalCustomers, totalTransporters,   kycPending,   activeRides] = await Promise.all([
             Customer.countDocuments(),
             TransportProvider.countDocuments(),
             TransportProvider.countDocuments({ kycStatus: "pending" }),
             Ride.countDocuments({ status: "active" })
         ]);
-
-        // the difference bet this two code is that in above code mongodb performs db operations in
-        //  multiple calls and in  below version in one db access it calculates all . so it is more optimized
 
         return res.status(200).json({
             success: true,

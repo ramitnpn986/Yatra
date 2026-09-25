@@ -18,7 +18,6 @@ const handleLogin = async (e: React.FormEvent) => {
   const startTime = performance.now();
 
   try {
-    console.log("1. Login request started");
 
     const res = await fetch("/api/transporter/login", {
       method: "POST",
@@ -32,10 +31,6 @@ const handleLogin = async (e: React.FormEvent) => {
       }),
     });
 
-    console.log(
-      "2. Login response received:",
-      `${(performance.now() - startTime).toFixed(0)}ms`
-    );
 
     const data = await res.json();
 

@@ -26,6 +26,13 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
         const { name, phone, password, role } = req.body;
 
+        if(role==="rider" || role==="passenger" || role==="admin"){
+            return res.status(400).json({
+                message: "Invalid role",
+                success: false
+            })
+        }
+
         if (!name || !phone || !password) {
             return res.status(400).json({
                 message: "All required fields must be provided",
@@ -72,6 +79,8 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
 export const loginTransporter = async (req: Request, res: Response) => {
     try {
+
+        console.log("i am hitted");
         const { phone, password } = req.body;
         console.log(phone, password )
 
@@ -83,6 +92,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const transporter = await TransportProvider.findOne({ phone }).select('+password')
+        console.log(transporter)
 
         if (!transporter) {
             return res.status(400).json({
@@ -92,6 +102,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const isPasswordValid = await bcrypt.compare(password, transporter.password);
+        console.log(isPasswordValid);
 
         if (!isPasswordValid) {
             return res.status(401).json({

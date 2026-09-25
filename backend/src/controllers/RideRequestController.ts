@@ -268,7 +268,7 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
         await ride.save({ session });
 
 
-        await TransportProvider.findByIdAndUpdate( transporterId,{ isAvailable: false},{ session });
+        await TransportProvider.findByIdAndUpdate(transporterId, { isAvailable: false }, { session });
 
         await session.commitTransaction();
 
@@ -303,3 +303,61 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
         await session.endSession();
     }
 };
+
+
+export const cancelRideRequest = async (req: Request, res: Response) => {
+    try {
+        if (!req.user?.customerId) {
+            return res.status(401).json({
+                success: false,
+                message: " you must be customer for cancel req"
+            })
+        }
+
+        const customerId = req.user?.customerId;
+        const rideRequestId = String(req.params.rideRequestId)
+
+        if (!mongoose.Types.ObjectId.isValid(rideRequestId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid ride request ID",
+            });
+        }
+
+        const rideRequest = await RideRequest.findOneAndUpdate({
+            _id: rideRequestId,
+            customer: customerId,
+            status: "pending"
+        }, {
+            $set: {
+                status: "cancelled",
+                cancelledAt: new Date(),
+            }
+        }, {
+            new: true,
+        })
+
+        if (!rideRequest) {
+            return res.status(404).json({
+                success: false,
+                message:
+                    "Ride request not found or cannot be cancelled",
+            });
+        }
+
+        const io= req.app.get("io");
+        if(io){
+            io.emit("ride_request_cancelled",{rideRequestId: rideRequest._id})
+        }
+
+
+    } catch (err) {
+        console.error("Cancel ride request error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to cancel ride request",
+        });
+    }
+}
+
+

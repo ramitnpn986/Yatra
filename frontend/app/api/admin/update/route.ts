@@ -4,7 +4,7 @@ export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
 
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/update-profile`,
+        const res = await fetch(`${process.env.ADMIN_URL}/update-profile`,
             {
                 method: "POST",
                 headers: {

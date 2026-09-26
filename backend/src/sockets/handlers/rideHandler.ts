@@ -1,42 +1,71 @@
-// Join / leave ride rooms
 
-import type { Socket } from "socket.io";
-import { AuthenticatedSocket, JoinRidePayload, LeaveRidePayload } from "../socketTypes.js";
-import { SOCKET_EVENTS } from "../socketEvents.js";
+//  join / leave ride rooms
 
-export const registerRideHandlers = (socket: Socket): void => {
-	const authenticatedSocket = socket as AuthenticatedSocket;
 
-	socket.on(SOCKET_EVENTS.RIDE.JOIN, (payload: JoinRidePayload) => {
-		if (!payload?.rideId) {
-			socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
-				message: "Ride ID is required",
-			});
-			return;
-		}
+import { Socket } from "socket.io"
+import { AuthenticatedSocket, JoinRidePayload, LeaveRidePayload } from "../socketTypes.js"
+import { SOCKET_EVENTS } from "../socketEvents.js"
 
-		const room = `ride:${payload.rideId}`;
-		void socket.join(room);
+export const registerRideHandlers = (socket: Socket) => {
+    const authenticatedSocket = socket as AuthenticatedSocket;
 
-		socket.emit(SOCKET_EVENTS.RIDE.JOINED, {
-			rideId: payload.rideId,
-			userId: authenticatedSocket.user.id,
-		});
-	});
+    socket.on(SOCKET_EVENTS.RIDE.JOIN, async (payload: JoinRidePayload) => {
+        try {
+            const { rideId } = payload;
+            if (!rideId) {
+                return socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
+                    message: "Ride ID is required",
+                });
+            }
 
-	socket.on(SOCKET_EVENTS.RIDE.LEAVE, (payload: LeaveRidePayload) => {
-		if (!payload?.rideId) {
-			socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
-				message: "Ride ID is required",
-			});
-			return;
-		}
+            const room = `ride: ${rideId}`;
+            await socket.join(room);
 
-		const room = `ride:${payload.rideId}`;
-		void socket.leave(room);
+            console.log(`${authenticatedSocket.user.role} ${authenticatedSocket.user.id} joined ${room}`);
 
-		socket.emit(SOCKET_EVENTS.RIDE.LEFT, {
-			rideId: payload.rideId,
-		});
-	});
-};
+            socket.emit(SOCKET_EVENTS.RIDE.JOINED, {
+                rideId,
+                message: "Successfully joined ride",
+            });
+
+        } catch (err) {
+            console.error("Join ride socket error: ", err);
+            socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
+                message: "Unable to join ride"
+            })
+        }
+    })
+
+
+    socket.on(SOCKET_EVENTS.RIDE.LEAVE, async (payload: LeaveRidePayload) => {
+        try {
+            const { rideId } = payload;
+            if (!rideId) {
+                return socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
+                    message: "Ride ID is required",
+                });
+            }
+
+            const room = `ride: ${rideId}`;
+            if (!authenticatedSocket.rooms.has(room)) {
+                return socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
+                    message: "You are not connected to this ride",
+                });
+            }
+
+            await socket.leave(room);
+            console.log( `${authenticatedSocket.user.role} ${authenticatedSocket.user.id} left ${room}`);
+
+            socket.emit(SOCKET_EVENTS.RIDE.LEFT, {
+                rideId,
+                message: "Successfully left ride",
+            });
+        } catch (err) {
+            console.error("Leave ride socket error:", err);
+            socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
+                message: "Unable to leave ride",
+            });
+        }
+    })
+}
+

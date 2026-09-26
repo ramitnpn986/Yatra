@@ -94,7 +94,7 @@ export default function AdminProviders() {
                     </td>
                     <td className="py-3 px-2 flex flex-wrap gap-2">
                       <Link
-                        href={`/en/admin/dashboard/providers/${provider._id}`}
+                        href={`/admin/dashboard/providers/${provider._id}`}
                         className="bg-primary text-white px-3 py-1 rounded-lg text-sm hover:bg-primary-dark transition"
                       >
                         View

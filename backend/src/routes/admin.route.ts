@@ -20,7 +20,7 @@ router.post("/update-profile", isAuthenticated, isAdmin, uploadImage.single("pro
 router.post("/change-password", isAuthenticated, isAdmin, changeAdminPassword);
 
 router.get("/transport-providers", isAuthenticated, isAdmin, getAllTransportersVerified);
-router.get("/transport-provider/:id", isAuthenticated, isAdmin, getTransportProviderById);
+router.get("/transport-provider/:transporterId", isAuthenticated, isAdmin, getTransportProviderById);
 router.get("/transport-providers/pending-kyc", isAuthenticated, isAdmin, getPendingKYCProviders);
 router.get("/transport-providers/blocked", isAuthenticated, isAdmin, getBlockedTransportProviders);
 

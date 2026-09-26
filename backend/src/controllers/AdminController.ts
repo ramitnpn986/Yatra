@@ -301,7 +301,9 @@ export const getAllTransportersVerified = async (req: Request, res: Response): P
 
 export const getTransportProviderById = async (req: Request, res: Response): Promise<Response> => {
     try {
+   
         const transporterId = req.params.transporterId;
+             console.log(transporterId);
         const transporter = await TransportProvider.findById(transporterId);
 
         if (!transporter) {

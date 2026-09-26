@@ -3,8 +3,8 @@
 
 import { Server, Socket } from 'socket.io';
 import { registerRideHandlers } from './rideHandler.js'
-import { registerLocationHandlers } from "./locationHandler";
-import { AuthenticatedSocket } from "../socketTypes";
+import { registerLocationHandlers } from "./locationHandler.js";
+import { AuthenticatedSocket } from "../socketTypes.js";
 
 export const handleSocketConnection = (io: Server, socket: Socket) => {
     const authenticatedSocket = socket as AuthenticatedSocket;

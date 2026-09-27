@@ -44,7 +44,7 @@ export default function Home() {
                 />
 
                 <div className="absolute bottom-5 group left-5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold  shadow hover:shadow-xl">
-                   Everyday Rides
+                  Everyday Rides
                 </div>
               </div>
 
@@ -81,7 +81,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                 <div className="absolute bottom-5 left-5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-900 shadow">
-                   Tours & Rentals
+                  Tours & Rentals
                 </div>
               </div>
 
@@ -124,7 +124,7 @@ export default function Home() {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-7 transition hover:-translate-y-1 ">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-                <MapPin className="text-indigo-600" size={24} />
+                <MapPin className="text-indigo-600" size={34} />
               </div>
 
               <h3 className="mb-2 text-lg font-bold"> Live Location </h3>
@@ -137,7 +137,13 @@ export default function Home() {
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-7 transition hover:-translate-y-1 ">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-                <ShieldCheck className="text-indigo-600" size={24} />
+                <Image
+                  src={"/trust.png"}
+                  alt="Profile preview"
+                  width={192}
+                  height={192}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <h3 className="mb-2 text-lg font-bold"> Trusted Providers </h3>
               <p className="text-sm leading-6 text-slate-500">
@@ -148,7 +154,13 @@ export default function Home() {
 
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-7 transition hover:-translate-y-1 ">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-                <Clock3 className="text-indigo-600" size={24} />
+                <Image
+                  src={"/s.webp"}
+                  alt="Profile preview"
+                  width={192}
+                  height={192}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <h3 className="mb-2 text-lg font-bold"> Simple & Fast </h3>
@@ -178,7 +190,13 @@ export default function Home() {
               className="rounded-2xl  bg-white/6 p-7 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/1"
             >
               <div className="mb-4 flex h-18 w-18 items-center justify-center ">
-                <Bike className="text-[#5b7dce]" size={57} />
+                <Image
+                  src={"/b.png"}
+                  alt="Profile preview"
+                  width={192}
+                  height={192}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <h3 className="mb-2 text-xl font-bold text-white"> Become a Rider </h3>
@@ -194,9 +212,15 @@ export default function Home() {
               </span>
             </Link>
 
-            <Link href="/register"className="rounded-2xl  bg-white/6 p-7 backdrop-blur transition duration-300 hover:-translate-y-1 ">
+            <Link href="/register" className="rounded-2xl  bg-white/6 p-7 backdrop-blur transition duration-300 hover:-translate-y-1 ">
               <div className="mb-6 flex h-14 w-14 items-center justify-center ">
-                <Bus className="text-[#5b7dce]" size={57} />
+                <Image
+                  src={"/bus.png"}
+                  alt="Profile preview"
+                  width={192}
+                  height={192}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <h3 className="mb-2 text-xl font-bold text-white">
@@ -216,7 +240,13 @@ export default function Home() {
 
             <Link href="/transporter/register" className=" rounded-2xl  bg-white/[0.06] p-7 backdrop-blur transition duration-300 hover:-translate-y-1 ">
               <div className="mb-6 flex h-14 w-14 items-center justify-center">
-                <Truck className="text-[#5b7dce]" size={77} />
+                <Image
+                  src={"/Truck.png"}
+                  alt="Profile preview"
+                  width={192}
+                  height={192}
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <h3 className="mb-2 text-xl font-bold text-white">  Become a Provider </h3>

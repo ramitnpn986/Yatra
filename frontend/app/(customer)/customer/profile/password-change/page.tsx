@@ -2,214 +2,130 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {  Eye, EyeOff, AlertCircle } from "lucide-react";
-import { toast } from "sonner";
 
-type PasswordFields = {
-    oldPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-};
-
-type PasswordErrors = Partial<Record<keyof PasswordFields, string>>;
-type FieldName = keyof PasswordFields;
-
-
-const AdminPasswordChange = () => {
+const PasswordChange = () => {
     const router = useRouter();
 
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<PasswordErrors>({});
-    const [passwords, setPasswords] = useState<PasswordFields>({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-    });
+    const [oldPassword, setOldPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+    const [saving, setSaving] = useState(false);
 
-    const validateInput = ({ oldPassword, newPassword, confirmPassword }: PasswordFields): PasswordErrors => {
-        const errors: PasswordErrors = {};
-        const strongPassRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
-
-        if (!oldPassword.trim()) {
-            errors.oldPassword = "Current password is required";
-        }
-
-        if (!newPassword.trim()) {
-            errors.newPassword = "New password is required";
-        } else if (oldPassword === newPassword) {
-            errors.newPassword = "Must be different from old password";
-        } else if (!strongPassRegex.test(newPassword)) {
-            errors.newPassword = "Weak password complexity";
-        }
-
-        if (!confirmPassword.trim()) {
-            errors.confirmPassword = "Please confirm your password";
-        } else if (confirmPassword !== newPassword) {
-            errors.confirmPassword = "Passwords do not match";
-        }
-
-        return errors;
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setPasswords((prev) => ({ ...prev, [name as FieldName]: value }));
-        if (errors[name as FieldName]) {
-            setErrors((prev) => ({ ...prev, [name as FieldName]: "" }));
-        }
-    };
-
-    const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setMessage("");
+        setError("");
 
-        if (loading) return;
-        const validationErrors = validateInput(passwords);
-
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
+        if (newPassword !== confirmPassword) {
+            setError("New password and confirm password do not match");
             return;
         }
 
-        setLoading(true);
-
         try {
-            const request = await fetch("/api/admin/password-change", {
+            setSaving(true);
+
+            const res = await fetch("/api/passenger/password-change", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 credentials: "include",
-                body: JSON.stringify({
-                    oldPassword: passwords.oldPassword,
-                    newPassword: passwords.newPassword,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ oldPassword, newPassword }),
             });
 
-            const res = await request.json();
+            const data = await res.json();
 
-            if (!request.ok) {
-                toast.error(res.message || "Password change failed");
-                return;
+            if (res.ok && data.success) {
+                setMessage("Password changed successfully");
+                setOldPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+            } else {
+                setError(data.message || "Unable to change password");
             }
-
-            if (res.success) {
-                toast.success(res.message || "Password changed successfully");
-                await fetch("/api/admin/logout", {
-                    method: "POST",
-                    credentials: "include",
-                });
-
-                router.push("/admin/login");
-            }
-        } catch (error: unknown) {
-            console.error("Admin password change error:", error);
+        } catch (err) {
+            console.error("Password change failed:", err);
+            setError("Unable to connect to backend");
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
-    const fields: {
-        label: string;
-        name: FieldName;
-        type: string;
-        placeholder: string;
-    }[] = [
-            {
-                label: "Current Password",
-                name: "oldPassword",
-                type: "password",
-                placeholder: "••••••••",
-            },
-            {
-                label: "New Password",
-                name: "newPassword",
-                type: showPassword ? "text" : "password",
-                placeholder: "New Secret Key",
-            },
-            {
-                label: "Confirm Password",
-                name: "confirmPassword",
-                type: "password",
-                placeholder: "Repeat Secret Key",
-            },
-        ];
-
     return (
-        <div className="min-h-screen text-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden bg-slate-50">
-
-            <div className=" w-full max-w-md sm:max-w-lg rounded-2xl shadow-2xl shadow-black/20 overflow-hidden ">
-                <div className="p-6 sm:p-8 md:p-10 lg:12 bg-[#ffffff] ">
-
-                    <h2 className="text-2xl  font-bold mb-8 "> Change Password </h2>
-
-                    <form onSubmit={submitHandler} className="space-y-5">
-                        {fields.map((field) => (
-                            <div key={field.name}>
-                                <label className="block text-[12px] font-bold text-slate-600  mb-2 ml-1">
-                                    {field.label}
-                                </label>
-
-                                <div className="relative">
-                                    <input
-                                        type={field.type}
-                                        name={field.name}
-                                        value={passwords[field.name]}
-                                        onChange={handleChange}
-                                        placeholder={field.placeholder}
-                                        className={`w-full  border ${errors[field.name]
-                                            ? "border-red-500 ring-1 ring-red-500/20"
-                                            : "border-slate-700"
-                                            } rounded-xl px-4 py-3 outline-none  transition-all text-gray-800 placeholder:text-slate-600`}
-                                    />
-
-                                    {field.name === "newPassword" && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword((prev) => !prev)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                                        >
-                                            {showPassword ? (
-                                                <EyeOff size={18} />
-                                            ) : (
-                                                <Eye size={18} />
-                                            )}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {errors[field.name] && (
-                                    <div className="flex items-center gap-1.5 mt-2 ml-1 text-red-400">
-                                        <AlertCircle size={14} />
-                                        <span className="text-xs font-medium">  {errors[field.name]} </span>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-
-                        <div className="flex flex-col gap-3 pt-6">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-black text-white py-3 rounded-xl font-bold shadow shadow-orange-900/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? "Processing..." : "Update Credentials"}
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="w-full text-slate-600 py-2 text-sm font-semibold hover:text-slate-800 transition-colors"
-                            >
-                                Cancel Request
-                            </button>
-                        </div>
-                    </form>
+        <div className="min-h-screen bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-lg">
+                <div className="mb-6">
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-600">Change Password</h1>
                 </div>
+
+                {message && (
+                    <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                        {message}
+                    </div>
+                )}
+                {error && (
+                    <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        {error}
+                    </div>
+                )}
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
+                >
+                    <div>
+                        <label className="mb-1 block text-xs font-semibold text-gray-500">Current Password</label>
+                        <input
+                            type="password"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-xs font-semibold text-gray-500">New Password</label>
+                        <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-xs font-semibold text-gray-500">Confirm New Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={() => router.push("/customer/profile")}
+                            className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="flex-1 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+                        >
+                            {saving ? "Saving..." : "Change Password"}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
 };
 
-export default AdminPasswordChange;
-
+export default PasswordChange;

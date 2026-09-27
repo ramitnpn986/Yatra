@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * Shared two-column layout: real map (pickup/dropoff + OSRM route) on
- * the side, step content as children. Used by every page under
- * transporter/ride/* so the map markup isn't duplicated seven times.
- */
-
 import dynamic from "next/dynamic";
 import { MOCK_RIDE } from "./mockRide";
 

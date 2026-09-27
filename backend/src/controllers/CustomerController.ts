@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken'
 import { TransportProvider } from '../models/TransportProvider.js';
 import RideRequest from '../models/RideRequest.js';
 import { Ride } from '../models/Ride.js';
+import { deleteImage, uploadImage } from '../utils/cloudinary.js';
+
 
 
 const generateOtp = () => {
@@ -240,10 +242,24 @@ export const updateCustomerProfile = async (req: Request, res: Response): Promis
         const customer = await Customer.findById(customerId);
 
         if (!customer) {
-            return res.status(404).json({ message: "Admin not found", success: false });
+            return res.status(404).json({ message: "Customer not found", success: false });
         }
 
         if (name) customer.name = name.trim();
+
+        if (req.file) {
+            if (customer.profileImage?.public_id) {
+                await deleteImage(customer.profileImage.public_id);
+            }
+
+            const result = await uploadImage(req.file.buffer, "Yatra/passengers");
+
+            customer.profileImage = {
+                url: result.secure_url,
+                public_id: result.public_id,
+            };
+        }
+
         await customer.save();
 
         return res.status(200).json({

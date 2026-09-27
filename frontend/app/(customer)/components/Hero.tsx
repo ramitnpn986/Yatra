@@ -19,7 +19,7 @@ export default function Hero() {
           however works for you.
         </p>
 
-        <button className="rounded-xl bg-blue-600 px-8 py-3 text-lg font-semibold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-500">
+        <button className="rounded bg-[#0b2c54] px-8 py-3 text-lg font-semibold text-white transition hover:bg-[#11345f]">
           Book a Ride
         </button>
       </div>

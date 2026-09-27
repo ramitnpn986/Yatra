@@ -7,8 +7,7 @@ import { useRouter  } from "next/navigation";
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("passenger");
-
+ 
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -60,16 +59,6 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
         />
-
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-        >
-          <option value="passenger">Passenger</option>
-          <option value="rider">Rider</option>
-          <option value="booking_partner">Booking Partner</option>
-        </select>
 
         <p className="text-sm text-gray-600 text-center">
           Don't have an account? {""}

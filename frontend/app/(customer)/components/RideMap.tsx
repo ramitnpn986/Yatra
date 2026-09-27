@@ -29,8 +29,9 @@ interface RideMapProps {
     routeCoordinates: Coordinates[];
     filteredVehicles: Vehicle[];
     selectedVehicle: Vehicle | null;
-    setSelectedVehicle: (vehicle: Vehicle | null) => void;
-    handleMapClick: (lat: number, lng: number) => void;
+    setSelectedVehicle: ( vehicle: Vehicle | null) => void;
+    handleMapClick: ( lat: number, lng: number) => void;
+
 }
 
 const userIcon = L.icon({

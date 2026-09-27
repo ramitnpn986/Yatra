@@ -1,39 +1,146 @@
 import Link from "next/link";
 import Image from "next/image";
+import {
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0F172A] text-white px-8  mt-12 py-10">
-      <div className="max-w-5xl mx-auto flex flex-col  justify-between items-center gap-4">
+    <footer className="bg-[#0F172A] text-white">
+  
+      <div className="mx-auto max-w-6xl px-6 py-16 md:px-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
 
-        <div className="w-full flex justify-between items-center py-5">
+          <div className="lg:col-span-2">
+            <Link href="/en" className="inline-block">
+              <Image
+                src="/logo.png"
+                alt="Yatra"
+                width={150}
+                height={50}
+                className="h-auto w-32 "
+              />
+            </Link>
 
-          <div>
-            <Image src="/logo.png"
-              alt="Yatra"
-              width={128}
-              height={40}
-              className="w-[8rem] text-blue-400 h-auto" />
+            <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
+              Your journey, your way. Yatra connects passengers with
+              trusted transport providers for rides, deliveries, tours,
+              and rentals across Nepal.
+            </p>
+
           </div>
 
+ 
+          <div>
+            <h3 className="mb-5 text-sm font-semibold text-white"> Company </h3>
 
-          <div className="flex gap-6 text-sm">
-            <Link href="/en" className="hover:text-blue-400 transition">
-              Home
-            </Link>
-            <Link href="/en/login" className="hover:text-blue-400 transition">
-              Login
-            </Link>
-            <Link href="/en/register" className="hover:text-blue-400 transition">
-              Register
-            </Link>
+            <div className="flex flex-col gap-3 text-sm text-slate-400">
+              <Link
+                href="/en"
+                className="transition hover:text-indigo-400"
+              >
+                Home
+              </Link>
+
+              <Link
+                href="/en/login"
+                className="transition hover:text-indigo-400"
+              >
+                Login
+              </Link>
+
+              <Link
+                href="/en/register"
+                className="transition hover:text-indigo-400"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+
+      
+          <div>
+            <h3 className="mb-5 text-sm font-semibold  text-white">  Services </h3>
+
+            <div className="flex flex-col gap-3 text-sm text-slate-400">
+              <Link
+                href="/register"
+                className="transition hover:text-indigo-400"
+              >
+                Book a Ride
+              </Link>
+
+              <Link
+                href="/transporter/register"
+                className="transition hover:text-indigo-400"
+              >
+                Become a Rider
+              </Link>
+
+              <Link
+                href="/transporter/register"
+                className="transition hover:text-indigo-400"
+              >
+                Vehicle Rental
+              </Link>
+            </div>
           </div>
         </div>
 
 
-        <p className="text-sm text-white/60">
-          @ 2026 Yatra All rights reserved.
-        </p>
+        <div className="mt-14 grid gap-4 pt-8 md:grid-cols-3">
+
+          <div className="flex items-center gap-3 text-sm text-slate-400">
+            <div className="flex h-9 w-9 items-center justify-center">
+              <MapPin size={17} className="text-indigo-400" />
+            </div>
+
+            <span>Butwal, Nepal</span>
+          </div>
+
+          <div className="flex items-center gap-3 text-sm text-slate-400">
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Mail size={17} className="text-indigo-400" />
+            </div>
+
+            <span>support@yatra.com</span>
+          </div>
+
+          <div className="flex items-center gap-3 text-sm text-slate-400">
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Phone size={17} className="text-indigo-400" />
+            </div>
+
+            <span>+977 9867782172</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-sm text-slate-500 md:flex-row md:px-8">
+          <p>
+            © {new Date().getFullYear()} Yatra. All rights reserved.
+          </p>
+
+          <div className="flex gap-6">
+            <Link
+              href="#"
+              className="transition hover:text-slate-300"
+            >
+              Privacy Policy
+            </Link>
+
+            <Link
+              href="#"
+              className="transition hover:text-slate-300"
+            >
+              Terms of Service
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

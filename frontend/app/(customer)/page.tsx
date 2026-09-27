@@ -3,8 +3,7 @@ import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import {
-  Car,
-  Package,
+
   Truck,
   ArrowRight,
   MapPin,

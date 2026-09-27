@@ -170,7 +170,7 @@ export const logout = async (req: Request, res: Response): Promise<Response> => 
 export const getAdminProfile = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-        console.log("i am hitted admin")
+    
         const adminId = req.user?.adminId;
         const admin = await Admin.findById(adminId).select('-password');
 
@@ -303,7 +303,6 @@ export const getTransportProviderById = async (req: Request, res: Response): Pro
     try {
    
         const transporterId = req.params.transporterId;
-             console.log(transporterId);
         const transporter = await TransportProvider.findById(transporterId);
 
         if (!transporter) {

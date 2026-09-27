@@ -1,11 +1,12 @@
 
 "use client";
 
+
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-interface AdminData {
+interface PassengerData {
     name: string;
     phone: string;
     createdAt?: string;
@@ -14,16 +15,16 @@ interface AdminData {
     };
 }
 
-const UserProfile = () => {
+const AdminProfile = () => {
     const router = useRouter();
 
-    const [admin, setAdmin] = useState<AdminData | null>(null);
+    const [passenger, setPassenger] = useState<PassengerData | null>(null);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch("/api/admin/profile", {
+                const res = await fetch("/api/passenger/profile", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -31,7 +32,8 @@ const UserProfile = () => {
                 const data = await res.json();
 
                 if (res.ok) {
-                    setAdmin(data.admin);
+                    setPassenger(data.customer);
+                    console.log(data.customer);
                 } else {
                     setMessage(data.message || "Unable to load profile");
                 }
@@ -48,7 +50,7 @@ const UserProfile = () => {
         <div className="min-h-screen bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
                 <div className="mb-6">
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-600"> Profile </h1>
+                    <h1 className="mt-1 text-2xl font-semibold tracking-tight text-gray-600"> Profile</h1>
                 </div>
 
                 {message && (
@@ -64,7 +66,7 @@ const UserProfile = () => {
                                 <div className="shrink-0">
                                     <div className="rounded-full border-4 border-white bg-white shadow-lg">
                                         <Image
-                                            src={admin?.profileImage?.url || "/user.avif"}
+                                            src={passenger?.profileImage?.url || "/user.avif"}
                                             alt="Admin Profile"
                                             width={128}
                                             height={128}
@@ -76,14 +78,18 @@ const UserProfile = () => {
                          
                                 <div className="flex-1 pb-1 text-center sm:text-left">
                                     <h2 className="text-2xl font-bold capitalize text-gray-900 sm:text-3xl">
-                                        {admin?.name || "Loading..."}
+                                        {passenger?.name || "Loading..."}
                                     </h2>
+
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Passenger
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="flex gap-2 pb-1">
                                 <button type="button"
-                                    onClick={() => router.push("/admin/dashboard/profile/update")}
+                                    onClick={() => router.push("/customer/profile/profile/update")}
                                     className="inline-flex items-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
                                 >
                                     Edit Profile
@@ -100,11 +106,18 @@ const UserProfile = () => {
                     </div>
 
                     <div className="p-6 sm:p-8">
+
+                        <div className="mb-5">
+                            <h3 className="text-base font-semibold text-gray-900">  Account Information </h3>
+                            <p className="mt-1 text-sm text-gray-500">  your account details. </p>
+                        </div>
+
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+
                             <div className=" rounded-xl  bg-[#eee8e8] p-5  text-black ">
                                 <div className="flex flex-col items-start gap-1 ">
                                     <p className="text-xs font-semibold">  Phone Number  </p>
-                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">  {admin?.phone || "Not Available"} </p>
+                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">  {passenger?.phone || "Not Available"} </p>
                                 </div>
                             </div>
 
@@ -112,16 +125,19 @@ const UserProfile = () => {
                                 <div className="flex flex-col items-start gap-1">
                                     <p className="text-xs font-semibold">Member Since</p>
                                     <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">
-                                        {admin?.createdAt ? new Date(admin.createdAt).toLocaleDateString(
-                                            "en-US",{
+                                        {passenger?.createdAt ? new Date(passenger.createdAt).toLocaleDateString(
+                                            "en-US",
+                                            {
                                                 month: "long",
                                                 year: "numeric",
                                             }
-                                        ) : "Not Available"}
+                                        )
+                                            : "Not Available"}
                                     </p>
 
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -130,4 +146,4 @@ const UserProfile = () => {
     );
 };
 
-export default UserProfile;
+export default AdminProfile;

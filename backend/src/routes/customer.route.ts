@@ -7,6 +7,7 @@ import {
 
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isCustomer from "../middleware/isCustomer.js";
+import { uploadImage } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.post("/login", loginUser);
 router.post("/logout", logout);
 router.get("/get-profile", isAuthenticated,isCustomer, getCustomerProfile);
 router.post("/change-password", isAuthenticated, isCustomer, changeCustomerPassword);
-router.post("/update-profile",isAuthenticated, isCustomer, updateCustomerProfile);
+router.post("/update-profile",isAuthenticated, isCustomer,uploadImage.single("profileImage"),  updateCustomerProfile);
 router.post("/request-ride",isAuthenticated,isCustomer, requestRide);
 router.post("/cancel-ride-request",isAuthenticated, isCustomer, cancelRideRequest);
 router.get("/get-ride-request/:id",isAuthenticated, isCustomer, getRideRequestStatus);

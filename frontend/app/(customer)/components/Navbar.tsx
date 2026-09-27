@@ -14,23 +14,17 @@ export default function Navbar() {
 
   return (
     <header>
-      <nav className="flex items-center justify-between bg-[#0F172A] px-8 py-3">
+      <nav className="flex items-center justify-between px-8 py-3 bg-[#0F172A]  backdrop-blur-lg  shadow-lg ">
         <Link href="/">
-          <Image
-            src="/logo.png"
-            alt="Yatra"
-            width={100}
-            height={30}
-            className="invert"
-          />
+          <Image src="/logo.png" alt="Yatra" width={100} height={30} className="invert"/>
         </Link>
 
         <div className="flex gap-3">
-          <button type="button" onClick={()=>setMenuOpenLogin(true)} className="rounded border border-white px-4 py-2 text-[#60A5FA] transition hover:text-white">
+          <button type="button" onClick={() => setMenuOpenLogin(true)} className="rounded  bg-[#1b355e] px-4 py-2 text-[#60A5FA] transition hover:text-white">
             Login
           </button>
 
-          <button type="button" onClick={() => setMenuOpen(true)} className="rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700">
+          <button type="button" onClick={() => setMenuOpen(true)} className="rounded-lg bg-[#1b355e]  px-5 py-2 text-[#60A5FA] transition hover:text-white">
             Register
           </button>
         </div>
@@ -40,13 +34,12 @@ export default function Navbar() {
         <div onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
       )}
 
-       {menuOpenLogin && (
+      {menuOpenLogin && (
         <div onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
       )}
 
 
-      <aside
-        className={`fixed right-0 top-0 z-50 h-screen w-full bg-white text-black transition-transform duration-500 ease-in-out sm:w-[80%] lg:w-1/3   ${menuOpen ? "translate-x-0" : "translate-x-full"
+      <aside className={`fixed right-0 top-0 z-50 h-screen w-full bg-white text-black transition-transform duration-500 ease-in-out sm:w-[80%] lg:w-1/3   ${menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
         <div className="flex h-16 items-center justify-between  px-6 sm:px-10">
@@ -138,7 +131,7 @@ export default function Navbar() {
 
           <div className="grid gap-4">
             <Link
-              href="/register"
+              href="/login"
               onClick={closeMenuLogin}
               className="group rounded-2xl  p-6 transition hover:border-blue-500 hover:bg-gray-100"
             >

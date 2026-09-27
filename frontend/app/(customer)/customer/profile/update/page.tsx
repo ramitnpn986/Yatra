@@ -49,7 +49,7 @@ const EditProfile = () => {
         try {
             setSaving(true);
 
-            const res = await fetch("/api/passenger/update", {
+            const res = await fetch("/api/passenger/profile/update", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

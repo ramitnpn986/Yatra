@@ -40,15 +40,6 @@ interface Vehicle {
     eta: number;
 }
 
-/*
- * OSRM returns GeoJSON coordinates as:
- *
- * [longitude, latitude]
- *
- * Leaflet Polyline needs:
- *
- * [latitude, longitude]
- */
 type RoutePoint = [number, number];
 
 const VEHICLE_PRICES: Record<VehicleType, number> = {
@@ -131,12 +122,6 @@ export default function Page() {
     const [roadDuration, setRoadDuration] =
         useState<number | null>(null);
 
-    /*
-     * Actual road geometry.
-     *
-     * Leaflet format:
-     * [[lat, lng], [lat, lng], ...]
-     */
     const [routeCoordinates, setRouteCoordinates] =
         useState<RoutePoint[]>([]);
 
@@ -146,9 +131,7 @@ export default function Page() {
     const [requestingRide, setRequestingRide] =
         useState(false);
 
-    /*
-     * Get address from coordinates
-     */
+
     const getPlaceName = async (
         lat: number,
         lng: number
@@ -180,22 +163,7 @@ export default function Page() {
         }
     };
 
-    /*
-     * ---------------------------------------------------------
-     * GET ACTUAL ROAD ROUTE
-     * ---------------------------------------------------------
-     *
-     * OSRM:
-     *
-     * pickup:
-     * longitude,latitude
-     *
-     * destination:
-     * longitude,latitude
-     *
-     * response:
-     * GeoJSON LineString
-     */
+   
     const calculateRoadRoute = async (
         pickup: [number, number],
         destination: [number, number]
@@ -203,11 +171,6 @@ export default function Page() {
         try {
             setCalculatingRoute(true);
 
-            /*
-             * Leaflet:
-             *
-             * [latitude, longitude]
-             */
             const [pickupLat, pickupLng] =
                 pickup;
 
@@ -216,11 +179,7 @@ export default function Page() {
                 destinationLng,
             ] = destination;
 
-            /*
-             * OSRM requires:
-             *
-             * longitude,latitude
-             */
+           
             const url =
                 `https://router.project-osrm.org/route/v1/driving/` +
                 `${pickupLng},${pickupLat};` +
@@ -262,23 +221,6 @@ export default function Page() {
                 route.duration / 60
             );
 
-            /*
-             * OSRM GeoJSON:
-             *
-             * [
-             *   [lng, lat],
-             *   [lng, lat],
-             *   ...
-             * ]
-             *
-             * Convert it to Leaflet:
-             *
-             * [
-             *   [lat, lng],
-             *   [lat, lng],
-             *   ...
-             * ]
-             */
             const coordinates =
                 route.geometry.coordinates.map(
                     (
@@ -333,11 +275,6 @@ export default function Page() {
         }
     };
 
-    /*
-     * ---------------------------------------------------------
-     * CURRENT LOCATION
-     * ---------------------------------------------------------
-     */
 
     const handleCurrentLocation = () => {
         if (!navigator.geolocation) {
@@ -393,12 +330,6 @@ export default function Page() {
         );
     };
 
-    /*
-     * ---------------------------------------------------------
-     * SEARCH DESTINATION
-     * ---------------------------------------------------------
-     */
-
     const handleSearch = async () => {
         if (!searchText.trim()) {
             return;
@@ -444,10 +375,6 @@ export default function Page() {
                 null
             );
 
-            /*
-             * Calculate actual road
-             * route.
-             */
             await calculateRoadRoute(
                 userCoords,
                 location
@@ -465,12 +392,6 @@ export default function Page() {
             setSearching(false);
         }
     };
-
-    /*
-     * ---------------------------------------------------------
-     * MAP CLICK DESTINATION
-     * ---------------------------------------------------------
-     */
 
     const handleMapClick = async (
         lat: number,
@@ -493,9 +414,6 @@ export default function Page() {
             null
         );
 
-        /*
-         * Get destination address
-         */
         const address =
             await getPlaceName(
                 lat,
@@ -506,20 +424,11 @@ export default function Page() {
             address
         );
 
-        /*
-         * Get actual road route
-         */
         await calculateRoadRoute(
             userCoords,
             destination
         );
     };
-
-    /*
-     * ---------------------------------------------------------
-     * CLEAR DESTINATION
-     * ---------------------------------------------------------
-     */
 
     const clearDestination = () => {
         setSearchText("");
@@ -539,11 +448,6 @@ export default function Page() {
         );
     };
 
-    /*
-     * ---------------------------------------------------------
-     * SEARCH ENTER
-     * ---------------------------------------------------------
-     */
 
     const handleSearchKey = (
         event: React.KeyboardEvent<HTMLInputElement>
@@ -553,12 +457,6 @@ export default function Page() {
         }
     };
 
-    /*
-     * ---------------------------------------------------------
-     * VEHICLE FILTER
-     * ---------------------------------------------------------
-     */
-
     const filteredVehicles =
         selectedType === "all"
             ? vehicles
@@ -567,12 +465,6 @@ export default function Page() {
                       vehicle.type ===
                       selectedType
               );
-
-    /*
-     * ---------------------------------------------------------
-     * FARE
-     * ---------------------------------------------------------
-     */
 
     const calculateFare = (
         type: VehicleType
@@ -587,11 +479,6 @@ export default function Page() {
         );
     };
 
-    /*
-     * ---------------------------------------------------------
-     * CONFIRM RIDE
-     * ---------------------------------------------------------
-     */
 
     const handleConfirmRide = async () => {
         if (
@@ -607,11 +494,6 @@ export default function Page() {
                 selectedVehicleType
             );
 
-        /*
-         * GeoJSON format:
-         *
-         * [longitude, latitude]
-         */
         const rideRequest = {
             pickupAddress:
                 userAddress,
@@ -646,25 +528,7 @@ export default function Page() {
         try {
             setRequestingRide(true);
 
-            /*
-             * Replace this with your backend:
-             *
-             * const response = await fetch(
-             *     "/api/customer/ride-request",
-             *     {
-             *         method: "POST",
-             *         credentials: "include",
-             *         headers: {
-             *             "Content-Type":
-             *                 "application/json",
-             *         },
-             *         body: JSON.stringify(
-             *             rideRequest
-             *         ),
-             *     }
-             * );
-             */
-
+            
             await new Promise(
                 (resolve) =>
                     setTimeout(
@@ -693,11 +557,6 @@ export default function Page() {
         }
     };
 
-    /*
-     * ---------------------------------------------------------
-     * VEHICLE DATA
-     * ---------------------------------------------------------
-     */
 
     const vehicleInformation: Record<
         VehicleType,
@@ -726,17 +585,10 @@ export default function Page() {
         },
     };
 
-    /*
-     * ---------------------------------------------------------
-     * UI
-     * ---------------------------------------------------------
-     */
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6 text-gray-900 sm:px-6 md:px-10">
             <div className="mx-auto max-w-7xl">
-
-                {/* HEADER */}
 
                 <div className="mb-6">
                     <p className="mb-1 text-sm font-medium text-blue-600">
@@ -754,7 +606,6 @@ export default function Page() {
                     </p>
                 </div>
 
-                {/* VEHICLE TYPE */}
 
                 <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {(
@@ -845,11 +696,8 @@ export default function Page() {
                     })}
                 </div>
 
-                {/* PICKUP + DESTINATION */}
 
                 <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-                    {/* PICKUP */}
 
                     <div className="rounded-2xl border bg-white p-4 shadow-sm">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -882,8 +730,6 @@ export default function Page() {
                             </div>
                         </div>
                     </div>
-
-                    {/* DESTINATION */}
 
                     <div className="rounded-2xl border bg-white p-2 shadow-sm">
                         <div className="flex items-center">
@@ -943,8 +789,6 @@ export default function Page() {
                         </div>
                     </div>
                 </div>
-
-                {/* ROUTE INFO */}
 
                 {destinationCoords && (
                     <div className="mb-6 rounded-2xl border bg-white p-4 shadow-sm">
@@ -1013,7 +857,6 @@ export default function Page() {
                     </div>
                 )}
 
-                {/* MAP */}
 
                 <div className="relative h-[450px] w-full overflow-hidden rounded-3xl border shadow-lg sm:h-[500px]">
 
@@ -1038,8 +881,6 @@ export default function Page() {
                             handleMapClick
                         }
                     />
-
-                    {/* MAP FILTER */}
 
                     <div className="absolute left-3 top-3 z-[1000] flex max-w-[calc(100%-24px)] gap-1 overflow-x-auto rounded-2xl bg-white/95 p-1.5 shadow-md">
 
@@ -1123,8 +964,6 @@ export default function Page() {
                         </button>
                     </div>
 
-                    {/* ROUTE STATUS */}
-
                     {roadDistance && (
                         <div className="absolute bottom-4 left-4 right-4 z-[1000]">
                             <div className="rounded-2xl bg-white/95 p-4 shadow-xl backdrop-blur">
@@ -1162,8 +1001,6 @@ export default function Page() {
                         </div>
                     )}
                 </div>
-
-                {/* FARE OPTIONS */}
 
                 {destinationCoords &&
                     roadDistance && (
@@ -1292,7 +1129,6 @@ export default function Page() {
                         </div>
                     )}
 
-                {/* CONFIRM RIDE */}
 
                 {selectedVehicleType &&
                     destinationCoords &&

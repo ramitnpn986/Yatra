@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-interface AdminData {
+interface PassengerData {
     name: string;
     phone: string;
     createdAt?: string;
@@ -14,16 +13,16 @@ interface AdminData {
     };
 }
 
-const UserProfile = () => {
+const CustomerProfile = () => {
     const router = useRouter();
 
-    const [admin, setAdmin] = useState<AdminData | null>(null);
+    const [passenger, setPassenger] = useState<PassengerData | null>(null);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch("/api/admin/profile", {
+                const res = await fetch("/api/passenger/profile", {
                     method: "GET",
                     credentials: "include",
                 });
@@ -31,12 +30,12 @@ const UserProfile = () => {
                 const data = await res.json();
 
                 if (res.ok) {
-                    setAdmin(data.admin);
+                    setPassenger(data.customer);
                 } else {
                     setMessage(data.message || "Unable to load profile");
                 }
             } catch (err) {
-                console.error("Failed to fetch admin profile:", err);
+                console.error("Failed to fetch passenger profile:", err);
                 setMessage("Unable to connect to backend");
             }
         };
@@ -64,8 +63,8 @@ const UserProfile = () => {
                                 <div className="shrink-0">
                                     <div className="rounded-full border-4 border-white bg-white shadow-lg">
                                         <Image
-                                            src={admin?.profileImage?.url || "/user.avif"}
-                                            alt="Admin Profile"
+                                            src={passenger?.profileImage?.url || "/user.avif"}
+                                            alt="Profile"
                                             width={128}
                                             height={128}
                                             className="h-28 w-28 rounded-full object-cover sm:h-32 sm:w-32"
@@ -73,24 +72,25 @@ const UserProfile = () => {
                                     </div>
                                 </div>
 
-                         
                                 <div className="flex-1 pb-1 text-center sm:text-left">
                                     <h2 className="text-2xl font-bold capitalize text-gray-900 sm:text-3xl">
-                                        {admin?.name || "Loading..."}
+                                        {passenger?.name || "Loading..."}
                                     </h2>
                                 </div>
                             </div>
 
                             <div className="flex gap-2 pb-1">
-                                <button type="button"
-                                    onClick={() => router.push("/admin/dashboard/profile/update")}
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/customer/profile/update")}
                                     className="inline-flex items-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
                                 >
                                     Edit Profile
                                 </button>
 
-                                <button type="button"
-                                    onClick={() => router.push("/admin/dashboard/profile/password-change")}
+                                <button
+                                    type="button"
+                                    onClick={() => router.push("/customer/profile/password-change")}
                                     className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800"
                                 >
                                     Security
@@ -101,10 +101,10 @@ const UserProfile = () => {
 
                     <div className="p-6 sm:p-8">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <div className=" rounded-xl  bg-[#eee8e8] p-5  text-black ">
-                                <div className="flex flex-col items-start gap-1 ">
-                                    <p className="text-xs font-semibold">  Phone Number  </p>
-                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">  {admin?.phone || "Not Available"} </p>
+                            <div className="rounded-xl bg-[#eee8e8] p-5 text-black">
+                                <div className="flex flex-col items-start gap-1">
+                                    <p className="text-xs font-semibold"> Phone Number </p>
+                                    <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]"> {passenger?.phone || "Not Available"} </p>
                                 </div>
                             </div>
 
@@ -112,14 +112,13 @@ const UserProfile = () => {
                                 <div className="flex flex-col items-start gap-1">
                                     <p className="text-xs font-semibold">Member Since</p>
                                     <p className="mt-1 truncate text-sm font-semibold text-[#534c4c]">
-                                        {admin?.createdAt ? new Date(admin.createdAt).toLocaleDateString(
-                                            "en-US",{
-                                                month: "long",
-                                                year: "numeric",
-                                            }
-                                        ) : "Not Available"}
+                                        {passenger?.createdAt
+                                            ? new Date(passenger.createdAt).toLocaleDateString("en-US", {
+                                                  month: "long",
+                                                  year: "numeric",
+                                              })
+                                            : "Not Available"}
                                     </p>
-
                                 </div>
                             </div>
                         </div>
@@ -130,4 +129,4 @@ const UserProfile = () => {
     );
 };
 
-export default UserProfile;
+export default CustomerProfile;

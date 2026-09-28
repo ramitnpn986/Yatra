@@ -345,9 +345,9 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const io= req.app.get("io");
-        if(io){
-            io.emit("ride_request_cancelled",{rideRequestId: rideRequest._id})
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("ride_request_cancelled", { rideRequestId: rideRequest._id })
         }
 
 
@@ -361,3 +361,68 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
 }
 
 
+export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.user?.customerId;
+
+        if (!customerId) {
+            return res.status(401).json({
+                message: " User authentication is required",
+                success: "false"
+            })
+        }
+
+        const allRideRequests = await RideRequest.find({ customer: customerId }).sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "Ride requests fetched successfully",
+            count: allRideRequests.length,
+            rideRequests: allRideRequests,
+        });
+
+    } catch (err) {
+        console.error("Get all ride requests of an user error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to cancel ride request",
+        });
+    }
+}
+
+
+export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.user?.customerId;
+        const { rideRequestId } = req.params;
+
+        if (!customerId) {
+            return res.status(401).json({
+                message: " User authentication is required",
+                success: "false"
+            })
+        }
+
+        const rideRequest = await RideRequest.findOne({ customer: customerId, _id: rideRequestId });
+
+        if (!rideRequest) {
+            return res.status(404).json({
+                success: false,
+                message: "Ride request not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Ride requests fetched successfully",
+            rideRequest,
+        });
+
+    } catch (err) {
+        console.error("Get ride error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to cancel ride request",
+        });
+    }
+}

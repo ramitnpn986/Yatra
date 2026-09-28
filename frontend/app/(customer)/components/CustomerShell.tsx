@@ -7,7 +7,7 @@ import { LayoutDashboard, UserCircle, Lock, LogOut, Menu, X } from "lucide-react
 
 const navItems = [
     {
-        label: "Dashboard",
+        label: "Home",
         href: "/dashboard",
         icon: LayoutDashboard,
         isActive: (p: string) => p === "/dashboard",

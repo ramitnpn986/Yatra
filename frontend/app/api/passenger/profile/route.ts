@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
                 },
                 { status: 500 }
             );
-        }
+        } 
 
         const res = await fetch(`${baseUrl}/get-profile`, {
             method: "GET",
@@ -48,3 +48,4 @@ export async function GET(req: NextRequest) {
         );
     }
 }
+

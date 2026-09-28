@@ -1,37 +1,37 @@
 import { Request, Response } from "express";
 import { Ride } from "../models/Ride.js";
 
-
-
 export const getAllRideOfAnUser = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
 
         if (!customerId) {
             return res.status(401).json({
-                message: " User authentication is required",
-                success: "false"
-            })
+                success: false,
+                message: "User authentication is required",
+            });
         }
 
-        const allRides = await Ride.find({ customer: customerId }).sort({ createdAt: -1 });
+        const allRides = await Ride.find({
+            customer: customerId,
+        }).sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
-            message: "Ride requests fetched successfully",
+            message: "Rides fetched successfully",
             count: allRides.length,
-            rideRequests: allRides,
+            rides: allRides,
         });
 
     } catch (err) {
-        console.error("Get all ride requests of an user error:", err);
+        console.error("Get all rides of a user error:", err);
+
         return res.status(500).json({
             success: false,
             message: "Failed to fetch all rides",
         });
     }
-}
-
+};
 
 export const getRideByIdOfAnUser = async (req: Request, res: Response) => {
     try {
@@ -40,17 +40,20 @@ export const getRideByIdOfAnUser = async (req: Request, res: Response) => {
 
         if (!customerId) {
             return res.status(401).json({
-                message: " User authentication is required",
-                success: "false"
-            })
+                success: false,
+                message: "User authentication is required",
+            });
         }
 
-        const ride = await Ride.findOne({ customer: customerId, _id: rideId });
+        const ride = await Ride.findOne({
+            _id: rideId,
+            customer: customerId,
+        });
 
         if (!ride) {
             return res.status(404).json({
                 success: false,
-                message: "Ride  not found",
+                message: "Ride not found",
             });
         }
 
@@ -61,10 +64,11 @@ export const getRideByIdOfAnUser = async (req: Request, res: Response) => {
         });
 
     } catch (err) {
-        console.error("Get ride error:", err);
+        console.error("Get ride by ID error:", err);
+
         return res.status(500).json({
             success: false,
             message: "Failed to fetch ride information",
         });
     }
-}
+};

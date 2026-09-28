@@ -1,6 +1,6 @@
 import CustomerShell from "../components/CustomerShell";
 
-export default function CustomerAccountLayout({
+export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;

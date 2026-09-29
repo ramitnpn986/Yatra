@@ -14,13 +14,14 @@ export default function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
 
           <div className="lg:col-span-2">
-            <Link href="/en" className="inline-block">
+            <Link href="/en" className="inline-block shrink-0">
               <Image
                 src="/yatralogo.png"
                 alt="Yatra"
                 width={150}
                 height={50}
-                className="h-auto w-24 rounded-[50%]"
+                priority
+                className="h-auto w-20 rounded-full sm:w-24 md:w-28 lg:w-32 xl:w-36"
               />
             </Link>
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">

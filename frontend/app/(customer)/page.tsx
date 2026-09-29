@@ -173,7 +173,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-slate-950 px-6 py-18">
+      <section id="services" className="relative scroll-mt-24 overflow-hidden bg-slate-950 px-6 py-18">
 
         <div className="relative mx-auto max-w-6xl">
           <div className="mb-14 text-center">

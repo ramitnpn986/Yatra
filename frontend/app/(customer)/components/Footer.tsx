@@ -21,7 +21,7 @@ export default function Footer() {
                 width={150}
                 height={50}
                 priority
-                className="h-auto w-20 rounded-full sm:w-24 md:w-28 lg:w-32 xl:w-36"
+                className="h-auto w-20 rounded-full sm:w-24 md:w-22 lg:w-22 "
               />
             </Link>
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">

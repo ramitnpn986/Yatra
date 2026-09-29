@@ -149,10 +149,12 @@ export default function Navbar() {
       </aside>
 
 
+      {/* Register Backdrop */}
       {menuOpen && (
         <div onClick={closeMenu} className="fixed inset-0 z-60 bg-black/40 backdrop-blur-sm"/>
       )}
 
+      {/* Login Backdrop */}
       {menuOpenLogin && (
         <div onClick={closeMenuLogin} className="fixed inset-0 z-60 bg-black/40 backdrop-blur-sm"/>
       )}

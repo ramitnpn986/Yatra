@@ -34,26 +34,33 @@ export default function Footer() {
 
 
           <div>
-            <h3 className="mb-5 text-sm font-semibold text-white"> Company </h3>
+            <h3 className="mb-5 text-sm font-semibold text-white"> Company 
+              <Link
+  href="/contact"
+  className="transition hover:text-[#ee8d39]"
+>
+  Contact
+</Link>
+            </h3>
 
             <div className="flex flex-col gap-3 text-sm text-slate-400">
               <Link
                 href="/en"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Home
               </Link>
 
               <Link
                 href="/en/login"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Login
               </Link>
 
               <Link
                 href="/en/register"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Register
               </Link>
@@ -67,21 +74,21 @@ export default function Footer() {
             <div className="flex flex-col gap-3 text-sm text-slate-400">
               <Link
                 href="/register"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Book a Ride
               </Link>
 
               <Link
                 href="/transporter/register"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Become a Rider
               </Link>
 
               <Link
                 href="/transporter/register"
-                className="transition hover:text-indigo-400"
+                className="transition hover:text-[#ee8d39]"
               >
                 Vehicle Rental
               </Link>
@@ -94,7 +101,7 @@ export default function Footer() {
 
           <div className="flex items-center gap-3 text-sm text-slate-400">
             <div className="flex h-9 w-9 items-center justify-center">
-              <MapPin size={17} className="text-indigo-400" />
+              <MapPin size={17} className="text-[#ee8d39]" />
             </div>
 
             <span>Butwal, Nepal</span>
@@ -102,7 +109,7 @@ export default function Footer() {
 
           <div className="flex items-center gap-3 text-sm text-slate-400">
             <div className="flex h-9 w-9 items-center justify-center">
-              <Mail size={17} className="text-indigo-400" />
+              <Mail size={17} className="text-[#ee8d39]" />
             </div>
 
             <span>support@yatra.com</span>
@@ -110,7 +117,7 @@ export default function Footer() {
 
           <div className="flex items-center gap-3 text-sm text-slate-400">
             <div className="flex h-9 w-9 items-center justify-center">
-              <Phone size={17} className="text-indigo-400" />
+              <Phone size={17} className="text-[#ee8d39]" />
             </div>
 
             <span>+977 9867782172</span>

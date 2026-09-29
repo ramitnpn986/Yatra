@@ -1,4 +1,4 @@
-import CustomerShell from "../components/CustomerShell";
+import CustomerShell from "../components/CustomerSidebar";
 
 export default function CustomerAccountLayout({
     children,

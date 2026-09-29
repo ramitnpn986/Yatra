@@ -301,3 +301,4 @@ const Page = ({  params }: { params: Promise<{ rideId: string }>;}) => {
 };
 
 export default Page;
+

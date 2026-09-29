@@ -24,7 +24,7 @@ const rideSchema = new mongoose.Schema({
     pickupLocation: {
         address: {
             type: String,
-            requred: true,
+            required: true,
             trim: true
         },
         type: {
@@ -83,7 +83,7 @@ const rideSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        emum: [
+        enum: [
             "confirmed",
             "driver_arriving",
             "driver_arrived",
@@ -126,7 +126,7 @@ const rideSchema = new mongoose.Schema({
         type: Date,
     },
 
-})
+},{ timestamps: true })
 
 
 export const Ride = mongoose.model("Ride", rideSchema);

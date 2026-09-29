@@ -1,29 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const customerUrl = () => process.env.CUSTOMER_URL?.trim();
+const RideUrl = () => process.env.RIDE_URL?.trim();
 
 export async function GET(req: NextRequest) {
     try {
-        const baseUrl = customerUrl();
+        const baseUrl = RideUrl();
 
         if (!baseUrl) {
-            console.error("CUSTOMER_URL is not configured");
+            console.error("RIDE_URL is not configured");
+
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Customer backend URL is not configured",
+                    message: "Rides backend URL is not configured",
                 },
                 { status: 500 }
             );
-        } 
+        }
 
-        const res = await fetch(`${baseUrl}/get-profile`, {
-            method: "GET",
-            headers: {
-                Cookie: req.headers.get("cookie") || "",
-            },
-            cache: "no-store",
-        });
+        const res = await fetch(`${baseUrl}/get-all-rides`,
+            {
+                method: "GET",
+                headers: {
+                    Cookie: req.headers.get("cookie") || "",
+                },
+                cache: "no-store",
+            }
+        );
 
         const data = await res.json();
 
@@ -36,8 +39,9 @@ export async function GET(req: NextRequest) {
         }
 
         return response;
+
     } catch (err) {
-        console.error("Passenger profile fetch failed:", err);
+        console.error("Rides fetch failed:", err);
 
         return NextResponse.json(
             {
@@ -48,4 +52,3 @@ export async function GET(req: NextRequest) {
         );
     }
 }
-

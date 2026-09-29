@@ -82,7 +82,7 @@ const CustomerProfile = () => {
                             <div className="flex gap-2 pb-1">
                                 <button
                                     type="button"
-                                    onClick={() => router.push("/customer/profile/update")}
+                                    onClick={() => router.push("/customer/profile/edit")}
                                     className="inline-flex items-center gap-2 rounded-xl bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
                                 >
                                     Edit Profile

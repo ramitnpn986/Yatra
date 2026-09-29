@@ -5,6 +5,7 @@ const RideUrl = () => process.env.RIDE_REQUEST_URL?.trim();
 export async function GET(req: NextRequest) {
     try {
         const baseUrl = RideUrl();
+        console.log(baseUrl);
 
         if (!baseUrl) {
             console.error("RIDE_REQUEST_URL is not configured");

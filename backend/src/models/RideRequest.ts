@@ -58,7 +58,6 @@ const RideRequestSchema = new mongoose.Schema(
             min: 0,
         },
 
-
         vehicleType: {
             type: String,
             enum: ["Bike", "Car", "Truck", "Bus"],

@@ -364,6 +364,7 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
 export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
+        console.log("i am called")
 
         if (!customerId) {
             return res.status(401).json({

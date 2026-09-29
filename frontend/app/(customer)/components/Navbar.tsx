@@ -14,17 +14,31 @@ export default function Navbar() {
 
   return (
     <header>
-      <nav className="flex items-center justify-between px-8 py-3 bg-[#0F172A]  backdrop-blur-lg  shadow-lg ">
-        <Link href="/">
-          <Image src="/logo.png" alt="Yatra" width={100} height={30} className="invert"/>
+      <nav className="flex items-center justify-between px-8 bg-[#ffffff] py-2 shadow-lg">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/yatralogo.png"
+            alt="Yatra"
+            width={64}
+            height={16}
+            className="object-contain "
+          />
         </Link>
 
-        <div className="flex gap-3">
-          <button type="button" onClick={() => setMenuOpenLogin(true)} className="rounded  bg-[#1b355e] px-4 py-2 text-[#60A5FA] transition hover:text-white">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMenuOpenLogin(true)}
+            className="rounded-lg bg-[#1b355e] px-5 py-2 text-sm font-medium text-[#ee8d39] hover:text-[#f59d50] transition-colors  hover:bg-[#193a6b] "
+          >
             Login
           </button>
 
-          <button type="button" onClick={() => setMenuOpen(true)} className="rounded-lg bg-[#1b355e]  px-5 py-2 text-[#60A5FA] transition hover:text-white">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="rounded-lg bg-[#1b355e] px-5 py-2 text-sm font-medium text-[#ee8d39] transition-colors hover:bg-[#193a6b] hover:text-[#f59d50]"
+          >
             Register
           </button>
         </div>
@@ -40,7 +54,7 @@ export default function Navbar() {
 
 
       <aside className={`fixed right-0 top-0 z-50 h-screen w-full bg-white text-black transition-transform duration-500 ease-in-out sm:w-[80%] lg:w-1/3   ${menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        }`}
       >
         <div className="flex h-16 items-center justify-between  px-6 sm:px-10">
           <button

@@ -9,21 +9,20 @@ import {
 export default function Footer() {
   return (
     <footer className="bg-[#0F172A] text-white">
-  
+
       <div className="mx-auto max-w-6xl px-6 py-16 md:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
 
           <div className="lg:col-span-2">
             <Link href="/en" className="inline-block">
               <Image
-                src="/logo.png"
+                src="/yatralogo.png"
                 alt="Yatra"
                 width={150}
                 height={50}
-                className="h-auto w-32 "
+                className="h-auto w-24 rounded-[50%]"
               />
             </Link>
-
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
               Your journey, your way. Yatra connects passengers with
               trusted transport providers for rides, deliveries, tours,
@@ -32,7 +31,7 @@ export default function Footer() {
 
           </div>
 
- 
+
           <div>
             <h3 className="mb-5 text-sm font-semibold text-white"> Company </h3>
 
@@ -60,7 +59,7 @@ export default function Footer() {
             </div>
           </div>
 
-      
+
           <div>
             <h3 className="mb-5 text-sm font-semibold  text-white">  Services </h3>
 

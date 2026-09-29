@@ -23,7 +23,7 @@ export default function Home() {
       <section className="relative  px-6 py-16">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-[#ee8d39] md:text-4xl">
               Move smarter with Yatra
             </h2>
 
@@ -114,7 +114,7 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-14 text-center">
             <span className="text-xl font-semibold text-[#3e5da7]"> Why Yatra ? </span>
-            <h2 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl"> Travel with confidence </h2>
+            <h2 className="mt-2 text-3xl font-bold text-[#ee8d39] md:text-4xl"> Travel with confidence </h2>
 
             <p className="mx-auto mt-4 max-w-2xl text-slate-500">
               Designed to make transportation simple, transparent, and convenient.
@@ -177,7 +177,7 @@ export default function Home() {
 
         <div className="relative mx-auto max-w-6xl">
           <div className="mb-14 text-center">
-            <h2 className="mt-5 text-3xl font-bold text-white md:text-4xl">  How do you want to use Yatra? </h2>
+            <h2 className="mt-5 text-3xl font-bold text-[#ee8d39] md:text-4xl">  How do you want to use Yatra? </h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-400">
               Whether you're travelling or providing transportation,
               Yatra has a place for you.
@@ -268,7 +268,7 @@ export default function Home() {
 
       <section className="px-6 py-24">
         <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-[#0F172A] px-8 py-14 text-center shadow-xl md:px-16">
-          <h2 className="text-3xl font-bold text-white md:text-4xl">
+          <h2 className="text-3xl font-bold text-[#ee8d39] md:text-4xl">
             Your journey starts here.
           </h2>
 

@@ -26,10 +26,7 @@ export default function ContactPage() {
         <div className="grid gap-8 md:grid-cols-2">
           {/* Contact Information */}
           <div className="rounded-2xl bg-[#102044] p-8 shadow-xl">
-            <h2 className="text-2xl font-bold text-white">
-              Let&apos;s talk
-            </h2>
-
+            <h2 className="text-2xl font-bold text-white"> Let&apos;s talk </h2>
             <p className="mt-3 text-[#b0aeae]">
               Whether you need help with a ride, delivery, rental, or
               anything else, you can contact the Yatra team.

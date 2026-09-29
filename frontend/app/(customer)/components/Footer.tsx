@@ -18,8 +18,8 @@ export default function Footer() {
               <Image
                 src="/yatralogo.png"
                 alt="Yatra"
-                width={150}
-                height={50}
+                width={100}
+                height={40}
                 priority
                 className="h-auto w-20 rounded-full sm:w-24 md:w-22 lg:w-22 "
               />
@@ -34,36 +34,19 @@ export default function Footer() {
 
 
           <div>
-            <h3 className="mb-5 text-sm font-semibold text-white"> Company 
+            <h3 className="mb-5 text-sm font-semibold text-white"> Company
               <Link
-  href="/contact"
-  className="transition hover:text-[#ee8d39]"
->
-  Contact
-</Link>
+                href="/contact"
+                className="transition hover:text-[#ee8d39]"
+              >
+                Contact
+              </Link>
             </h3>
 
             <div className="flex flex-col gap-3 text-sm text-slate-400">
-              <Link
-                href="/en"
-                className="transition hover:text-[#ee8d39]"
-              >
-                Home
-              </Link>
-
-              <Link
-                href="/en/login"
-                className="transition hover:text-[#ee8d39]"
-              >
-                Login
-              </Link>
-
-              <Link
-                href="/en/register"
-                className="transition hover:text-[#ee8d39]"
-              >
-                Register
-              </Link>
+              <Link href="/en" className="transition hover:text-[#ee8d39]"> Home </Link>
+              <Link  href="/en/login"  className="transition hover:text-[#ee8d39]"> Login </Link>
+              <Link  href="/en/register" className="transition hover:text-[#ee8d39]"> Register </Link>
             </div>
           </div>
 
@@ -72,24 +55,15 @@ export default function Footer() {
             <h3 className="mb-5 text-sm font-semibold  text-white">  Services </h3>
 
             <div className="flex flex-col gap-3 text-sm text-slate-400">
-              <Link
-                href="/register"
-                className="transition hover:text-[#ee8d39]"
-              >
+              <Link href="/register" className="transition hover:text-[#ee8d39]">
                 Book a Ride
               </Link>
 
-              <Link
-                href="/transporter/register"
-                className="transition hover:text-[#ee8d39]"
-              >
+              <Link href="/transporter/register" className="transition hover:text-[#ee8d39]">
                 Become a Rider
               </Link>
 
-              <Link
-                href="/transporter/register"
-                className="transition hover:text-[#ee8d39]"
-              >
+              <Link href="/transporter/register" className="transition hover:text-[#ee8d39]">
                 Vehicle Rental
               </Link>
             </div>

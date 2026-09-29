@@ -38,11 +38,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center p-4 justify-center bg-white">
+    <div className="flex min-h-screen items-center p-4 justify-center bg-[#0a1f39]">
       <form onSubmit={handleLogin} className="flex w-full flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-8 shadow-lg md:w-1/2 lg:w-1/3">
-        <Image src="/logo.png" alt="Yatra" width={100} height={35}
+        <Image src="/yatralogo.png" alt="Yatra" width={100} height={35}
           className="mx-auto mb-2" />
-        <h1 className="text-xl font-semibold text-primary">Login</h1>
+        <h1 className="text-xl font-semibold text-[#d86d0e]">Login</h1>
 
         <input
           type="tel"

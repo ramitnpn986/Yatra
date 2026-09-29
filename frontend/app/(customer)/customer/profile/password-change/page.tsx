@@ -54,9 +54,7 @@ const PasswordChange = () => {
     return (
         <div className="min-h-screen bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-lg">
-                <div className="mb-6">
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-gray-600">Change Password</h1>
-                </div>
+                <h1 className="mt-1 mb-6 text-2xl font-bold  text-gray-600">Change Password</h1>
 
                 {message && (
                     <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
@@ -69,10 +67,7 @@ const PasswordChange = () => {
                     </div>
                 )}
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="space-y-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8"
-                >
+                <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl  bg-white p-6 shadow-sm sm:p-8">
                     <div>
                         <label className="mb-1 block text-xs font-semibold text-gray-500">Current Password</label>
                         <input
@@ -106,18 +101,18 @@ const PasswordChange = () => {
                         />
                     </div>
 
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex gap-3 pt-2 justify-end">
                         <button
                             type="button"
                             onClick={() => router.push("/customer/profile")}
-                            className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                            className=" rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex-1 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+                            className=" rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
                         >
                             {saving ? "Saving..." : "Change Password"}
                         </button>

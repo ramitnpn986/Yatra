@@ -1,14 +1,52 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", title: "", subject: "" });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData((prev) => ({
+      ...prev, [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message);
+        return;
+      }
+      toast.success(data.message);
+
+      setFormData({
+        name: "",
+        email: "",
+        title: "",
+        subject: "",
+      });
+
+    } catch (err) {
+      console.error("Contact form error:", err);
+      toast.error("Unable to send message. Please try again.");
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,6 +109,8 @@ export default function ContactPage() {
                   type="text"
                   required
                   placeholder="Enter your name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-[#ee8d39] "
                 />
               </div>
@@ -86,6 +126,8 @@ export default function ContactPage() {
                   type="email"
                   required
                   placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-[#ee8d39] "
                 />
               </div>
@@ -101,6 +143,8 @@ export default function ContactPage() {
                   type="text"
                   required
                   placeholder="Enter the title"
+                  value={formData.title}
+                  onChange={handleChange}
                   className="w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-[#ee8d39]"
                 />
               </div>
@@ -115,6 +159,8 @@ export default function ContactPage() {
                   name="subject"
                   required
                   rows={5}
+                  value={formData.subject}
+                  onChange={handleChange}
                   placeholder="Write your message..."
                   className="w-full resize-none rounded-lg border border-slate-200 px-4 py-3 text-slate-900 outline-none transition focus:border-[#ee8d39]"
                 />
@@ -123,12 +169,6 @@ export default function ContactPage() {
               <button type="submit" className="w-full rounded-lg bg-[#ee8d39] px-6 py-3 font-semibold text-white transition hover:bg-[#EA7C28]">
                 Send Message
               </button>
-
-              {submitted && (
-                <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-                  Thank you! Your message has been submitted.
-                </p>
-              )}
             </form>
           </div>
         </div>

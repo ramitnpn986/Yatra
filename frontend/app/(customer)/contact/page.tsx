@@ -167,7 +167,7 @@ export default function ContactPage() {
               </div>
 
               <button type="submit" className="w-full rounded-lg bg-[#ee8d39] px-6 py-3 font-semibold text-white transition hover:bg-[#EA7C28]">
-                Send Message
+                  {loading ? "sending...":"Send Message"} 
               </button>
             </form>
           </div>

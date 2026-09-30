@@ -52,7 +52,11 @@ const navItems = [
     },
 ];
 
-export default function CustomerShell({ children }: { children: React.ReactNode }) {
+export default function CustomerShell({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const pathname = usePathname();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -78,40 +82,55 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <header className="fixed left-0 right-0 top-0 z-[1100] flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm md:hidden">
-                <div className="text-lg font-semibold text-[#16115a]">
+        <div className="min-h-screen bg-[#f5f7fa]">
+            {/* Mobile Header */}
+            <header className="fixed left-0 right-0 top-0 z-[1100] flex h-16 items-center justify-between border-b border-[#0b2c54]/10 bg-[#0a1f39] px-4 shadow-sm md:hidden">
+                <div className="text-lg font-semibold text-[#ee8d39]">
                     Yatra
                 </div>
 
-                <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-gray-700 hover:bg-gray-100" aria-label="Open menu">
+                <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="rounded-lg p-2 text-white transition hover:bg-[#0b2c54]"
+                    aria-label="Open menu"
+                >
                     <Menu size={24} />
                 </button>
             </header>
 
+            {/* Mobile Overlay */}
             {sidebarOpen && (
-                <div className="fixed inset-0 z-[1100] bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />
+                <div
+                    className="fixed inset-0 z-[1100] bg-black/50 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
             )}
 
+            {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-64 flex-col border-r border-slate-200 bg-white p-4 text-slate-700 transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-                    } md:translate-x-0`}
+                className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-64 flex-col bg-[#0a1f39] p-4 text-white shadow-xl transition-transform duration-300 ease-in-out ${
+                    sidebarOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full"
+                } md:translate-x-0`}
             >
-                <div className="mb-6 flex items-center justify-between px-2 pb-6">
-                    <div className="text-lg font-semibold  text-[#3a3485]">
+                {/* Logo */}
+                <div className="mb-6 flex items-center justify-between border-b border-white/10 px-2 pb-6">
+                    <div className="text-xl font-bold text-[#ee8d39]">
                         Yatra
                     </div>
 
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 md:hidden"
+                        className="rounded-lg p-2 text-[#b0aeae] transition hover:bg-[#0b2c54] hover:text-white md:hidden"
                         aria-label="Close menu"
                     >
                         <X size={22} />
                     </button>
                 </div>
 
-                <nav className="flex flex-col gap-1">
+                {/* Navigation */}
+                <nav className="flex flex-col gap-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const active = item.isActive(pathname);
@@ -121,10 +140,11 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
                                 key={item.label}
                                 href={item.href}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active
-                                        ? "bg-blue-50 font-semibold text-blue-700"
-                                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                                    }`}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
+                                    active
+                                        ? "bg-[#ee8d39] font-semibold text-white shadow-sm"
+                                        : "text-[#b0aeae] hover:bg-[#0b2c54] hover:text-white"
+                                }`}
                             >
                                 <Icon size={18} />
                                 <span>{item.label}</span>
@@ -133,13 +153,17 @@ export default function CustomerShell({ children }: { children: React.ReactNode 
                     })}
                 </nav>
 
-                <button onClick={handleLogout} className="mt-auto flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                {/* Logout */}
+                <button
+                    onClick={handleLogout}
+                    className="mt-auto flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-[#b0aeae] transition hover:bg-[#0b2c54] hover:text-white"
                 >
                     <LogOut size={18} />
                     <span>Log out</span>
                 </button>
             </aside>
 
+            {/* Main Content */}
             <main className="min-h-screen pt-20 md:ml-64 md:pt-0">
                 <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                     {children}

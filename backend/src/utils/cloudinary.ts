@@ -1,7 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
 import { UploadApiResponse } from "cloudinary";
 
-export const uploadImage = ( buffer: Buffer, folder: string): Promise<UploadApiResponse> => {
+export const uploadImage = (buffer: Buffer, folder: string): Promise<UploadApiResponse> => {
     return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
             {
@@ -26,7 +26,7 @@ export const uploadImage = ( buffer: Buffer, folder: string): Promise<UploadApiR
     });
 };
 
-export const deleteImage = async ( publicId: string): Promise<void> => {
+export const deleteImage = async (publicId: string): Promise<void> => {
     if (!publicId) return;
     await cloudinary.uploader.destroy(publicId);
 };

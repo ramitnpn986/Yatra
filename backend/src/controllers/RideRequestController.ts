@@ -10,8 +10,6 @@ import mongoose from 'mongoose';
 
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
-
-
         if (!req.user?.customerId) {
             return res.status(400).json({
                 message: " Customer authentication required",
@@ -28,7 +26,6 @@ export const createRideRequest = async (req: Request, res: Response) => {
                 success: false
             });
         }
-
 
         const { pickupLocation, dropoffLocation, distanceKm, estimatedFare, vehicleType, passengerCount } = req.body;
 

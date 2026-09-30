@@ -12,19 +12,11 @@ import RideRoutes from "./src/routes/ride.route.js"
 import RideRequestRoutes from './src/routes/rideRequest.route.js'
 
 const PORT = process.env.PORT || 8000;
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-
-app.get("/api/test", (req, res) => {
-    res.json({
-        success: true,
-        message: "Main Express app is working",
-    });
-});
 
 app.use("/uploads", express.static("uploads"));
 

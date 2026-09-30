@@ -1,11 +1,11 @@
-import React from 'react'
+import React from "react";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className=''>
-        {children}
-    </div>
-  )
-}
+const Layout = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <div className="min-h-screen bg-slate-50">
+            {children}
+        </div>
+    );
+};
 
-export default layout
+export default Layout;

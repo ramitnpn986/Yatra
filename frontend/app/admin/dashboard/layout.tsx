@@ -84,70 +84,118 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
+      <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:hidden">
+        <Link
+          href="/admin/dashboard"
+          className="flex items-center"
+        >
+          <img
+            src="/yatralogo.png"
+            alt="Yatra"
+            className="h-9 w-auto object-contain"
+          />
+        </Link>
 
-      <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm md:hidden">
-        <div className="text-lg font-semibold text-gray-900">
-          Yatra Admin
-        </div>
-
-        <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-gray-700 hover:bg-gray-100" aria-label="Open menu">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="rounded-lg p-2 text-[#0F172A] transition hover:bg-slate-100"
+          aria-label="Open menu"
+        >
           <Menu size={24} />
         </button>
       </header>
 
-  
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)}/>
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
-      <aside className={`fixed left-0 top-0 z-50 flex min-h-screen w-64 flex-col bg-[#161717] p-4 text-white transition-transform duration-300 ease-in-out
-           ${ sidebarOpen? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+      <aside
+        className={`fixed left-0 top-0 z-50 flex min-h-screen w-64 flex-col bg-[#0F172A] p-4 text-white transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
       >
-        <div className="mb-6 flex items-center justify-between px-2 pb-6">
-          <div className="text-lg font-semibold text-white">
-            Yatra Admin
-          </div>
+        <div className="mb-6 flex items-center justify-between border-b border-white/10 px-2 pb-5">
+          <Link
+            href="/admin/dashboard"
+            onClick={handleNavigation}
+            className="flex items-center"
+          >
+            <img
+              src="/yatralogo.png"
+              alt="Yatra"
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
 
           <button
+            type="button"
             onClick={() => setSidebarOpen(false)}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-800 hover:text-white md:hidden"
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white md:hidden"
             aria-label="Close menu"
           >
             <X size={22} />
           </button>
         </div>
 
+        <div className="mb-4 px-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Admin Panel
+          </p>
+        </div>
+
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
 
-            const isActive =  pathname === item.href || (item.href !== "/admin/dashboard" && pathname.startsWith(item.href));
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/admin/dashboard" &&
+                pathname.startsWith(item.href));
 
             return (
-              <Link key={item.label} href={item.disabled ? "#" : item.href} onClick={(e) => {
+              <Link
+                key={item.label}
+                href={item.disabled ? "#" : item.href}
+                onClick={(e) => {
                   if (item.disabled) {
                     e.preventDefault();
                     return;
                   }
+
                   handleNavigation();
                 }}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${ item.disabled
-                    ? "cursor-not-allowed text-gray-500"
-                    : isActive ? "bg-white/10 font-semibold text-white" : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+                  item.disabled
+                    ? "cursor-not-allowed text-slate-600"
+                    : isActive
+                      ? "bg-[#ee8d39] font-semibold text-white"
+                      : "text-slate-300 hover:bg-[#0b2c54] hover:text-white"
                 }`}
               >
                 <Icon size={18} />
+
                 <span>{item.label}</span>
+
                 {item.disabled && (
-                  <span className="ml-auto text-xs text-gray-500"> soon </span>
+                  <span className="ml-auto text-xs text-slate-600">
+                    Soon
+                  </span>
                 )}
               </Link>
             );
           })}
         </nav>
 
-        <button onClick={handleLogout} className="mt-auto flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 transition hover:bg-gray-800 hover:text-white">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-auto flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-300 transition hover:bg-[#0b2c54] hover:text-white"
+        >
           <LogOut size={18} />
           <span>Log out</span>
         </button>

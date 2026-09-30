@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {  Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
 
 type PasswordFields = {
@@ -13,7 +13,6 @@ type PasswordFields = {
 
 type PasswordErrors = Partial<Record<keyof PasswordFields, string>>;
 type FieldName = keyof PasswordFields;
-
 
 const AdminPasswordChange = () => {
     const router = useRouter();
@@ -27,9 +26,14 @@ const AdminPasswordChange = () => {
         confirmPassword: "",
     });
 
-    const validateInput = ({ oldPassword, newPassword, confirmPassword }: PasswordFields): PasswordErrors => {
+    const validateInput = ({
+        oldPassword,
+        newPassword,
+        confirmPassword,
+    }: PasswordFields): PasswordErrors => {
         const errors: PasswordErrors = {};
-        const strongPassRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        const strongPassRegex =
+            /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
         if (!oldPassword.trim()) {
             errors.oldPassword = "Current password is required";
@@ -54,16 +58,27 @@ const AdminPasswordChange = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setPasswords((prev) => ({ ...prev, [name as FieldName]: value }));
+
+        setPasswords((prev) => ({
+            ...prev,
+            [name as FieldName]: value,
+        }));
+
         if (errors[name as FieldName]) {
-            setErrors((prev) => ({ ...prev, [name as FieldName]: "" }));
+            setErrors((prev) => ({
+                ...prev,
+                [name as FieldName]: "",
+            }));
         }
     };
 
-    const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    const submitHandler = async (
+        e: React.FormEvent<HTMLFormElement>
+    ) => {
         e.preventDefault();
 
         if (loading) return;
+
         const validationErrors = validateInput(passwords);
 
         if (Object.keys(validationErrors).length > 0) {
@@ -94,7 +109,10 @@ const AdminPasswordChange = () => {
             }
 
             if (res.success) {
-                toast.success(res.message || "Password changed successfully");
+                toast.success(
+                    res.message || "Password changed successfully"
+                );
+
                 await fetch("/api/admin/logout", {
                     method: "POST",
                     credentials: "include",
@@ -115,96 +133,128 @@ const AdminPasswordChange = () => {
         type: string;
         placeholder: string;
     }[] = [
-            {
-                label: "Current Password",
-                name: "oldPassword",
-                type: "password",
-                placeholder: "••••••••",
-            },
-            {
-                label: "New Password",
-                name: "newPassword",
-                type: showPassword ? "text" : "password",
-                placeholder: "New Secret Key",
-            },
-            {
-                label: "Confirm Password",
-                name: "confirmPassword",
-                type: "password",
-                placeholder: "Repeat Secret Key",
-            },
-        ];
+        {
+            label: "Current Password",
+            name: "oldPassword",
+            type: "password",
+            placeholder: "••••••••",
+        },
+        {
+            label: "New Password",
+            name: "newPassword",
+            type: showPassword ? "text" : "password",
+            placeholder: "New Secret Key",
+        },
+        {
+            label: "Confirm Password",
+            name: "confirmPassword",
+            type: "password",
+            placeholder: "Repeat Secret Key",
+        },
+    ];
 
     return (
-        <div className="min-h-screen text-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden bg-slate-50">
+        <div className="min-h-full bg-slate-50 px-4 py-8">
+            <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl items-center justify-center">
+                <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div className="bg-[#0F172A] px-6 py-7 text-white sm:px-8">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+                                <LockKeyhole size={22} />
+                            </div>
 
-            <div className=" w-full max-w-md sm:max-w-lg rounded-2xl shadow-2xl shadow-black/20 overflow-hidden ">
-                <div className="p-6 sm:p-8 md:p-10 lg:12 bg-[#ffffff] ">
+                            <div>
+                                <p className="text-xs font-bold uppercase tracking-wider text-[#ee8d39]">
+                                    Account Security
+                                </p>
 
-                    <h2 className="text-2xl  font-bold mb-8 "> Change Password </h2>
+                                <h1 className="mt-1 text-2xl font-black">
+                                    Change Password
+                                </h1>
+                            </div>
+                        </div>
 
-                    <form onSubmit={submitHandler} className="space-y-5">
-                        {fields.map((field) => (
-                            <div key={field.name}>
-                                <label className="block text-[12px] font-bold text-slate-600  mb-2 ml-1">
-                                    {field.label}
-                                </label>
+                      
+                    </div>
 
-                                <div className="relative">
-                                    <input
-                                        type={field.type}
-                                        name={field.name}
-                                        value={passwords[field.name]}
-                                        onChange={handleChange}
-                                        placeholder={field.placeholder}
-                                        className={`w-full  border ${errors[field.name]
-                                            ? "border-red-500 ring-1 ring-red-500/20"
-                                            : "border-slate-700"
-                                            } rounded-xl px-4 py-3 outline-none  transition-all text-gray-800 placeholder:text-slate-600`}
-                                    />
+                    <div className="p-6 sm:p-8">
+                        <form onSubmit={submitHandler} className="space-y-5">
+                            {fields.map((field) => (
+                                <div key={field.name}>
+                                    <label className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                                        {field.label}
+                                    </label>
 
-                                    {field.name === "newPassword" && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword((prev) => !prev)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
-                                        >
-                                            {showPassword ? (
-                                                <EyeOff size={18} />
-                                            ) : (
-                                                <Eye size={18} />
-                                            )}
-                                        </button>
+                                    <div className="relative">
+                                        <input
+                                            type={field.type}
+                                            name={field.name}
+                                            value={passwords[field.name]}
+                                            onChange={handleChange}
+                                            placeholder={field.placeholder}
+                                            className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 ${
+                                                errors[field.name]
+                                                    ? "border-red-400 ring-2 ring-red-100"
+                                                    : "border-slate-200 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
+                                            }`}
+                                        />
+
+                                        {field.name === "newPassword" && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setShowPassword(
+                                                        (prev) => !prev
+                                                    )
+                                                }
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-[#0F172A]"
+                                                aria-label={
+                                                    showPassword
+                                                        ? "Hide password"
+                                                        : "Show password"
+                                                }
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff size={18} />
+                                                ) : (
+                                                    <Eye size={18} />
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {errors[field.name] && (
+                                        <div className="mt-2 ml-1 flex items-center gap-1.5 text-red-500">
+                                            <AlertCircle size={14} />
+                                            <span className="text-xs font-medium">
+                                                {errors[field.name]}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
+                            ))}
 
-                                {errors[field.name] && (
-                                    <div className="flex items-center gap-1.5 mt-2 ml-1 text-red-400">
-                                        <AlertCircle size={14} />
-                                        <span className="text-xs font-medium">  {errors[field.name]} </span>
-                                    </div>
-                                )}
+                            <div className="flex flex-col gap-3 pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full rounded-xl bg-[#0F172A] py-3 font-bold text-white shadow-sm transition hover:bg-[#0b2c54] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {loading
+                                        ? "Processing..."
+                                        : "Update Credentials"}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="w-full rounded-xl py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-50 hover:text-[#0F172A]"
+                                >
+                                    Cancel Request
+                                </button>
                             </div>
-                        ))}
-
-                        <div className="flex flex-col gap-3 pt-6">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-black text-white py-3 rounded-xl font-bold shadow shadow-orange-900/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? "Processing..." : "Update Credentials"}
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="w-full text-slate-600 py-2 text-sm font-semibold hover:text-slate-800 transition-colors"
-                            >
-                                Cancel Request
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -212,4 +262,3 @@ const AdminPasswordChange = () => {
 };
 
 export default AdminPasswordChange;
-

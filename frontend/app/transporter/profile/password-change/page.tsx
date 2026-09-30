@@ -238,7 +238,7 @@ const Page = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full rounded-xl bg-[#ee8d39] py-3.5 font-bold text-white shadow-lg shadow-[#ee8d39]/20 transition-all hover:bg-[#f59d50] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                                   className="w-full rounded-xl bg-[#0a1f39] py-3.5 font-bold text-white shadow-lg shadow-[#0a1f39]/20 transition-all hover:bg-[#0b2c54] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     {loading
                                         ? "Processing..."

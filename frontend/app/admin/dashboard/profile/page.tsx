@@ -90,15 +90,12 @@ const AdminProfile = () => {
                                 </div>
 
                                 <div className="text-center sm:text-left">
-                                    <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#ee8d39]">
-                                        Administrator
-                                    </p>
-
+                            
                                     <h2 className="text-2xl font-black capitalize sm:text-3xl">
                                         {admin?.name || "Loading..."}
                                     </h2>
 
-                                    <p className="mt-1 text-sm text-slate-300">
+                                    <p className="mt-1 text-sm text-[#ee8d39]">
                                         Yatra Administrator
                                     </p>
                                 </div>

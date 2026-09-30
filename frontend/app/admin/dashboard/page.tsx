@@ -118,18 +118,16 @@ export default function AdminDashboard() {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-[#0F172A]  p-6 shadow-sm transition hover:shadow-md"
           >
-            <p className="text-sm font-semibold text-slate-500">
+            <p className="text-sm font-semibold text-slate-400">
               {stat.label}
             </p>
 
             <div className="mt-3 flex items-end justify-between">
-              <p className="text-3xl font-black text-[#0F172A]">
+              <p className="text-2xl text-white">
                 {loadingStat ? "..." : stat.value}
               </p>
-
-              <div className="h-2.5 w-2.5 rounded-full bg-[#ee8d39]" />
             </div>
           </div>
         ))}

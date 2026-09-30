@@ -48,7 +48,7 @@ export default function AdminLogin() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
+        <div className="flex min-h-screen items-center justify-center bg-white px-4 py-8">
             <div className="w-full max-w-md">
                 <div className="mb-6 flex justify-center">
                     <Image
@@ -56,23 +56,13 @@ export default function AdminLogin() {
                         alt="Yatra"
                         width={150}
                         height={55}
-                        className="h-auto w-36 object-contain"
+                        className="h-auto w-30 object-contain"
                     />
                 </div>
 
-                <form
-                    onSubmit={handleLogin}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-                >
+                <form onSubmit={handleLogin}   className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="bg-[#0F172A] px-6 py-7 text-white sm:px-8">
-                        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#ee8d39]">
-                            Yatra Administration
-                        </p>
-
-                        <h1 className="text-2xl font-black">
-                            Admin Login
-                        </h1>
-
+                        <h1 className="text-2xl font-black text-[#ee8d39]">  Admin Login </h1>
                         <p className="mt-2 text-sm leading-6 text-slate-300">
                             Sign in to manage customers, providers, and rides.
                         </p>
@@ -80,51 +70,36 @@ export default function AdminLogin() {
 
                     <div className="space-y-5 p-6 sm:p-8">
                         <div>
-                            <label
-                                htmlFor="phone"
-                                className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
-                            >
+                            <label  htmlFor="phone"  className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
                                 Phone Number
                             </label>
 
                             <div className="relative">
-                                <Phone
-                                    size={18}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                                />
-
+                           
                                 <input
                                     id="phone"
                                     type="text"
                                     placeholder="Enter phone number"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
+                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-5 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label
-                                htmlFor="password"
-                                className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
-                            >
+                            <label htmlFor="password" className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
                                 Password
                             </label>
 
                             <div className="relative">
-                                <LockKeyhole
-                                    size={18}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                                />
-
                                 <input
                                     id="password"
                                     type="password"
                                     placeholder="Enter password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
+                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-5 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
                                 />
                             </div>
                         </div>
@@ -139,9 +114,7 @@ export default function AdminLogin() {
                     </div>
                 </form>
 
-                <p className="mt-6 text-center text-xs text-slate-400">
-                    Yatra Admin Panel
-                </p>
+                <p className="mt-6 text-center text-xs text-slate-400">  Yatra Admin Panel </p>
             </div>
         </div>
     );

@@ -14,6 +14,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import Image from "next/image";
 
 const navItems = [
   {
@@ -90,10 +91,12 @@ export default function AdminLayout({
           href="/admin/dashboard"
           className="flex items-center"
         >
-          <img
+          <Image
             src="/yatralogo.png"
             alt="Yatra"
-            className="h-9 w-auto object-contain"
+            width={160}
+            height={40}
+            className="h-10 w-auto rounded-full object-contain"
           />
         </Link>
 
@@ -115,22 +118,30 @@ export default function AdminLayout({
       )}
 
       <aside
-        className={`fixed left-0 top-0 z-50 flex min-h-screen w-64 flex-col bg-[#0F172A] p-4 text-white transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
+        className={`fixed left-0 top-0 z-50 flex min-h-screen w-64 flex-col bg-[#0F172A] p-4 text-white transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
       >
-        <div className="mb-6 flex items-center justify-between border-b border-white/10 px-2 pb-5">
-          <Link
-            href="/admin/dashboard"
-            onClick={handleNavigation}
-            className="flex items-center"
-          >
-            <img
-              src="/yatralogo.png"
-              alt="Yatra"
-              className="h-10 w-auto object-contain"
-            />
-          </Link>
+        <div className="mb-6 flex w-full items-center justify-between border-b border-white/10  pb-2">
+
+          <div className="mb-4 px-2 grid grid-cols-1 md:grid-cols-2 gap-1  items-center">
+            <Link
+              href="/admin/dashboard"
+              onClick={handleNavigation}
+              className="flex items-center justify-center"
+            >
+              <Image
+                src="/yatralogo.png"
+                alt="Yatra"
+                width={160}
+                height={40}
+                className="h-10 w-auto rounded-full object-contain"
+              />
+            </Link>
+
+            <p className="text-xs font-semibold capitalize tracking-wider text-slate-400">
+              Admin Panel
+            </p>
+          </div>
 
           <button
             type="button"
@@ -142,11 +153,7 @@ export default function AdminLayout({
           </button>
         </div>
 
-        <div className="mb-4 px-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Admin Panel
-          </p>
-        </div>
+
 
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
@@ -169,13 +176,12 @@ export default function AdminLayout({
 
                   handleNavigation();
                 }}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
-                  item.disabled
-                    ? "cursor-not-allowed text-slate-600"
-                    : isActive
-                      ? "bg-[#ee8d39] font-semibold text-white"
-                      : "text-slate-300 hover:bg-[#0b2c54] hover:text-white"
-                }`}
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${item.disabled
+                  ? "cursor-not-allowed text-slate-600"
+                  : isActive
+                    ? "bg-[#ee8d39] font-semibold text-white"
+                    : "text-slate-300 hover:bg-[#0b2c54] hover:text-white"
+                  }`}
               >
                 <Icon size={18} />
 

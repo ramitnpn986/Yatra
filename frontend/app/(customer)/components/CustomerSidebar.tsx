@@ -88,10 +88,9 @@ export default function CustomerShell({
                 <Image
                     src="/yatralogo.png"
                     alt="Yatra"
-                    width={120}
-                    height={40}
-                    priority
-                    className="h-auto w-auto object-contain"
+                    width={70}
+                    height={10}
+                    className=" object-contain rounded-full"
                 />
 
                 <button
@@ -110,21 +109,19 @@ export default function CustomerShell({
                 />
             )}
 
-            <aside
-                className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-60 flex-col gap-8 bg-[#0F172A] p-6 text-white shadow-xl transition-transform duration-300 ease-in-out ${
+            <aside className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-60 flex-col gap-8 bg-[#0F172A] p-6 text-white shadow-xl transition-transform duration-300 ease-in-out ${
                     sidebarOpen
                         ? "translate-x-0"
                         : "-translate-x-full"
                 } md:sticky md:translate-x-0`}
             >
-                <div className="flex items-center justify-between px-2">
+                <div className="flex items-center justify-between px-2 ">
                     <Image
                         src="/yatralogo.png"
                         alt="Yatra"
-                        width={120}
-                        height={40}
-                        priority
-                        className="h-auto w-auto object-contain"
+                        width={70}
+                        height={10}
+                        className=" object-contain rounded-full"
                     />
 
                     <button

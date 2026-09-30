@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
+import { useRideRequest } from "@/hooks/passenger/useRideRequest";
 
 const RideMap = dynamic(() => import("../components/RideMap"), {
     ssr: false,
@@ -83,7 +84,55 @@ export default function Page() {
         }
     };
 
-    const calculateRoadRoute = async (   pickup: [number, number],
+    const { createRequest, loading, error } = useRideRequest();
+
+    const handleSubmitRequest = async () => {
+    if (!destinationCoords) {
+        return;
+    }
+
+    if (!selectedVehicleType) {
+        return;
+    }
+
+    if (!roadDistance) {
+        return;
+    }
+
+    try {
+        const result = await createRequest({
+            pickupLocation: {
+                address: userAddress,
+                coordinates: [userCoords[1], userCoords[0]],
+            },
+
+            dropoffLocation: {
+                address: destinationName,
+                coordinates: [
+                    destinationCoords[1],
+                    destinationCoords[0],
+                ],
+            },
+
+            distanceKm: roadDistance,
+
+            estimatedFare:
+                VEHICLE_PRICES[selectedVehicleType],
+
+            vehicleType:
+                selectedVehicleType === "ev" ? "Car"
+                    : selectedVehicleType === "car" ? "Car" : "Bike",
+
+            passengerCount: 1,
+        });
+
+        console.log("Ride request created:", result);
+
+    } catch (err) {
+        console.error("Ride request failed:", err);
+    }
+};
+    const calculateRoadRoute = async (pickup: [number, number],
         destination: [number, number]
     ) => {
         try {
@@ -225,7 +274,7 @@ export default function Page() {
         if (event.key === "Enter") handleSearch();
     };
 
-    const filteredVehicles =  selectedType === "all" ? vehicles: vehicles.filter((vehicle) => vehicle.type === selectedType);
+    const filteredVehicles = selectedType === "all" ? vehicles : vehicles.filter((vehicle) => vehicle.type === selectedType);
 
     const calculateFare = (type: VehicleType) => {
         if (!roadDistance) return 0;
@@ -304,13 +353,12 @@ export default function Page() {
                     {(["car", "ev", "bike"] as VehicleType[]).map((type) => {
                         const vehicle = vehicleInformation[type];
                         return (
-                            <button  key={type}  onClick={() => {
-                                    setSelectedType(type);
-                                    setSelectedVehicleType(type);
-                                }}
-                                className={`rounded-2xl border-2 bg-[#102044] p-4 text-left transition ${
-                                    selectedVehicleType === type ? "border-blue-500 shadow-md" : "border-transparent shadow-sm hover:border-gray-200"
-                                }`}
+                            <button key={type} onClick={() => {
+                                setSelectedType(type);
+                                setSelectedVehicleType(type);
+                            }}
+                                className={`rounded-2xl border-2 bg-[#102044] p-4 text-left transition ${selectedVehicleType === type ? "border-blue-500 shadow-md" : "border-transparent shadow-sm hover:border-gray-200"
+                                    }`}
                             >
                                 <div className="flex items-center justify-between">
                                     <Image
@@ -434,42 +482,38 @@ export default function Page() {
                         routeCoordinates={routeCoordinates}
                         filteredVehicles={filteredVehicles}
                         selectedVehicle={null}
-                        setSelectedVehicle={() => {}}
+                        setSelectedVehicle={() => { }}
                         handleMapClick={handleMapClick}
                     />
 
                     <div className="absolute left-3 top-3 z-[1000] flex max-w-[calc(100%-24px)] gap-1 overflow-x-auto rounded-2xl bg-white/95 p-1.5 shadow-md">
                         <button
                             onClick={() => setSelectedType("all")}
-                            className={`rounded-xl px-3 py-1.5 text-xs font-semibold ${
-                                selectedType === "all" ? "bg-black text-white" : "hover:bg-gray-100"
-                            }`}
+                            className={`rounded-xl px-3 py-1.5 text-xs font-semibold ${selectedType === "all" ? "bg-black text-white" : "hover:bg-gray-100"
+                                }`}
                         >
                             All
                         </button>
                         <button
                             onClick={() => setSelectedType("car")}
-                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${
-                                selectedType === "car" ? "bg-black text-white" : "hover:bg-gray-100"
-                            }`}
+                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${selectedType === "car" ? "bg-black text-white" : "hover:bg-gray-100"
+                                }`}
                         >
                             <Car size={14} />
                             Car
                         </button>
                         <button
                             onClick={() => setSelectedType("ev")}
-                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${
-                                selectedType === "ev" ? "bg-black text-white" : "hover:bg-gray-100"
-                            }`}
+                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${selectedType === "ev" ? "bg-black text-white" : "hover:bg-gray-100"
+                                }`}
                         >
                             <Zap size={14} />
                             EV
                         </button>
                         <button
                             onClick={() => setSelectedType("bike")}
-                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${
-                                selectedType === "bike" ? "bg-black text-white" : "hover:bg-gray-100"
-                            }`}
+                            className={`flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold ${selectedType === "bike" ? "bg-black text-white" : "hover:bg-gray-100"
+                                }`}
                         >
                             <Bike size={14} />
                             Bike
@@ -514,11 +558,10 @@ export default function Page() {
                                     <button
                                         key={type}
                                         onClick={() => setSelectedVehicleType(type)}
-                                        className={`rounded-2xl  bg-white p-5 text-left transition ${
-                                            selectedVehicleType === type
+                                        className={`rounded-2xl  bg-white p-5 text-left transition ${selectedVehicleType === type
                                                 ? "shadow-lg"
                                                 : "shadow-sm hover:border-gray-300"
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <Image

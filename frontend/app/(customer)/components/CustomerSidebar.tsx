@@ -13,6 +13,7 @@ import {
     ClipboardList,
     CarFront,
 } from "lucide-react";
+import Image from "next/image";
 
 const navItems = [
     {
@@ -83,10 +84,15 @@ export default function CustomerShell({
 
     return (
         <div className="min-h-screen bg-[#f5f7fa]">
-            {/* Mobile Header */}
             <header className="fixed left-0 right-0 top-0 z-[1100] flex h-16 items-center justify-between border-b border-[#0b2c54]/10 bg-[#0a1f39] px-4 shadow-sm md:hidden">
                 <div className="text-lg font-semibold text-[#ee8d39]">
-                    Yatra
+                    <Image
+                        src="/yatralogo.png"
+                        alt="Yatra"
+                        width={100}
+                        height={40}
+                        className="h-auto w-20 rounded-full sm:w-24 md:w-22 lg:w-22 "
+                    />
                 </div>
 
                 <button
@@ -98,26 +104,28 @@ export default function CustomerShell({
                 </button>
             </header>
 
-            {/* Mobile Overlay */}
             {sidebarOpen && (
-                <div
-                    className="fixed inset-0 z-[1100] bg-black/50 md:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
+                <div className="fixed inset-0 z-[1100] bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />
             )}
 
-            {/* Sidebar */}
+
             <aside
-                className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-64 flex-col bg-[#0a1f39] p-4 text-white shadow-xl transition-transform duration-300 ease-in-out ${
-                    sidebarOpen
-                        ? "translate-x-0"
-                        : "-translate-x-full"
-                } md:translate-x-0`}
+                className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-64 flex-col bg-[#0a1f39] p-4 text-white shadow-xl transition-transform duration-300 ease-in-out ${sidebarOpen
+                    ? "translate-x-0"
+                    : "-translate-x-full"
+                    } md:translate-x-0`}
             >
-                {/* Logo */}
-                <div className="mb-6 flex items-center justify-between border-b border-white/10 px-2 pb-6">
-                    <div className="text-xl font-bold text-[#ee8d39]">
-                        Yatra
+
+                <div className="mb-6 flex items-center justify-between px-2 pb-6">
+                    <div className="text-xl flex gap-2 items-end font-bold text-[#afaca9]">
+                        <Image
+                            src="/yatralogo.png"
+                            alt="Yatra"
+                            width={80}
+                            height={10}
+                            className="h-auto w-20 rounded-full sm:w-24 md:w-15 lg:w-15 "
+                        />
+                        <span className="text-sm">passenger</span>
                     </div>
 
                     <button
@@ -136,14 +144,9 @@ export default function CustomerShell({
                         const active = item.isActive(pathname);
 
                         return (
-                            <Link
-                                key={item.label}
-                                href={item.href}
-                                onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${
-                                    active
-                                        ? "bg-[#ee8d39] font-semibold text-white shadow-sm"
-                                        : "text-[#b0aeae] hover:bg-[#0b2c54] hover:text-white"
+                            <Link key={item.label} href={item.href} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition ${active
+                                ? "bg-[#ee8d39] font-semibold text-white shadow-sm"
+                                : "text-[#b0aeae] hover:bg-[#0b2c54] hover:text-white"
                                 }`}
                             >
                                 <Icon size={18} />
@@ -153,7 +156,6 @@ export default function CustomerShell({
                     })}
                 </nav>
 
-                {/* Logout */}
                 <button
                     onClick={handleLogout}
                     className="mt-auto flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-[#b0aeae] transition hover:bg-[#0b2c54] hover:text-white"
@@ -163,7 +165,6 @@ export default function CustomerShell({
                 </button>
             </aside>
 
-            {/* Main Content */}
             <main className="min-h-screen pt-20 md:ml-64 md:pt-0">
                 <div className="p-4 sm:p-5 md:p-6 lg:p-8">
                     {children}

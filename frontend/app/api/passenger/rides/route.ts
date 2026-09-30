@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const RideUrl = () => process.env.RIDE_URL?.trim();
+const RideUrl = () => {
+    const baseUrl = process.env.BACKEND_URL?.trim();
+
+    if (!baseUrl) {
+        return null;
+    }
+
+    return `${baseUrl}/api/v8/ride`;
+};
 
 export async function GET(req: NextRequest) {
     try {
         const baseUrl = RideUrl();
 
         if (!baseUrl) {
-            console.error("RIDE_URL is not configured");
+            console.error("BACKEND_URL is not configured");
 
             return NextResponse.json(
                 {
@@ -18,15 +26,13 @@ export async function GET(req: NextRequest) {
             );
         }
 
-        const res = await fetch(`${baseUrl}/get-all-rides`,
-            {
-                method: "GET",
-                headers: {
-                    Cookie: req.headers.get("cookie") || "",
-                },
-                cache: "no-store",
-            }
-        );
+        const res = await fetch(`${baseUrl}/get-all-rides`, {
+            method: "GET",
+            headers: {
+                Cookie: req.headers.get("cookie") || "",
+            },
+            cache: "no-store",
+        });
 
         const data = await res.json();
 
@@ -39,7 +45,6 @@ export async function GET(req: NextRequest) {
         }
 
         return response;
-
     } catch (err) {
         console.error("Rides fetch failed:", err);
 

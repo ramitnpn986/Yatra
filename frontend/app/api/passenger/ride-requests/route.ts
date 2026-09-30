@@ -1,33 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const RideUrl = () => process.env.RIDE_REQUEST_URL?.trim();
+const RideRequestUrl = () => {
+    const baseUrl = process.env.BACKEND_URL?.trim();
+
+    if (!baseUrl) {
+        return null;
+    }
+
+    return `${baseUrl}/api/v8/ride-request`;
+};
 
 export async function GET(req: NextRequest) {
     try {
-        const baseUrl = RideUrl();
-        console.log(baseUrl);
+        const baseUrl = RideRequestUrl();
 
         if (!baseUrl) {
-            console.error("RIDE_REQUEST_URL is not configured");
+            console.error("BACKEND_URL is not configured");
 
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Ride REQUEST backend URL is not configured",
+                    message: "Ride request backend URL is not configured",
                 },
                 { status: 500 }
             );
         }
 
-        const res = await fetch(`${baseUrl}/get-all-ride-requests`, 
-            {
-                method: "GET",
-                headers: {
-                    Cookie: req.headers.get("cookie") || "",
-                },
-                cache: "no-store",
-            }
-        );
+        const res = await fetch(`${baseUrl}/get-all-ride-requests`, {
+            method: "GET",
+            headers: {
+                Cookie: req.headers.get("cookie") || "",
+            },
+            cache: "no-store",
+        });
 
         const data = await res.json();
 
@@ -40,9 +45,8 @@ export async function GET(req: NextRequest) {
         }
 
         return response;
-
     } catch (err) {
-        console.error("Ride fetch failed:", err);
+        console.error("Ride request fetch failed:", err);
 
         return NextResponse.json(
             {

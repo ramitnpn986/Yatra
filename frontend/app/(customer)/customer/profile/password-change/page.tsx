@@ -52,70 +52,102 @@ const PasswordChange = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-lg">
-                <h1 className="mt-1 mb-6 text-2xl font-bold  text-gray-600">Change Password</h1>
+        <div className="min-h-screen bg-white px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                        Security
+                    </h1>
+                </div>
 
                 {message && (
-                    <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
                         {message}
                     </div>
                 )}
+
                 {error && (
-                    <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl  bg-white p-6 shadow-sm sm:p-8">
-                    <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-500">Current Password</label>
-                        <input
-                            type="password"
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                            required
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                        />
+                <form
+                    onSubmit={handleSubmit}
+                    className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                >
+                    <div className="bg-[#0F172A] px-6 py-6 sm:px-8">
+                        <h2 className="text-lg font-bold text-white">
+                            Update Credentials
+                        </h2>
+                       
                     </div>
 
-                    <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-500">New Password</label>
-                        <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            required
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                        />
-                    </div>
+                    <div className="space-y-5 p-6 sm:p-8">
+                        <div>
+                            <label className="mb-2 block text-sm font-bold text-slate-700">
+                                Current Password
+                            </label>
+                            <input
+                                type="password"
+                                value={oldPassword}
+                                onChange={(e) =>
+                                    setOldPassword(e.target.value)
+                                }
+                                required
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0F172A] focus:bg-white focus:ring-2 focus:ring-slate-200"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-500">Confirm New Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                        />
-                    </div>
+                        <div>
+                            <label className="mb-2 block text-sm font-bold text-slate-700">
+                                New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) =>
+                                    setNewPassword(e.target.value)
+                                }
+                                required
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0F172A] focus:bg-white focus:ring-2 focus:ring-slate-200"
+                            />
+                        </div>
 
-                    <div className="flex gap-3 pt-2 justify-end">
-                        <button
-                            type="button"
-                            onClick={() => router.push("/customer/profile")}
-                            className=" rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className=" rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-                        >
-                            {saving ? "Saving..." : "Change Password"}
-                        </button>
+                        <div>
+                            <label className="mb-2 block text-sm font-bold text-slate-700">
+                                Confirm New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                                required
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0F172A] focus:bg-white focus:ring-2 focus:ring-slate-200"
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-3">
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    router.push("/customer/profile")
+                                }
+                                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="rounded-xl bg-[#0F172A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0b2c54] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {saving ? "Saving..." : "Update Credentials"}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

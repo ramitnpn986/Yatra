@@ -83,8 +83,7 @@ export default function Page() {
         }
     };
 
-    const calculateRoadRoute = async (
-        pickup: [number, number],
+    const calculateRoadRoute = async (   pickup: [number, number],
         destination: [number, number]
     ) => {
         try {
@@ -305,16 +304,12 @@ export default function Page() {
                     {(["car", "ev", "bike"] as VehicleType[]).map((type) => {
                         const vehicle = vehicleInformation[type];
                         return (
-                            <button
-                                key={type}
-                                onClick={() => {
+                            <button  key={type}  onClick={() => {
                                     setSelectedType(type);
                                     setSelectedVehicleType(type);
                                 }}
-                                className={`rounded-2xl border-2 bg-white p-4 text-left transition ${
-                                    selectedVehicleType === type
-                                        ? "border-blue-500 shadow-md"
-                                        : "border-transparent shadow-sm hover:border-gray-200"
+                                className={`rounded-2xl border-2 bg-[#102044] p-4 text-left transition ${
+                                    selectedVehicleType === type ? "border-blue-500 shadow-md" : "border-transparent shadow-sm hover:border-gray-200"
                                 }`}
                             >
                                 <div className="flex items-center justify-between">
@@ -326,13 +321,13 @@ export default function Page() {
                                         className="h-16 w-24 object-contain"
                                     />
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-500">Price/km</p>
-                                        <p className="font-bold text-blue-600">Rs. {VEHICLE_PRICES[type]}</p>
+                                        <p className="text-xs text-gray-200">Price/km</p>
+                                        <p className="font-bold text-white">Rs. {VEHICLE_PRICES[type]}</p>
                                     </div>
                                 </div>
                                 <div className="mt-3 flex items-center justify-between">
                                     <div>
-                                        <h3 className="font-bold">{vehicle.name}</h3>
+                                        <h3 className="font-bold text-gray-400">{vehicle.name}</h3>
                                         <p className="text-xs text-gray-500">{vehicle.seats} seats</p>
                                     </div>
                                     {selectedVehicleType === type && (
@@ -351,7 +346,7 @@ export default function Page() {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <button
                                 onClick={handleCurrentLocation}
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 sm:w-auto"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl  bg-[#102044] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1a3061] sm:w-auto"
                             >
                                 <MapPin size={18} />
                                 {loadingLocation ? "Locating..." : "Find my location"}

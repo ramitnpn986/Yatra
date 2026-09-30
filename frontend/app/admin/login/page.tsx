@@ -1,14 +1,16 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { LockKeyhole, Phone } from "lucide-react";
 
 export default function AdminLogin() {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const router = useRouter()
+    const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -16,6 +18,7 @@ export default function AdminLogin() {
 
         try {
             setLoading(true);
+
             const res = await fetch(`/api/admin/login`, {
                 method: "POST",
                 headers: {
@@ -24,52 +27,122 @@ export default function AdminLogin() {
                 credentials: "include",
                 body: JSON.stringify({
                     phone,
-                    password
-                })
-            })
+                    password,
+                }),
+            });
 
             const data = await res.json();
+
             if (!res.ok) {
                 console.log(data.message || "login failed");
-                return
+                return;
             }
 
             router.push("/admin/dashboard");
             router.refresh();
-
         } catch (err) {
-            console.log("Error at login logic :", err)
+            console.log("Error at login logic :", err);
         } finally {
             setLoading(false);
         }
-    }
-
+    };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-white p-2">
-            <form onSubmit={handleLogin}
-                className="flex  flex-col gap-4 border-2 border-gray-200 shadow-xl rounded-2xl p-8 w-100 bg-white">
-                <Image src="/logo.png" alt="Yatra" width={100} height={35}
-                    className="mx-auto mb-2" />
-                <h1 className="text-xl font-semibold text-primary">Admin Login</h1>
-                <input
-                    type="text"
-                    placeholder="Phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                />
-                <button type="submit" disabled={loading} className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60" >
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-8">
+            <div className="w-full max-w-md">
+                <div className="mb-6 flex justify-center">
+                    <Image
+                        src="/yatralogo.png"
+                        alt="Yatra"
+                        width={150}
+                        height={55}
+                        className="h-auto w-36 object-contain"
+                    />
+                </div>
+
+                <form
+                    onSubmit={handleLogin}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                >
+                    <div className="bg-[#0F172A] px-6 py-7 text-white sm:px-8">
+                        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#ee8d39]">
+                            Yatra Administration
+                        </p>
+
+                        <h1 className="text-2xl font-black">
+                            Admin Login
+                        </h1>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
+                            Sign in to manage customers, providers, and rides.
+                        </p>
+                    </div>
+
+                    <div className="space-y-5 p-6 sm:p-8">
+                        <div>
+                            <label
+                                htmlFor="phone"
+                                className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                            >
+                                Phone Number
+                            </label>
+
+                            <div className="relative">
+                                <Phone
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+
+                                <input
+                                    id="phone"
+                                    type="text"
+                                    placeholder="Enter phone number"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wide text-slate-500"
+                            >
+                                Password
+                            </label>
+
+                            <div className="relative">
+                                <LockKeyhole
+                                    size={18}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    placeholder="Enter password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#0F172A] focus:ring-2 focus:ring-slate-100"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full rounded-xl bg-[#0F172A] py-3.5 font-bold text-white shadow-sm transition hover:bg-[#0b2c54] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {loading ? "Logging in..." : "Login"}
+                        </button>
+                    </div>
+                </form>
+
+                <p className="mt-6 text-center text-xs text-slate-400">
+                    Yatra Admin Panel
+                </p>
+            </div>
         </div>
     );
 }

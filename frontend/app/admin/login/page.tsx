@@ -62,9 +62,6 @@ export default function AdminLogin() {
                 <form onSubmit={handleLogin}   className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="bg-[#0F172A] px-6 py-7 text-white sm:px-8">
                         <h1 className="text-2xl font-black text-[#ee8d39]">  Admin Login </h1>
-                        <p className="mt-2 text-sm leading-6 text-slate-300">
-                            Sign in to manage customers, providers, and rides.
-                        </p>
                     </div>
 
                     <div className="space-y-5 p-6 sm:p-8">

@@ -146,6 +146,8 @@ const Page = ({ children }: LayoutProps) => {
             </aside>
 
             <main className="flex-1 p-4 py-8">{children}</main>
+
+            <RideNotificationListener />
         </div>
     );
 };

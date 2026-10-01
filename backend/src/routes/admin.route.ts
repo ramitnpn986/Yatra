@@ -37,7 +37,7 @@ router.delete("/customer/:id", isAuthenticated, isAdmin, deleteCustomer);
 router.get("/rides", isAuthenticated, isAdmin, getAllRides);
 router.get("/ride/:id", isAuthenticated, isAdmin, getRideById);
 router.get("/rides/active", isAuthenticated, isAdmin, getActiveRides);
-router.get("/rides/active", isAuthenticated, isAdmin, getCancelledRides);
+router.get("/rides/active", isAuthenticated, isAdmin, getRideById);
 router.get("/rides/active", isAuthenticated, isAdmin, getCompletedRides);
 router.get("/rides/active", isAuthenticated, isAdmin, viewRideDetails);
 router.get("/rides/active", isAuthenticated, isAdmin, getCancelRideById);

@@ -7,6 +7,7 @@ interface RideRequestPopupProps {
     request: NewRideRequest;
     onAccept: () => void;
     onReject: () => void;
+    loading: boolean;
 }
 
 const getVehicleIcon = (vehicleType: NewRideRequest["vehicleType"]) => {
@@ -26,7 +27,7 @@ const getVehicleIcon = (vehicleType: NewRideRequest["vehicleType"]) => {
     }
 };
 
-export default function RideRequestPopup({request,  onAccept,  onReject}: RideRequestPopupProps) {
+export default function RideRequestPopup({request,  onAccept,  onReject, loading}: RideRequestPopupProps) {
     return (
         <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
             <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
@@ -111,7 +112,7 @@ export default function RideRequestPopup({request,  onAccept,  onReject}: RideRe
                             className="flex items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-green-700"
                         >
                             <Check size={18} />
-                            Accept
+                            {loading? "processing": "Accept"} 
                         </button>
                     </div>
 

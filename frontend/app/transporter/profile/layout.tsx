@@ -13,6 +13,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import React, { ReactNode } from "react";
 import Image from "next/image";
+import RideNotificationListener from "@/components/notifications/RideNotificationListener";
 
 interface LayoutProps {
     children: ReactNode;

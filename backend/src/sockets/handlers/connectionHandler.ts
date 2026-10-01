@@ -18,7 +18,7 @@ export const handleSocketConnection = (io: Server, socket: Socket) => {
 
     registerRideHandlers(socket);
     registerLocationHandlers(socket);
-    registerTransporterHandlers(socket);
+    // registerTransporterHandlers(socket); 
 
     socket.on("disconnect", (reason) => {
         console.log(`Socket disconnected: ${authenticatedSocket.id}`);

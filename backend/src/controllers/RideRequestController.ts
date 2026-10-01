@@ -205,7 +205,7 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
             });
         }
 
-        if (transporter.vehicle !== rideRequest.vehicleType) {
+        if (transporter.vehicle?.type !== rideRequest.vehicleType) {
             return res.status(403).json({
                 success: false,
                 message: "Your vehicle type does not match this ride",
@@ -215,14 +215,13 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
         const acceptedAt = new Date();
 
         session.startTransaction();
-        const acceptedRequest =
-            await RideRequest.findOneAndUpdate(
+        const acceptedRequest =  await RideRequest.findOneAndUpdate(
                 {
                     _id: rideRequestId,
                     status: "pending",
                     expiresAt: { $gt: acceptedAt },
                     acceptedBy: null,
-                    vehicleType: transporter.vehicle,
+                    vehicleType: transporter.vehicle?.type,
                 },
                 {
                     $set: {

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { LockKeyhole, Phone } from "lucide-react";
 
 export default function AdminLogin() {
     const [phone, setPhone] = useState("");

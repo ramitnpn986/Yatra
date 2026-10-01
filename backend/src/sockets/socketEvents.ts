@@ -6,11 +6,17 @@ export const SOCKET_EVENTS = {
 
     RIDE: {
         JOIN: "ride:join",
-        JOINED: "ride: joined",
+        JOINED: "ride:joined",
 
         LEAVE: "ride:leave",    // client asks the server to leave  "Server, I want to leave this ride room."
-        LEFT: "ride: left",               // server confirms that the user left that room "Your request was successful. You have left the ride."
+        LEFT: "ride:left",               // server confirms that the user left that room "Your request was successful. You have left the ride."
         ERROR: "ride:error",
+        NEW_REQUEST: "new_ride_request"
+    },
+
+    TRANSPORTER: {
+        JOIN: "transporter:join",
+        JOINED: "transporter:joined",
     },
 
     LOCATION: {

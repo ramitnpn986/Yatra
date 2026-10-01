@@ -5,8 +5,8 @@ import { Socket } from 'socket.io';
 export type SocketRole = "customer" | "transporter";
 
 export interface SocketUser {
-     id: string;
-     role: SocketRole;
+    id: string;
+    role: SocketRole;
 }
 
 export interface AuthenticatedSocket extends Socket {
@@ -14,11 +14,11 @@ export interface AuthenticatedSocket extends Socket {
 }
 
 export interface JoinRidePayload {
-     rideId : string
+    rideId: string
 }
 
 export interface LeaveRidePayload {
-     rideId : string
+    rideId: string
 }
 
 export interface LocationUpdatePayload {

@@ -15,17 +15,8 @@ import {
     Navigation,
 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
 import { useRideRequest } from "@/hooks/passenger/useRideRequest";
-
-const RideMap = dynamic(() => import("../components/RideMap"), {
-    ssr: false,
-    loading: () => (
-        <div className="flex h-full items-center justify-center bg-gray-100">
-            <p className="text-sm text-gray-500">Loading map...</p>
-        </div>
-    ),
-});
+import RideMap from "../components/RideMapClient";
 
 type VehicleType = "car" | "ev" | "bike";
 
@@ -42,9 +33,9 @@ interface Vehicle {
 type RoutePoint = [number, number];
 
 const VEHICLE_PRICES: Record<VehicleType, number> = {
-    bike: 100,
-    car: 400,
-    ev: 400,
+    bike: 30,
+    car: 70,
+    ev: 60,
 };
 
 const vehicles: Vehicle[] = [
@@ -87,51 +78,36 @@ export default function Page() {
     const { createRequest, loading, error } = useRideRequest();
 
     const handleSubmitRequest = async () => {
-    if (!destinationCoords) {
-        return;
-    }
+        if (!destinationCoords || !selectedVehicleType || !roadDistance ) {
+            return;
+        }
 
-    if (!selectedVehicleType) {
-        return;
-    }
+        try {
+            const result = await createRequest({
+                pickupLocation: {
+                    address: userAddress,
+                    coordinates: [userCoords[1], userCoords[0]],
+                },
+                dropoffLocation: {
+                    address: destinationName,
+                    coordinates: [
+                        destinationCoords[1],
+                        destinationCoords[0],
+                    ],
+                },
+                distanceKm: roadDistance,
+                estimatedFare: VEHICLE_PRICES[selectedVehicleType],
+                vehicleType: selectedVehicleType === "ev" ? "Car": selectedVehicleType === "car" ? "Car" : "Bike",
+                passengerCount: 1,
+            });
 
-    if (!roadDistance) {
-        return;
-    }
+            console.log("Ride request created:", result);
 
-    try {
-        const result = await createRequest({
-            pickupLocation: {
-                address: userAddress,
-                coordinates: [userCoords[1], userCoords[0]],
-            },
+        } catch (err) {
+            console.error("Ride request failed:", err);
+        }
+    };
 
-            dropoffLocation: {
-                address: destinationName,
-                coordinates: [
-                    destinationCoords[1],
-                    destinationCoords[0],
-                ],
-            },
-
-            distanceKm: roadDistance,
-
-            estimatedFare:
-                VEHICLE_PRICES[selectedVehicleType],
-
-            vehicleType:
-                selectedVehicleType === "ev" ? "Car"
-                    : selectedVehicleType === "car" ? "Car" : "Bike",
-
-            passengerCount: 1,
-        });
-
-        console.log("Ride request created:", result);
-
-    } catch (err) {
-        console.error("Ride request failed:", err);
-    }
-};
     const calculateRoadRoute = async (pickup: [number, number],
         destination: [number, number]
     ) => {
@@ -281,63 +257,14 @@ export default function Page() {
         return Math.ceil(roadDistance * VEHICLE_PRICES[type]);
     };
 
-    const handleConfirmRide = async () => {
-        if (!destinationCoords || !selectedVehicleType || !roadDistance) return;
-
-        const estimatedFare = calculateFare(selectedVehicleType);
-
-        const rideRequest = {
-            pickupLocation: {
-                address: userAddress,
-                coordinates: [userCoords[1], userCoords[0]],
-            },
-            dropoffLocation: {
-                address: destinationName,
-                coordinates: [destinationCoords[1], destinationCoords[0]],
-            },
-            vehicleType: selectedVehicleType,
-            distanceKm: roadDistance,
-            estimatedFare,
-            passengerCount: 1,
-        };
-
-        try {
-            setRequestingRide(true);
-
-            const response = await fetch("/api/customer/ride-request", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(rideRequest),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                alert(data?.message || "Unable to request ride.");
-                return;
-            }
-
-            alert(
-                `Ride requested!\n\n` +
-                `Vehicle: ${selectedVehicleType}\n` +
-                `Distance: ${roadDistance} km\n` +
-                `Fare: Rs. ${estimatedFare}\n\n` +
-                `Waiting for a nearby driver to accept...`
-            );
-        } catch (error) {
-            console.error("Ride request failed:", error);
-            alert("Unable to request ride.");
-        } finally {
-            setRequestingRide(false);
-        }
-    };
 
     const vehicleInformation: Record<VehicleType, { name: string; icon: string; seats: number }> = {
         bike: { name: "Bike", icon: "/bike.webp", seats: 1 },
         car: { name: "Car", icon: "/car1.png", seats: 4 },
         ev: { name: "EV Car", icon: "/ev_car.webp", seats: 4 },
     };
+
+    const canRequestRide = userCoords && destinationCoords && destinationName && selectedVehicleType && roadDistance !== null && roadDistance > 0 && !calculatingRoute;
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6 text-gray-900 sm:px-6 md:px-10">
@@ -417,18 +344,11 @@ export default function Page() {
                                 className="min-w-0 flex-1 px-3 py-2.5 text-sm outline-none"
                             />
                             {searchText && (
-                                <button
-                                    onClick={clearDestination}
-                                    className="shrink-0 rounded-full p-2 hover:bg-gray-100"
-                                >
+                                <button onClick={clearDestination} className="shrink-0 rounded-full p-2 hover:bg-gray-100">
                                     <X size={18} />
                                 </button>
                             )}
-                            <button
-                                onClick={handleSearch}
-                                disabled={searching}
-                                className="shrink-0 rounded-xl bg-black px-4 py-2.5 text-sm text-white disabled:opacity-50"
-                            >
+                            <button  onClick={handleSearch}  disabled={searching}  className="shrink-0 rounded-xl bg-black px-4 py-2.5 text-sm text-white disabled:opacity-50">
                                 {searching ? "Searching..." : "Search"}
                             </button>
                         </div>
@@ -555,13 +475,8 @@ export default function Page() {
                                 const fare = calculateFare(type);
 
                                 return (
-                                    <button
-                                        key={type}
-                                        onClick={() => setSelectedVehicleType(type)}
-                                        className={`rounded-2xl  bg-white p-5 text-left transition ${selectedVehicleType === type
-                                                ? "shadow-lg"
-                                                : "shadow-sm hover:border-gray-300"
-                                            }`}
+                                    <button key={type} onClick={() => setSelectedVehicleType(type)}
+                                        className={`rounded-2xl   bg-[#102044] p-5 text-left transition ${selectedVehicleType === type ? "shadow-lg" : "shadow-sm hover:border-gray-300" }`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <Image
@@ -575,13 +490,13 @@ export default function Page() {
                                                 Rs. {VEHICLE_PRICES[type]}/km
                                             </span>
                                         </div>
-                                        <h3 className="mt-4 text-lg font-bold">{vehicle.name}</h3>
-                                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                        <h3 className="mt-4 text-lg font-bold text-white">{vehicle.name}</h3>
+                                        <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
                                             <Users size={14} />
                                             {vehicle.seats} seats
                                         </div>
                                         <div className="mt-4  pt-4">
-                                            <p className="text-xs text-gray-500">Estimated fare</p>
+                                            <p className="text-xs text-gray-300">Estimated fare</p>
                                             <p className="text-2xl font-bold text-blue-600">Rs. {fare}</p>
                                         </div>
                                     </button>
@@ -591,7 +506,7 @@ export default function Page() {
                     </div>
                 )}
 
-                {selectedVehicleType && destinationCoords && roadDistance && (
+                { canRequestRide && (
                     <div className="sticky bottom-4 z-20 mt-6">
                         <div className="rounded-2xl  bg-white p-4 shadow-xl sm:p-5">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -611,9 +526,9 @@ export default function Page() {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={handleConfirmRide}
+                                    onClick={handleSubmitRequest}
                                     disabled={requestingRide || calculatingRoute}
-                                    className="w-full rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400 sm:w-auto"
+                                    className="w-full rounded-xl bg-[#102044] px-6 py-3 text-sm font-bold text-white hover:bg-[#102044] disabled:cursor-not-allowed disabled:bg-gray-400 sm:w-auto"
                                 >
                                     {requestingRide ? "Requesting..." : "Confirm Ride"}
                                 </button>

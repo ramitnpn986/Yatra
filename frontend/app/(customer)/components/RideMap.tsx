@@ -29,8 +29,8 @@ interface RideMapProps {
     routeCoordinates: Coordinates[];
     filteredVehicles: Vehicle[];
     selectedVehicle: Vehicle | null;
-    setSelectedVehicle: ( vehicle: Vehicle | null) => void;
-    handleMapClick: ( lat: number, lng: number) => void;
+    setSelectedVehicle: (vehicle: Vehicle | null) => void;
+    handleMapClick: (lat: number, lng: number) => void;
 
 }
 
@@ -79,15 +79,22 @@ const getVehicleIcon = (type: Vehicle["type"]) => {
 function RouteView({ routeCoordinates }: { routeCoordinates: Coordinates[] }) {
     const map = useMap();
     useEffect(() => {
-        if (!routeCoordinates || routeCoordinates.length === 0) return;
-        if (!map || !map.getContainer()) return;
+        if (!routeCoordinates.length) return;
+
+        const container = map.getContainer();
+        if (!container || !container.isConnected) return;
         const bounds = L.latLngBounds(routeCoordinates);
         if (!bounds.isValid()) return;
-        map.fitBounds(bounds, {
-            padding: [60, 60],
-            maxZoom: 16,
+        requestAnimationFrame(() => {
+            if (!map.getContainer()?.isConnected) return;
+
+            map.fitBounds(bounds, {
+                padding: [60, 60],
+                maxZoom: 16,
+            });
         });
     }, [routeCoordinates, map]);
+
     return null;
 }
 
@@ -116,6 +123,7 @@ export default function RideMap({
 }: RideMapProps) {
     return (
         <MapContainer
+            key="ride-map"
             center={userCoords}
             zoom={14}
             scrollWheelZoom={true}

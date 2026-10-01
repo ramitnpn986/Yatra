@@ -18,7 +18,7 @@ export const registerRideHandlers = (socket: Socket) => {
                 });
             }
 
-            const room = `ride: ${rideId}`;
+            const room = `ride:${rideId}`;
             await socket.join(room);
 
             console.log(`${authenticatedSocket.user.role} ${authenticatedSocket.user.id} joined ${room}`);
@@ -46,7 +46,7 @@ export const registerRideHandlers = (socket: Socket) => {
                 });
             }
 
-            const room = `ride: ${rideId}`;
+            const room = `ride:${rideId}`;
             if (!authenticatedSocket.rooms.has(room)) {
                 return socket.emit(SOCKET_EVENTS.RIDE.ERROR, {
                     message: "You are not connected to this ride",

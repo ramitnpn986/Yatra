@@ -13,8 +13,8 @@ export const useRideRequest = () => {
         setLoading(true);
         setError(null);
         try {
-
-            const res = await fetch("/api/ride-request/create", {
+            console.log("i just hitted");
+            const res = await fetch("/api/passenger/ride-requests/create", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

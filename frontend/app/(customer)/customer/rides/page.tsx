@@ -19,7 +19,7 @@ import {
   ChevronRight,
   IndianRupee,
 } from "lucide-react";
-import type { Ride, getVehicleIcon, getVehicleStyle } from "@/app/(customer)/components/CommonItems"
+import { Ride, getVehicleIcon, getVehicleStyle } from "@/app/(customer)/components/CommonItems"
 import { getStatus, formatDate } from "@/app/(customer)/components/CommonItems";
 
 
@@ -276,4 +276,3 @@ const Page = () => {
 };
 
 export default Page;
-

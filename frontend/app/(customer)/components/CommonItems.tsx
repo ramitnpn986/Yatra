@@ -1,4 +1,3 @@
-
 export interface Ride {
     _id: string;
     rideRequest: string;

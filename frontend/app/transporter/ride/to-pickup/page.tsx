@@ -1,9 +1,5 @@
 "use client";
 
-// MOCKUP — static data, no socket/API wiring yet.
-// Real version: transporter's live location streams via socket,
-// "I've Arrived" triggers a status update to the backend.
-
 import { Clock } from "lucide-react";
 import MapPanel from "../_shared/MapPanel";
 import { RiderRow, RouteCard } from "../_shared/StepPieces";

@@ -1,9 +1,5 @@
 "use client";
 
-// MOCKUP — static data, no socket/API wiring yet.
-// Real version: star rating is stateful and posts to a rating endpoint
-// (not yet built on the backend either — flag to Sushil separately).
-
 import { Star } from "lucide-react";
 import MapPanel from "../_shared/MapPanel";
 import { MOCK_RIDE } from "../_shared/mockRide";

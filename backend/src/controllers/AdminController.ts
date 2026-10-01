@@ -800,12 +800,23 @@ export const getCompletedRides = async (req: Request, res: Response): Promise<Re
 
 export const getDashboardStats = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const [  totalCustomers, totalTransporters,   kycPending,   activeRides] = await Promise.all([
-            Customer.countDocuments(),
-            TransportProvider.countDocuments(),
-            TransportProvider.countDocuments({ kycStatus: "pending" }),
-            Ride.countDocuments({ status: "active" })
-        ]);
+        const [totalCustomers, totalTransporters, kycPending, activeRides] =
+    await Promise.all([
+        Customer.countDocuments(),
+        TransportProvider.countDocuments(),
+        TransportProvider.countDocuments({ kycStatus: "pending" }),
+        Ride.countDocuments({
+            status: {
+                $in: [
+                    "confirmed",
+                    "driver_arriving",
+                    "driver_arrived",
+                    "started",
+                    "arrived_destination"
+                ]
+            }
+        })
+    ]);
 
         return res.status(200).json({
             success: true,

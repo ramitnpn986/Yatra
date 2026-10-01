@@ -34,9 +34,8 @@ const navItems = [
   },
   {
     label: "Rides",
-    href: "#",
+    href: "/admin/dashboard/rides",
     icon: Route,
-    disabled: true,
   },
   {
     label: "Profile",
@@ -153,50 +152,32 @@ export default function AdminLayout({
           </button>
         </div>
 
+<nav className="flex flex-col gap-1">
+  {navItems.map((item) => {
+    const Icon = item.icon;
 
+    const isActive =
+      pathname === item.href ||
+      (item.href !== "/admin/dashboard" &&
+        pathname.startsWith(item.href));
 
-        <nav className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin/dashboard" &&
-                pathname.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.label}
-                href={item.disabled ? "#" : item.href}
-                onClick={(e) => {
-                  if (item.disabled) {
-                    e.preventDefault();
-                    return;
-                  }
-
-                  handleNavigation();
-                }}
-                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${item.disabled
-                  ? "cursor-not-allowed text-slate-600"
-                  : isActive
-                    ? "bg-[#ee8d39] font-semibold text-white"
-                    : "text-slate-300 hover:bg-[#0b2c54] hover:text-white"
-                  }`}
-              >
-                <Icon size={18} />
-
-                <span>{item.label}</span>
-
-                {item.disabled && (
-                  <span className="ml-auto text-xs text-slate-600">
-                    Soon
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
+    return (
+      <Link
+        key={item.label}
+        href={item.href}
+        onClick={handleNavigation}
+        className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+          isActive
+            ? "bg-[#ee8d39] font-semibold text-white"
+            : "text-slate-300 hover:bg-[#0b2c54] hover:text-white"
+        }`}
+      >
+        <Icon size={18} />
+        <span>{item.label}</span>
+      </Link>
+    );
+  })}
+</nav>
         <button
           type="button"
           onClick={handleLogout}

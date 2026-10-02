@@ -1,10 +1,11 @@
-
 import { Request, Response } from "express";
 import RideRequest from "../models/RideRequest.js";
 import { Ride } from "../models/Ride.js";
 import { TransportProvider } from "../models/TransportProvider.js";
 import Customer from "../models/Customer.js";
+
 import mongoose from 'mongoose';
+import { VehicleRental } from "../models/VehicleRentals.js";
 
 
 
@@ -420,6 +421,382 @@ export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
         return res.status(500).json({
             success: false,
             message: "Failed to cancel ride request",
+        });
+    }
+}
+
+
+// ============================================================
+// Vehicle rental (date-range bookings — separate from on-demand rides)
+// ============================================================
+
+export const vehicleRentalRequest = async (req: Request, res: Response) => {
+    try {
+        if (!req.user?.customerId) {
+            return res.status(400).json({
+                message: "Customer authentication required",
+                success: false
+            });
+        }
+
+        const customerId = req.user?.customerId;
+        const customer = await Customer.findById(customerId).select("-password");
+
+        if (customer?.isBlocked) {
+            return res.status(400).json({
+                message: "You can not make a rental request",
+                success: false
+            });
+        }
+
+        const {
+            transporterId,
+            vehicleType,
+            rentalType,
+            pickupLocation,
+            returnLocation,
+            startDate,
+            endDate,
+            pricePerDay,
+            securityDeposit,
+        } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(transporterId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid transporter ID",
+            });
+        }
+
+        if (!pickupLocation?.coordinates || pickupLocation.coordinates.length !== 2 ||
+            !returnLocation?.coordinates || returnLocation.coordinates.length !== 2) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid pickup or return coordinates"
+            })
+        }
+
+        if (!vehicleType || !rentalType || !startDate || !endDate || pricePerDay === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Vehicle type, rental type, dates and price are required",
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId);
+
+        if (!transporter) {
+            return res.status(404).json({
+                success: false,
+                message: "Transporter not found",
+            });
+        }
+
+        if (transporter.verificationStatus !== "approved") {
+            return res.status(403).json({
+                success: false,
+                message: "This provider's KYC is not verified",
+            });
+        }
+
+        if (transporter.vehicle?.type !== vehicleType) {
+            return res.status(403).json({
+                success: false,
+                message: "Provider's vehicle type does not match this request",
+            });
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+            return res.status(400).json({
+                success: false,
+                message: "endDate must be after startDate",
+            });
+        }
+
+        const hasOtherPendingRequest = await VehicleRental.findOne({
+            customer: customerId,
+            status: "pending",
+        });
+
+        if (hasOtherPendingRequest) {
+            return res.status(409).json({
+                success: false,
+                message: "You already have a pending rental request",
+                rental: hasOtherPendingRequest,
+            });
+        }
+
+        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        const totalPrice = days * pricePerDay;
+
+        const rental = await VehicleRental.create({
+            customer: customerId,
+            transporter: transporterId,
+            vehicleType,
+            rentalType,
+            pickupLocation: {
+                address: pickupLocation.address,
+                type: "Point",
+                coordinates: pickupLocation.coordinates,
+            },
+            returnLocation: {
+                address: returnLocation.address,
+                type: "Point",
+                coordinates: returnLocation.coordinates,
+            },
+            startDate: start,
+            endDate: end,
+            pricePerDay,
+            totalPrice,
+            securityDeposit: securityDeposit || 0,
+            status: "pending",
+        });
+
+        const io = req.app.get("io");
+        if (io) {
+            io.to(`transporter:${transporterId}`).emit("new_rental_request", {
+                rentalId: rental._id,
+                vehicleType: rental.vehicleType,
+                startDate: rental.startDate,
+                endDate: rental.endDate,
+                totalPrice: rental.totalPrice,
+            });
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Rental request submitted",
+            rental,
+        });
+
+    } catch (err) {
+        console.error("Create rental request error:", err);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false
+        });
+    }
+}
+
+export const acceptRentalRequest = async (req: Request, res: Response) => {
+    try {
+        if (!req.user?.transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        const transporterId = req.user.transporterId;
+        const rentalId = String(req.params.rentalId);
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId);
+
+        if (!transporter) {
+            return res.status(404).json({
+                success: false,
+                message: "Transporter not found",
+            });
+        }
+
+        if (transporter.isBlocked) {
+            return res.status(400).json({
+                success: false,
+                message: "You are currently not able to accept this request",
+            });
+        }
+
+        const rental = await VehicleRental.findOneAndUpdate(
+            {
+                _id: rentalId,
+                transporter: transporterId,
+                status: "pending",
+            },
+            {
+                $set: {
+                    status: "confirmed",
+                    acceptedAt: new Date(),
+                },
+            },
+            { new: true }
+        );
+
+        if (!rental) {
+            return res.status(409).json({
+                success: false,
+                message: "Rental request is no longer available",
+            });
+        }
+
+        const io = req.app.get("io");
+        if (io) {
+            io.to(`customer:${rental.customer}`).emit("rental_accepted", {
+                rentalId: rental._id,
+                status: rental.status,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rental request accepted",
+            rental,
+        });
+
+    } catch (err) {
+        console.error("Accept rental request error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+export const rejectRentalRequest = async (req: Request, res: Response) => {
+    try {
+        if (!req.user?.transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        const transporterId = req.user.transporterId;
+        const rentalId = String(req.params.rentalId);
+        const { reason } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+        const rental = await VehicleRental.findOneAndUpdate(
+            {
+                _id: rentalId,
+                transporter: transporterId,
+                status: "pending",
+            },
+            {
+                $set: {
+                    status: "rejected",
+                    rejectedAt: new Date(),
+                    ...(reason ? { rejectedReason: reason } : {}),
+                },
+            },
+            { new: true }
+        );
+
+        if (!rental) {
+            return res.status(409).json({
+                success: false,
+                message: "Rental request is no longer available",
+            });
+        }
+
+        const io = req.app.get("io");
+        if (io) {
+            io.to(`customer:${rental.customer}`).emit("rental_rejected", {
+                rentalId: rental._id,
+                status: rental.status,
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rental request rejected",
+            rental,
+        });
+
+    } catch (err) {
+        console.error("Reject rental request error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+export const cancelRentalRequest = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.user?.customerId;
+        const transporterId = req.user?.transporterId;
+
+        if (!customerId && !transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required",
+            });
+        }
+
+        const rentalId = String(req.params.rentalId);
+        const { reason } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+        const rental = await VehicleRental.findById(rentalId);
+
+        if (!rental) {
+            return res.status(404).json({
+                success: false,
+                message: "Rental not found",
+            });
+        }
+
+        const isOwner = customerId && rental.customer.toString() === customerId;
+        const isProvider = transporterId && rental.transporter.toString() === transporterId;
+
+        if (!isOwner && !isProvider) {
+            return res.status(403).json({
+                success: false,
+                message: "Not authorized to cancel this rental",
+            });
+        }
+
+        if (["completed", "cancelled", "rejected"].includes(rental.status)) {
+            return res.status(400).json({
+                success: false,
+                message: `This rental is already ${rental.status} and cannot be cancelled`,
+            });
+        }
+
+        rental.status = "cancelled";
+        rental.cancelledAt = new Date();
+        rental.cancelledBy = isOwner ? "customer" : "transporter";
+        if (reason) rental.cancelledReason = reason;
+        await rental.save();
+
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("rental_cancelled", { rentalId: rental._id });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rental cancelled successfully",
+            rental,
+        });
+
+    } catch (err) {
+        console.error("Cancel rental request error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to cancel rental request",
         });
     }
 }

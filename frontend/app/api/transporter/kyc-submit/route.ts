@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
     try{
         const formData = await req.formData();
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/kyc-submit`, {
+        const res = await fetch(`${process.env.TRANSPORTER_URL}/submit-kyc`, {
             method: "POST",
             headers:{
                  Cookie: req.headers.get("cookie") || "",

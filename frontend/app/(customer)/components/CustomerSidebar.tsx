@@ -13,6 +13,7 @@ import {
     Lock,
     ClipboardList,
     CarFront,
+    CalendarDays,
 } from "lucide-react";
 
 const navItems = [
@@ -50,6 +51,12 @@ const navItems = [
         icon: CarFront,
         isActive: (p: string) =>
             p.startsWith("/customer/rides"),
+    },
+    {
+        label: "Rentals",
+        href: "/customer/rentals",
+        icon: CalendarDays,
+        isActive: (p: string) => p.startsWith("/customer/rentals"),
     },
 ];
 

@@ -32,7 +32,8 @@ app.use("/api/v8/transporters", TransportRoutes);
 app.use("/api/v8/ride", RideRoutes);
 app.use("/api/v8/ride-request", RideRequestRoutes);
 
-initializeSocket(httpServer);
+    const io = initializeSocket(httpServer);
+    app.set("io", io);
 
 const startServer = async () => {
     try {

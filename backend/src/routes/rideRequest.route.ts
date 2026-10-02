@@ -1,13 +1,22 @@
 import {
-    acceptRideRequest, createRideRequest, getAllRideReqsOfAnUser, getRideReqByIdOfAnUser,
-    vehicleRentalRequest, acceptRentalRequest, rejectRentalRequest, cancelRentalRequest,
-} from './../controllers/RideRequestController.js';
+    acceptRideRequest,
+    createRideRequest,
+    getAllRideReqsOfAnUser,
+    getRideReqByIdOfAnUser,
+    vehicleRentalRequest,
+    acceptRentalRequest,
+    rejectRentalRequest,
+    cancelRentalRequest,
+    getMyRentals,
+    getPendingRentalRequests,
+    cancelRideRequest,
+    getRentalProviders,
+} from "../controllers/RideRequestController.js";
 
 import { Router } from "express";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isCustomer from "../middleware/isCustomer.js";
 import isTransporter from '../middleware/isTransporter.js';
-import { cancelRideRequest } from '../controllers/CustomerController.js';
 
 const router = Router();
 
@@ -19,8 +28,22 @@ router.get("/get-ride-request/:rideRequestId", isAuthenticated, isCustomer, getR
 
 // ---- Vehicle rental ----
 router.post("/rental/create", isAuthenticated, isCustomer, vehicleRentalRequest);
+router.get("/rental/providers", isAuthenticated, isCustomer, getRentalProviders);
 router.post("/rental/accept/:rentalId", isAuthenticated, isTransporter, acceptRentalRequest);
 router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRentalRequest);
 router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); // customer or transporter — role checked inside
+router.get(
+    "/rental/my-rentals",
+    isAuthenticated,
+    isCustomer,
+    getMyRentals
+);
+
+router.get(
+    "/rental/pending",
+    isAuthenticated,
+    isTransporter,
+    getPendingRentalRequests
+);
 
 export default router;

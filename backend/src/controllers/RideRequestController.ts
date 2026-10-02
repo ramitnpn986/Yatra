@@ -90,7 +90,7 @@ export const createRideRequest = async (req: Request, res: Response) => {
             isVerified: true,
             isKycCompleted: true,
             verificationStatus: "approved",
-            vehicleType,
+            "vehicle.type": vehicleType,
             currentLocation: {
                 $near: {
                     $geometry: {
@@ -800,3 +800,86 @@ export const cancelRentalRequest = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const getMyRentals = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.user?.customerId;
+
+        if (!customerId) {
+            return res.status(401).json({
+                success: false,
+                message: "Customer authentication required",
+            });
+        }
+
+        const rentals = await VehicleRental.find({
+            customer: customerId,
+        }).sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "Rentals fetched successfully",
+            count: rentals.length,
+            rentals,
+        });
+    } catch (err) {
+        console.error("Get customer rentals error:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch rentals",
+        });
+    }
+};
+
+export const getPendingRentalRequests = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const transporterId = req.user?.transporterId;
+
+        if (!transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        const rentals = await VehicleRental.find({
+            transporter: transporterId,
+            status: "pending",
+        }).sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "Pending rental requests fetched successfully",
+            count: rentals.length,
+            rentals,
+        });
+    } catch (err) {
+        console.error("Get pending rental requests error:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch pending rental requests",
+        });
+    }
+};
+
+export const getRentalProviders = async (req: Request, res: Response) => {
+    try {
+        const providers = await TransportProvider.find({
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+            "vehicle.type": { $exists: true },
+        }).select("name phone vehicle pricePerKm").sort({ name: 1 });
+
+        return res.status(200).json({ success: true, providers });
+    } catch (err) {
+        console.error("Get rental providers error:", err);
+        return res.status(500).json({ success: false, message: "Failed to fetch rental providers" });
+    }
+};

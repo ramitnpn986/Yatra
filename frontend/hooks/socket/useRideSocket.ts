@@ -5,11 +5,12 @@
 import { useEffect, useState } from "react";
 import { useSocket } from "./useSocket";
 import { NewRideRequest } from "@/types/rideRequest";
+import { SOCKET_EVENTS } from "@/lib/socketEvents";
 
 export const useRideSocket = () => {
     const { socket, connected } = useSocket();
-
     const [newRideRequest, setNewRideRequest] = useState<NewRideRequest | null>(null);
+
     useEffect(() => {
         if (!connected) return;
 
@@ -18,14 +19,14 @@ export const useRideSocket = () => {
             setNewRideRequest(request)
         }
 
-        socket.on("new_ride_request", handleNewRideRequest)
+        socket.on( SOCKET_EVENTS.RIDE.NEW_REQUEST, handleNewRideRequest);
 
         return () => {
-            socket.off("new_ride_request", handleNewRideRequest)
+            socket.off(SOCKET_EVENTS.RIDE.NEW_REQUEST, handleNewRideRequest)
         }
-    },[socket, connected]);
+    }, [socket, connected]);
 
-        const clearRideRequest = () => {
+    const clearRideRequest = () => {
         setNewRideRequest(null);
     };
 

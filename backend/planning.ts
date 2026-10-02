@@ -55,3 +55,40 @@
 //       │
 //       ▼
 //     Rating/Review
+
+
+
+    //                      SOCKET CONNECTION
+    //                             │
+    //                             ▼
+    //                     JWT authentication
+    //                             │
+    //                             ▼
+    //                  Identify user + role
+    //                             │
+    //                             ▼
+    //                 Automatically join personal room
+    //                             │
+    //              ┌──────────────┴──────────────┐
+    //              ▼                             ▼
+    //       transporter:123                 customer:456
+    //              │                             │
+    //              │                             │
+    //              ├── new_ride_request          │
+    //              ├── notification              │
+    //              └── ride accepted             │
+                               
+    //                  RIDE ACCEPTED
+    //                        │
+    //          ┌─────────────┴─────────────┐
+    //          ▼                           ▼
+    //    transporter:123               customer:456
+    //          │                           │
+    //          └──────────┬────────────────┘
+    //                     ▼
+    //                ride:rideId
+    //                     │
+    //          ┌──────────┼──────────┐
+    //          ▼          ▼          ▼
+    //    location      ride:start   ride:end
+    //     :updated

@@ -50,10 +50,10 @@ const Page = ({ children }: LayoutProps) => {
                     <Image
                         src="/yatralogo.png"
                         alt="Yatra"
-                        width={120}
-                        height={40}
+                        width={60}
+                        height={15}
                         priority
-                        className="h-auto w-auto object-contain"
+                        className="rounded-[50%] object-contain"
                     />
                 </div>
 

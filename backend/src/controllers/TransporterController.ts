@@ -189,9 +189,9 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
         const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = files || {};
 
-        let { vehicleType, numberPlate, capacityKg, serviceAreas, pricePerKm } = req.body;
+        let { vehicleType, numberPlate, capacityKg, serviceAreas } = req.body;
 
-         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !numberPlate || !capacityKg || !pricePerKm) {
+         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !numberPlate || !capacityKg ) {
            return res.status(400).json({
               success: false,
                message: "All fields are required",
@@ -219,8 +219,8 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
         }
 
         const citizenshipRes = await uploadImage(citizenshipCard[0].buffer, "Yatra/kyc/citizenship");
-        const drivingLicenseRes = await uploadImage(    drivingLicense[0].buffer, "Yatra/kyc/driving-license")
-        const vehicleRegistrationRes = await uploadImage(  vehicleRegistration[0].buffer, "Yatra/kyc/vehicle-registration");
+        const drivingLicenseRes = await uploadImage(drivingLicense[0].buffer, "Yatra/kyc/driving-license")
+        const vehicleRegistrationRes = await uploadImage(vehicleRegistration[0].buffer, "Yatra/kyc/vehicle-registration");
         const vehiclePhotoRes = await uploadImage( vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
   
        
@@ -238,8 +238,7 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
         };
 
         transporter.serviceAreas = serviceAreas || [];
-        transporter.pricePerKm = pricePerKm;
-
+        transporter.pricePerKm = vehicleType === "Bike" ? 30 : vehicleType === "Car" ? 40 : vehicleType === "Truck" ? 70 : vehicleType === "Bus" ? 100 : 0;
 
         transporter.isKycCompleted = true;
         transporter.verificationStatus = "pending";

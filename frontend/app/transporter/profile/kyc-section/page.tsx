@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import FileUploadField from "@/app/(customer)/components/FileUpload";
+import { toast } from "sonner";
 
 type FileField =
     | "citizenshipCard"
@@ -13,10 +14,10 @@ type FileField =
 interface User {
     isVerified: boolean;
     verificationStatus:
-        | "approved"
-        | "pending"
-        | "rejected"
-        | null;
+    | "approved"
+    | "pending"
+    | "rejected"
+    | null;
     isKycDataSubmitted: boolean;
 }
 
@@ -35,7 +36,6 @@ const Page = () => {
         numberPlate: "",
         capacityKg: "",
         serviceAreas: "",
-        pricePerKm: "",
     });
 
     const [errors, setErrors] = useState({
@@ -47,22 +47,16 @@ const Page = () => {
         numberPlate: "",
         capacityKg: "",
         serviceAreas: "",
-        pricePerKm: "",
     });
 
-    const [previews, setPreviews] = useState<
-        Record<FileField, string | null>
-    >({
+    const [previews, setPreviews] = useState<Record<FileField, string | null>>({
         citizenshipCard: null,
         drivingLicense: null,
         vehicleRegistration: null,
         vehiclePhoto: null,
     });
 
-    const changeFileHandler = (
-        e: React.ChangeEvent<HTMLInputElement>,
-        fieldName: string
-    ) => {
+    const changeFileHandler = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
         const file = e.target.files?.[0];
 
         if (!file) return;
@@ -102,10 +96,7 @@ const Page = () => {
                 : "pdf-placeholder",
         }));
 
-        setErrors((prev) => ({
-            ...prev,
-            [fieldName]: "",
-        }));
+        setErrors((prev) => ({ ...prev, [fieldName]: "" }));
     };
 
     const removeFile = (fieldName: FileField) => {
@@ -126,48 +117,82 @@ const Page = () => {
         }));
     };
 
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-
-        setErrors((prev) => ({
-            ...prev,
-            [name]: "",
-        }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-    const handleSubmit = async () => {};
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (loading) return;
+        setLoading(true);
+
+        try {
+            if (!formData.citizenshipCard || !formData.drivingLicense ||
+                !formData.vehicleRegistration || !formData.vehiclePhoto
+            ) {
+                toast.error("Please upload all required documents");
+                return;
+            }
+
+            const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = formData;
+
+            const data = new FormData();
+            data.append("citizenshipCard", citizenshipCard);
+            data.append("drivingLicense", drivingLicense);
+            data.append("vehicleRegistration", vehicleRegistration);
+            data.append("vehiclePhoto", vehiclePhoto);
+
+            data.append("vehicleType", formData.vehicleType);
+            data.append("numberPlate", formData.numberPlate);
+            data.append("capacityKg", formData.capacityKg);
+            data.append("serviceAreas", formData.serviceAreas);
+
+            const res = await fetch("/api/transporter/kyc-submit", {
+                method: "POST",
+                credentials: "include",
+                body: data,
+            })
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                throw new Error(result.message || "KYC submission failed");
+            }
+
+            toast.success("KYC submitted successfully");
+            router.push("/transporter/profile");
+
+        } catch (err) {
+            console.error("KYC submission error:", err);
+            toast.error(err instanceof Error ? err.message : "Failed to submit KYC");
+
+        } finally {
+            setLoading(false);
+        }
+
+    };
 
     return (
         <div className="min-h-screen bg-[#f5f7fa] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
-             
+
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-[#0a1f39]">
                         KYC Verification
                     </h1>
 
-                    <p className="mt-1 text-sm font-medium text-[#b0aeae]">
+                    <p className="mt-1 text-sm font-medium text-[#423a3a]">
                         Fill all the fields with valid information
                     </p>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="grid grid-cols-1 gap-5"
-                >
-                   
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5">
+
                     <div className="overflow-hidden rounded-2xl border border-[#0b2c54]/10 bg-white shadow-sm">
                         <div className="border-b border-[#0b2c54]/10 bg-[#0a1f39] px-5 py-4">
-                            <h2 className="font-bold text-white">
-                                Identity & Legal Documents
-                            </h2>
+                            <h2 className="font-bold text-white"> Identity & Legal Documents </h2>
 
                             <p className="mt-1 text-xs text-[#b0aeae]">
                                 Upload valid documents for verification
@@ -238,35 +263,20 @@ const Page = () => {
                                         name="vehicleType"
                                         value={formData.vehicleType}
                                         onChange={handleChange}
-                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${
-                                            errors.vehicleType
-                                                ? "border-red-300"
-                                                : "border-[#0b2c54]/10"
-                                        }`}
+                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.vehicleType
+                                            ? "border-red-300"
+                                            : "border-[#0b2c54]/10"
+                                            }`}
                                     >
-                                        <option value="">
-                                            Select Type
-                                        </option>
+                                        <option value=""> Select Type </option>
 
-                                        {[
-                                            "Bus",
-                                            "Truck",
-                                            "Bike",
-                                            "Car",
-                                        ].map((type) => (
-                                            <option
-                                                key={type}
-                                                value={type}
-                                            >
-                                                {type}
-                                            </option>
+                                        {["Bus", "Truck", "Bike", "Car"].map((type) => (
+                                            <option key={type} value={type}> {type} </option>
                                         ))}
                                     </select>
 
                                     {errors.vehicleType && (
-                                        <p className="text-[10px] font-medium text-red-500">
-                                            {errors.vehicleType}
-                                        </p>
+                                        <p className="text-[10px] font-medium text-red-500">  {errors.vehicleType} </p>
                                     )}
                                 </div>
 
@@ -280,17 +290,14 @@ const Page = () => {
                                         value={formData.numberPlate}
                                         placeholder="BA 1 PA 1234"
                                         onChange={handleChange}
-                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${
-                                            errors.numberPlate
-                                                ? "border-red-300"
-                                                : "border-[#0b2c54]/10"
-                                        }`}
+                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.numberPlate
+                                            ? "border-red-300"
+                                            : "border-[#0b2c54]/10"
+                                            }`}
                                     />
 
                                     {errors.numberPlate && (
-                                        <p className="text-[10px] font-medium text-red-500">
-                                            {errors.numberPlate}
-                                        </p>
+                                        <p className="text-[10px] font-medium text-red-500"> {errors.numberPlate} </p>
                                     )}
                                 </div>
 
@@ -305,11 +312,10 @@ const Page = () => {
                                         value={formData.capacityKg}
                                         placeholder="e.g. 1500"
                                         onChange={handleChange}
-                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${
-                                            errors.capacityKg
-                                                ? "border-red-300"
-                                                : "border-[#0b2c54]/10"
-                                        }`}
+                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.capacityKg
+                                            ? "border-red-300"
+                                            : "border-[#0b2c54]/10"
+                                            }`}
                                     />
 
                                     {errors.capacityKg && (
@@ -322,7 +328,7 @@ const Page = () => {
                         </div>
                     </div>
 
-              
+
                     <div className="overflow-hidden rounded-2xl border border-[#0b2c54]/10 bg-white shadow-sm">
                         <div className="border-b border-[#0b2c54]/10 px-5 py-4">
                             <h2 className="font-bold text-[#0a1f39]">
@@ -332,7 +338,7 @@ const Page = () => {
 
                         <div className="p-5">
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                              
+
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-[#0a1f39]">
                                         Service Areas
@@ -343,11 +349,10 @@ const Page = () => {
                                         value={formData.serviceAreas}
                                         placeholder="e.g. Kathmandu, Lalitpur, Bhaktapur"
                                         onChange={handleChange}
-                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${
-                                            errors.serviceAreas
-                                                ? "border-red-300"
-                                                : "border-[#0b2c54]/10"
-                                        }`}
+                                        className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.serviceAreas
+                                            ? "border-red-300"
+                                            : "border-[#0b2c54]/10"
+                                            }`}
                                     />
 
                                     {errors.serviceAreas && (
@@ -357,41 +362,12 @@ const Page = () => {
                                     )}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#0a1f39]">
-                                        Price/km
-                                    </label>
 
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            name="pricePerKm"
-                                            value={formData.pricePerKm}
-                                            placeholder="50"
-                                            onChange={handleChange}
-                                            className={`w-full rounded-xl border bg-[#f5f7fa] py-3 pl-12 pr-4 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${
-                                                errors.pricePerKm
-                                                    ? "border-red-300"
-                                                    : "border-[#0b2c54]/10"
-                                            }`}
-                                        />
-
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-[#0b2c54]">
-                                            Rs.
-                                        </span>
-                                    </div>
-
-                                    {errors.pricePerKm && (
-                                        <p className="text-[10px] font-medium text-red-500">
-                                            {errors.pricePerKm}
-                                        </p>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                
+
                     <div className="flex items-center justify-end gap-3 pt-2">
                         <button
                             type="button"
@@ -413,13 +389,13 @@ const Page = () => {
                             {loading ? (
                                 <>Processing...</>
                             ) : user?.isVerified &&
-                              user?.verificationStatus === "approved" ? (
+                                user?.verificationStatus === "approved" ? (
                                 "Already Verified"
                             ) : user?.isKycDataSubmitted &&
-                              user?.verificationStatus === "pending" ? (
+                                user?.verificationStatus === "pending" ? (
                                 "KYC is Pending"
                             ) : !user?.isKycDataSubmitted &&
-                              user?.verificationStatus === "pending" ? (
+                                user?.verificationStatus === "pending" ? (
                                 "KYC not Submitted"
                             ) : user?.verificationStatus === "rejected" ? (
                                 "Reapply"

@@ -23,6 +23,11 @@ export const SOCKET_EVENTS = {
         UPDATED: "location:updated",
     },
 
+    TRANSPORTER: {
+        JOIN: "transporter:join",
+        JOINED: "transporter:joined",
+    },
+
     SYSTEM: {
         ERROR: "socket:error"
     }

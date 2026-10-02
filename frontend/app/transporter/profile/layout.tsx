@@ -9,6 +9,7 @@ import {
     Settings,
     ShieldCheck,
     User,
+    CalendarDays,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import React, { ReactNode } from "react";
@@ -108,6 +109,15 @@ const Page = ({ children }: LayoutProps) => {
                             pathname ===
                             "/transporter/profile/notification"
                         }
+                    />
+
+                    <NavButton
+                        onClick={() =>
+                            router.push("/transporter/profile/rentals")
+                        }
+                        icon={<CalendarDays size={18} />}
+                        label="Rental Requests"
+                        active={pathname === "/transporter/profile/rentals"}
                     />
 
                     <NavButton

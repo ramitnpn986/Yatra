@@ -220,7 +220,7 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
              });
         }
 
-        if (transporter.isKycCompleted) {
+        if (transporter.isKycCompleted && transporter.verificationStatus !== "rejected") {
             return res.status(400).json({
                 success: false,
                 message: "KYC already submitted"

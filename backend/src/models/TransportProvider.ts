@@ -39,7 +39,7 @@ const transportProviderSchema = new mongoose.Schema(
             default: "rider"
         },
 
-        location: {   // this is the transporter registered / base location 
+        location: {   
             type: {
                 type: String,
                 enum: ["Point"],
@@ -116,7 +116,7 @@ const transportProviderSchema = new mongoose.Schema(
             required: false,
         },
 
-        currentLocation: {     //    where the transporter was last seen 
+        currentLocation: { 
             type: {
                 type: String,
                 enum: ["Point"],

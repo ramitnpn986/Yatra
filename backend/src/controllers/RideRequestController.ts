@@ -7,8 +7,6 @@ import Customer from "../models/Customer.js";
 import mongoose from 'mongoose';
 import { VehicleRental } from "../models/VehicleRentals.js";
 
-
-
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.customerId) {
@@ -424,11 +422,6 @@ export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
         });
     }
 }
-
-
-// ============================================================
-// Vehicle rental (date-range bookings — separate from on-demand rides)
-// ============================================================
 
 export const vehicleRentalRequest = async (req: Request, res: Response) => {
     try {

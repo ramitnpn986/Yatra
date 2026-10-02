@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FileUploadField from "@/app/(customer)/components/FileUpload";
 import { toast } from "sonner";
 
@@ -26,6 +26,23 @@ const Page = () => {
     const [user, setUser] = useState<User | null>(null);
 
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const response = await fetch("/api/transporter/profile", {
+                    credentials: "include",
+                    cache: "no-store",
+                });
+                const data = await response.json();
+                if (response.ok && data.success) setUser(data.transporter);
+            } catch (error) {
+                console.error("Failed to load KYC status:", error);
+            }
+        };
+
+        void loadProfile();
+    }, []);
 
     const [formData, setFormData] = useState({
         citizenshipCard: null,
@@ -118,6 +135,12 @@ const Page = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (loading) return;
+
+        if (user?.isKycDataSubmitted && user.verificationStatus !== "rejected") {
+            toast.error("KYC has already been submitted");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -373,8 +396,8 @@ const Page = () => {
                             type="submit"
                             disabled={
                                 loading ||
-                                (user?.isVerified &&
-                                    user?.verificationStatus === "approved")
+                                (user?.isKycDataSubmitted &&
+                                    user?.verificationStatus !== "rejected")
                             }
                             className="rounded-xl bg-[#ee8d39] px-10 py-3.5 font-bold text-white shadow-lg shadow-[#ee8d39]/20 transition-all hover:bg-[#f59d50] active:scale-95 disabled:pointer-events-none disabled:opacity-70"
                         >

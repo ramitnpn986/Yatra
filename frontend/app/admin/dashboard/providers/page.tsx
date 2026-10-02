@@ -7,7 +7,11 @@ interface Provider {
   _id: string;
   name: string;
   phone: string;
-  vehicle: string;
+  vehicle?: {
+    type?: string;
+    numberPlate?: string;
+    capacityKg?: number;
+  };
   isKycCompleted: boolean;
   isKycDataSubmitted: boolean;
   isVerified: boolean;
@@ -119,7 +123,7 @@ export default function AdminProviders() {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-slate-600">
-                      {provider.vehicle || "N/A"}
+                      {provider.vehicle?.type || "N/A"}
                     </td>
 
                     <td className="px-6 py-4">

@@ -1,6 +1,3 @@
-//  this file creates or configures socket.io server
-
-
 import { Server } from 'socket.io';
 import { Server as HttpServer } from 'http';
 import { socketAuth } from './socketAuth.js';

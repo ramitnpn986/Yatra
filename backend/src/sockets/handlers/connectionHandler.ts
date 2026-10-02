@@ -1,5 +1,3 @@
-//   connection/ disconnection logic
-
 import { Server, Socket } from "socket.io";
 import { registerRideHandlers } from "./rideHandler.js";
 import { registerLocationHandlers } from "./locationHandler.js";

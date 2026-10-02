@@ -1,5 +1,3 @@
-// verifies jwt and identifies customer and transporter
-
 import { Socket } from "socket.io" // this is just Typescript type for one connected Socket.IO client
 import jwt from 'jsonwebtoken'    // normaly to verify 
 import { AuthenticatedSocket, SocketRole } from "./socketTypes.js"

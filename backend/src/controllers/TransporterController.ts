@@ -170,8 +170,11 @@ export const logout = async (req: Request, res: Response) => {
         });
 
     } catch (err) {
-        console.log(err)
-        return res.status(500).send("Internal Server Error");
+        console.error("Submit KYC error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
     }
 }
 

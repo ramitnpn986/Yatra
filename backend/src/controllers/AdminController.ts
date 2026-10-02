@@ -326,7 +326,7 @@ export const getTransportProviderById = async (req: Request, res: Response): Pro
 
 export const verifyTransportProviderKYC = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { transporterId } = req.params;
+        const transporterId = req.params.id;
 
         const transporter = await TransportProvider.findById(transporterId);
 
@@ -344,7 +344,7 @@ export const verifyTransportProviderKYC = async (req: Request, res: Response): P
             })
         }
 
-        if (transporter.isKycCompleted) {
+        if (transporter.isVerified || transporter.verificationStatus === "approved") {
             return res.status(400).json({
                 success: false,
                 message: "KYC is already verified"
@@ -359,6 +359,7 @@ export const verifyTransportProviderKYC = async (req: Request, res: Response): P
         await transporter.save();
 
         return res.status(200).json({
+            success: true,
             message: "Transport Provider Kyc Verified successfully"
         })
 
@@ -377,7 +378,7 @@ export const verifyTransportProviderKYC = async (req: Request, res: Response): P
 export const rejectTransportProviderKYC = async (req: Request, res: Response): Promise<Response> => {
     try {
 
-        const { transporterId } = req.params;
+        const transporterId = req.params.id;
 
         const transporter = await TransportProvider.findById(transporterId);
 

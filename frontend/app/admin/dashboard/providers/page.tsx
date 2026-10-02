@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Provider {
   _id: string;
@@ -22,6 +23,23 @@ interface Provider {
 export default function AdminProviders() {
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState<Provider[]>([]);
+
+  const updateKyc = async (providerId: string, action: "verify-kyc" | "reject-kyc") => {
+    try {
+      const response = await fetch(
+        `/api/admin/dashboard/transport-providers/${providerId}?action=${action}`,
+        { method: "PATCH", credentials: "include" },
+      );
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "KYC update failed");
+      setProviders((current) => current.map((provider) => provider._id === providerId
+        ? { ...provider, verificationStatus: action === "verify-kyc" ? "approved" : "rejected", isVerified: action === "verify-kyc" }
+        : provider));
+      toast.success(action === "verify-kyc" ? "KYC approved" : "KYC rejected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "KYC update failed");
+    }
+  };
 
   useEffect(() => {
     const handlePendingKyc = async () => {
@@ -161,10 +179,11 @@ export default function AdminProviders() {
                           View
                         </Link>
 
-                        {provider.verificationStatus === "pending" && (
+                        {provider.verificationStatus === "pending" && provider.isKycDataSubmitted && (
                           <>
                             <button
                               type="button"
+                              onClick={() => updateKyc(provider._id, "verify-kyc")}
                               className="rounded-lg bg-[#ee8d39] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#EA7C28]"
                             >
                               Verify
@@ -172,11 +191,18 @@ export default function AdminProviders() {
 
                             <button
                               type="button"
+                              onClick={() => updateKyc(provider._id, "reject-kyc")}
                               className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                             >
                               Reject
                             </button>
                           </>
+                        )}
+
+                        {provider.verificationStatus === "pending" && !provider.isKycDataSubmitted && (
+                          <span className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-500">
+                            KYC not submitted
+                          </span>
                         )}
 
                         <button

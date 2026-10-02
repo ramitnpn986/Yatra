@@ -105,16 +105,8 @@ const Page = () => {
         if (preview && preview !== "pdf-placeholder") {
             URL.revokeObjectURL(preview);
         }
-
-        setFormData((prev) => ({
-            ...prev,
-            [fieldName]: null,
-        }));
-
-        setPreviews((prev) => ({
-            ...prev,
-            [fieldName]: null,
-        }));
+        setFormData((prev) => ({ ...prev, [fieldName]: null }));
+        setPreviews((prev) => ({  ...prev, [fieldName]: null }));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -253,7 +245,7 @@ const Page = () => {
 
                         <div className="p-5">
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                {/* Vehicle Type */}
+
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-[#0a1f39]">
                                         Vehicle Type

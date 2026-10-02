@@ -7,13 +7,9 @@ import RideRequest from '../models/RideRequest.js';
 import { Ride } from '../models/Ride.js';
 import { deleteImage, uploadImage } from '../utils/cloudinary.js';
 
-
-
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
-
-
 
 export const registerCustomer = async (req: Request, res: Response) => {
     try {

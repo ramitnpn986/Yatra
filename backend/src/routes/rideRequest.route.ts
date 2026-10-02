@@ -25,13 +25,11 @@ router.post("/accept/:rideRequestId", isAuthenticated, isTransporter, acceptRide
 router.post("/cancel/:rideRequestId", isAuthenticated, isCustomer, cancelRideRequest);
 router.get("/get-all-ride-requests", isAuthenticated, isCustomer, getAllRideReqsOfAnUser);
 router.get("/get-ride-request/:rideRequestId", isAuthenticated, isCustomer, getRideReqByIdOfAnUser);
-
-// ---- Vehicle rental ----
 router.post("/rental/create", isAuthenticated, isCustomer, vehicleRentalRequest);
 router.get("/rental/providers", isAuthenticated, isCustomer, getRentalProviders);
 router.post("/rental/accept/:rentalId", isAuthenticated, isTransporter, acceptRentalRequest);
 router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRentalRequest);
-router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); // customer or transporter — role checked inside
+router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); 
 router.get(
     "/rental/my-rentals",
     isAuthenticated,

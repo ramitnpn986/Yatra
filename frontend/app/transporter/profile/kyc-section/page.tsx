@@ -35,9 +35,14 @@ const Page = () => {
                     cache: "no-store",
                 });
                 const data = await response.json();
-                if (response.ok && data.success) setUser(data.transporter);
+                if (response.ok && data.success) {
+                    setUser(data.transporter);
+                } else {
+                    toast.error(data.message || "Failed to load KYC status");
+                }
             } catch (error) {
                 console.error("Failed to load KYC status:", error);
+                toast.error("Unable to load KYC status");
             }
         };
 

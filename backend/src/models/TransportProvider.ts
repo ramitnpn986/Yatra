@@ -1,7 +1,6 @@
 import validator from 'validator';
 import mongoose from "mongoose";
 
-
 const transportProviderSchema = new mongoose.Schema(
     {
         name: {

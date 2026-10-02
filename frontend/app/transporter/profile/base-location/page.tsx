@@ -81,16 +81,8 @@ const TransporterLocationSelection = () => {
                     setSavedLocation(initialData);
                 }
             } catch (err) {
-                console.error(
-                    "Failed to fetch transporter profile:",
-                    err
-                );
-
-                toast.error(
-                    err instanceof Error
-                        ? err.message
-                        : "Failed to load location"
-                );
+                console.error( "Failed to fetch transporter profile:",err);
+                toast.error(err instanceof Error ? err.message : "Failed to load location");
             } finally {
                 setAddressLoading(false);
             }
@@ -103,12 +95,9 @@ const TransporterLocationSelection = () => {
         setAddressLoading(true);
 
         try {
-            const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
                 {
-                    headers: {
-                        "Accept-Language": "np",
-                    },
+                    headers: {  "Accept-Language": "np"},
                 }
             );
 
@@ -132,20 +121,11 @@ const TransporterLocationSelection = () => {
                 ward: addrComponents.ward || "N/A",
             };
 
-            setLocation((prev) => ({
-                ...prev,
-                ...extractedDetails,
-            }));
+            setLocation((prev) => ({ ...prev, ...extractedDetails}));
         } catch (err) {
-            console.error(
-                "Failed to parse address components",
-                err
-            );
-
-            setLocation((prev) => ({
-                ...prev,
-                address: "Manual location pin",
-            }));
+            console.error("Failed to parse address components", err);
+            toast.error("Failed to fetch address details. Please try again.");
+            setLocation((prev) => ({...prev, address: "Manual location pin"}));
         } finally {
             setAddressLoading(false);
         }
@@ -153,30 +133,19 @@ const TransporterLocationSelection = () => {
 
     const handleLocationSelect = ([lat, lng]: [number, number]) => {
         if (!isEditMode) return;
-
-        setLocation((prev) => ({
-            ...prev,
-            latitude: lat,
-            longitude: lng,
-        }));
-
+        setLocation((prev) => ({ ...prev, latitude: lat, longitude: lng}));
         fetchAddress(lat, lng);
     };
 
     const getCurrentLocation = () => {
         if (!navigator.geolocation) {
-            console.error(
-                "Geolocation is not supported by your browser."
-            );
+            console.error("Geolocation is not supported by your browser.");
             return;
         }
 
         if (!isEditMode) {
             setIsEditMode(true);
-
-            toast.info(
-                "Map editing enabled via current location detection."
-            );
+            toast.info("Map editing enabled via current location detection.");
         }
 
         setAddressLoading(true);
@@ -185,14 +154,8 @@ const TransporterLocationSelection = () => {
             (position) => {
                 const { latitude, longitude } = position.coords;
 
-                setLocation((prev) => ({
-                    ...prev,
-                    latitude,
-                    longitude,
-                }));
-
+                setLocation((prev) => ({...prev, latitude, longitude}));
                 fetchAddress(latitude, longitude);
-
                 toast.success("Current location detected!");
             },
             (error) => {
@@ -200,15 +163,11 @@ const TransporterLocationSelection = () => {
 
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        toast.error(
-                            "Please allow location access in your browser settings."
-                        );
+                        toast.error("Please allow location access in your browser settings."); 
                         break;
 
                     default:
-                        toast.error(
-                            "Could not obtain wireless location access."
-                        );
+                        toast.error("Could not obtain wireless location access.");
                 }
             },
             {
@@ -220,17 +179,13 @@ const TransporterLocationSelection = () => {
 
     const toggleEditMode = () => {
         setIsEditMode(true);
-
-        toast.info(
-            "Map editing enabled. Click anywhere to move pin."
-        );
+        toast.info("Map editing enabled. Click anywhere to move pin.");
     };
 
     const cancelEdit = () => {
         if (savedLocation) {
             setLocation(savedLocation);
         }
-
         setIsEditMode(false);
         toast.warning("Changes discarded");
     };

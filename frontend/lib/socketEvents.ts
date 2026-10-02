@@ -1,3 +1,4 @@
+
 export const SOCKET_EVENTS = {
     CONNECTION: "connection",
     DISCONNECT: "disconnect",
@@ -6,16 +7,17 @@ export const SOCKET_EVENTS = {
         JOIN: "ride:join",
         JOINED: "ride:joined",
 
-        LEAVE: "ride:leave",    // client asks the server to leave  "Server, I want to leave this ride room."
-        LEFT: "ride:left",               // server confirms that the user left that room "Your request was successful. You have left the ride."
+        LEAVE: "ride:leave",
+        LEFT: "ride:left",
+
         ERROR: "ride:error",
+
         NEW_REQUEST: "new_ride_request",
 
         STARTED: "ride:started",
         ARRIVED_AT_PICKUP: "ride:arrived_at_pickup",
         COMPLETED: "ride:completed",
         CANCELLED: "ride:cancelled",
-
     },
 
     LOCATION: {
@@ -24,6 +26,7 @@ export const SOCKET_EVENTS = {
     },
 
     SYSTEM: {
-        ERROR: "socket:error"
-    }
-}
+        ERROR: "socket:error",
+    },
+} as const;
+

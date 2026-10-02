@@ -1,4 +1,4 @@
-import {deleteImage,uploadImage} from "../utils/cloudinary.js";
+import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 import { Request, Response } from 'express';
 import Admin from '../models/Admin.js'
 import bcrypt from 'bcryptjs'
@@ -131,7 +131,7 @@ export const loginAdmin = async (req: Request, res: Response): Promise<Response>
             message: "Login successful",
             success: true,
             customer: adminData,
-            role:"admin"
+            role: "admin"
         });
 
 
@@ -170,7 +170,7 @@ export const logout = async (req: Request, res: Response): Promise<Response> => 
 export const getAdminProfile = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-    
+
         const adminId = req.user?.adminId;
         const admin = await Admin.findById(adminId).select('-password');
 
@@ -301,7 +301,7 @@ export const getAllTransportersVerified = async (req: Request, res: Response): P
 
 export const getTransportProviderById = async (req: Request, res: Response): Promise<Response> => {
     try {
-   
+
         const transporterId = req.params.transporterId;
         const transporter = await TransportProvider.findById(transporterId);
 
@@ -598,30 +598,36 @@ export const blockUnBlockCustomer = async (req: Request, res: Response): Promise
         }
 
         const customer = await Customer.findById(customerId);
+
         if (!customer) {
             return res.status(404).json({
-                message: "Transporter not found !",
+                message: "Customer not found !",
                 success: false
             })
         }
 
-        if (action === "block" && customer.isBlocked) {
-            return res.status(400).json({
-                message: "Transporter is already blocked",
-                success: false,
-            });
-        } else {
+        if (action === "block") {
+            if (customer.isBlocked) {
+                return res.status(400).json({
+                    message: "Customer is already blocked",
+                    success: false,
+                });
+            }
+
             customer.isBlocked = true;
         }
 
-        if (action === "unblock" && !customer.isBlocked) {
-            return res.status(400).json({
-                message: "Transporter is already unblocked",
-                success: false,
-            });
-        } else {
+        if (action === "unblock") {
+            if (!customer.isBlocked) {
+                return res.status(400).json({
+                    message: "Customer is already unblocked",
+                    success: false,
+                });
+            }
+
             customer.isBlocked = false;
         }
+
 
         await customer.save();
 
@@ -730,7 +736,6 @@ export const viewRideDetails = async (req: Request, res: Response): Promise<Resp
     }
 }
 
-
 export const getCancelRideById = async (req: Request, res: Response): Promise<Response> => {
     try {
         const id = req.params.id;
@@ -760,7 +765,6 @@ export const getCancelRideById = async (req: Request, res: Response): Promise<Re
     }
 }
 
-
 export const getCancelledRides = async (req: Request, res: Response): Promise<Response> => {
     try {
         const rides = await Ride.find({ status: "cancelled" })
@@ -778,7 +782,6 @@ export const getCancelledRides = async (req: Request, res: Response): Promise<Re
         return res.status(500).json({ message: "Internal Server Error", success: false });
     }
 }
-
 
 export const getCompletedRides = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -798,26 +801,25 @@ export const getCompletedRides = async (req: Request, res: Response): Promise<Re
     }
 }
 
-
 export const getDashboardStats = async (req: Request, res: Response): Promise<Response> => {
     try {
         const [totalCustomers, totalTransporters, kycPending, activeRides] =
-    await Promise.all([
-        Customer.countDocuments(),
-        TransportProvider.countDocuments(),
-        TransportProvider.countDocuments({ kycStatus: "pending" }),
-        Ride.countDocuments({
-            status: {
-                $in: [
-                    "confirmed",
-                    "driver_arriving",
-                    "driver_arrived",
-                    "started",
-                    "arrived_destination"
-                ]
-            }
-        })
-    ]);
+            await Promise.all([
+                Customer.countDocuments(),
+                TransportProvider.countDocuments(),
+                TransportProvider.countDocuments({ kycStatus: "pending" }),
+                Ride.countDocuments({
+                    status: {
+                        $in: [
+                            "confirmed",
+                            "driver_arriving",
+                            "driver_arrived",
+                            "started",
+                            "arrived_destination"
+                        ]
+                    }
+                })
+            ]);
 
         return res.status(200).json({
             success: true,

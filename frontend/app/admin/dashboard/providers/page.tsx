@@ -8,10 +8,11 @@ interface Provider {
   _id: string;
   name: string;
   phone: string;
-  vehicle?: {
-    type?: string;
-    numberPlate?: string;
-    capacityKg?: number;
+  vehicle: {
+    type: string;
+    vehiclePhoto?: string;
+    numberPlate: string;
+    capacityKg: number;
   };
   isKycCompleted: boolean;
   isKycDataSubmitted: boolean;
@@ -141,18 +142,17 @@ export default function AdminProviders() {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-slate-600">
-                      {provider.vehicle?.type || "N/A"}
+                     {provider.vehicle?.type || "N/A"}
                     </td>
 
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-bold capitalize ${
-                          provider.verificationStatus === "approved"
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-bold capitalize ${provider.verificationStatus === "approved"
                             ? "bg-green-50 text-green-600"
                             : provider.verificationStatus === "rejected"
                               ? "bg-red-50 text-red-600"
                               : "bg-amber-50 text-amber-600"
-                        }`}
+                          }`}
                       >
                         {provider.verificationStatus}
                       </span>
@@ -160,11 +160,10 @@ export default function AdminProviders() {
 
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                          provider.isBlocked
+                        className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${provider.isBlocked
                             ? "bg-red-50 text-red-600"
                             : "bg-green-50 text-green-600"
-                        }`}
+                          }`}
                       >
                         {provider.isBlocked ? "Blocked" : "Active"}
                       </span>

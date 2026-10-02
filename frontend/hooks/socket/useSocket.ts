@@ -14,7 +14,6 @@ export const useSocket = () => {
             setConnected(true);
         }
 
-
         const handleDisconnect = () => {
             console.log("Socket disconnected");
             setConnected(false);
@@ -38,13 +37,11 @@ export const useSocket = () => {
             socket.off("connect_error", handleConnectError);
         }
 
-
     },[]);
 
      return {
         socket: getSocket(),
         connected,
     };
-
 
 }

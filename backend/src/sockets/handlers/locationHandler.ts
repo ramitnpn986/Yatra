@@ -46,6 +46,7 @@ export const registerLocationHandlers = (socket: Socket) => {
             }
 
             const locationData = {
+                rideId,
                 userId: authenticatedSocket.user.id,
                 role: authenticatedSocket.user.role,
                 coordinates: [longitude, latitude] as [number, number],

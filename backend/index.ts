@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import express from "express";
+import { createServer } from "http";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -10,9 +11,11 @@ import TransportRoutes from "./src/routes/transporter.route.js";
 import AdminRoutes from "./src/routes/admin.route.js";
 import RideRoutes from "./src/routes/ride.route.js"
 import RideRequestRoutes from './src/routes/rideRequest.route.js'
+import { initializeSocket } from "./src/sockets/socket.js";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
+const httpServer = createServer(app);
 
 app.use(cors());
 app.use(express.json());
@@ -26,11 +29,13 @@ app.use("/api/v8/transporters", TransportRoutes);
 app.use("/api/v8/ride", RideRoutes);
 app.use("/api/v8/ride-request", RideRequestRoutes);
 
+initializeSocket(httpServer);
+
 const startServer = async () => {
     try {
         await connectDB();
 
-        app.listen(PORT, () => {
+        httpServer.listen(PORT, () => {
             console.log(`server is running at port ${PORT}`);
         });
     } catch (error) {

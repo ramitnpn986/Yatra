@@ -1,5 +1,3 @@
-//   typescript types for sockets/events
-
 import { Socket } from 'socket.io';
 
 export type SocketRole = "customer" | "transporter";

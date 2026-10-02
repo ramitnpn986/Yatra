@@ -1,5 +1,3 @@
-//  Real-time GPS updates
-
 import { Socket } from "socket.io";
 import { AuthenticatedSocket, LocationUpdatePayload } from "../socketTypes.js";
 import { SOCKET_EVENTS } from "../socketEvents.js";

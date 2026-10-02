@@ -113,7 +113,6 @@ const Page = () => {
                     </div>
                 </div>
 
-                {/* Notifications */}
                 <div className="overflow-hidden rounded-2xl border border-[#0b2c54]/10 bg-white shadow-sm">
                     {notifications.length === 0 ? (
                         <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">

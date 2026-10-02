@@ -3,18 +3,34 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { validateName, validatePhone, validatePassword } from "@/utils/validation";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("rider");
+    const [errors, setErrors] = useState<{ name?: string; phone?: string; password?: string }>({});
+    const [submitting, setSubmitting] = useState(false);
 
     const router = useRouter();
 
     const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const nameErr = validateName(name);
+        const phoneErr = validatePhone(phone);
+        const passwordErr = validatePassword(password);
+
+        if (nameErr || phoneErr || passwordErr) {
+            setErrors({ name: nameErr, phone: phoneErr, password: passwordErr });
+            return;
+        }
+
+        setErrors({});
+        setSubmitting(true);
+
         try {
-            e.preventDefault();
             const res = await fetch(`/api/transporter/register`, {
                 method: "POST",
                 headers: {
@@ -31,13 +47,16 @@ export default function RegisterPage() {
             const data = await res.json();
             if (!res.ok) {
                 console.log(data.message);
-
+                setErrors({ password: data.message || "Registration failed" });
+                return;
             }
             console.log("register success: ", data);
             router.push("/transporter/login")
 
         } catch (err) {
             console.log("Error at login logic :", err)
+        } finally {
+            setSubmitting(false);
         }
     }
 
@@ -50,27 +69,39 @@ export default function RegisterPage() {
                 <Image src="/yatralogo.png" alt="Yatra" width={100} height={35} className="mx-auto mb-2"
                 />
                 <h1 className="text-xl font-semibold text-[#d86d0e]"> Register</h1>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                />
-                <input
-                    type="tel"
-                    placeholder="Phone number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                />
+
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400 w-full"
+                    />
+                    {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                </div>
+
+                <div>
+                    <input
+                        type="tel"
+                        placeholder="Phone number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400 w-full"
+                    />
+                    {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+                </div>
+
+                <div>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className=" border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400 w-full"
+                    />
+                    {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                </div>
 
                 <select
                     value={role}
@@ -82,9 +113,10 @@ export default function RegisterPage() {
 
                 <button
                     type="submit"
-                    className="bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition w-full"
+                    disabled={submitting}
+                    className="bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition w-full disabled:opacity-60"
                 >
-                    Register
+                    {submitting ? "Registering..." : "Register"}
                 </button>
                 <p className="text-sm text-gray-600 text-center">
                     Already have an account?{" "}

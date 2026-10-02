@@ -1,7 +1,3 @@
-
-//  join / leave ride rooms
-
-
 import { Socket } from "socket.io"
 import { AuthenticatedSocket, JoinRidePayload, LeaveRidePayload } from "../socketTypes.js"
 import { SOCKET_EVENTS } from "../socketEvents.js"

@@ -41,7 +41,16 @@ export default function TransporterRentalsPage() {
       await loadRentals();
     };
 
+    const handleRentalRequest = () => {
+      void loadInitialRentals();
+    };
+
     void loadInitialRentals();
+    window.addEventListener("rental-request-received", handleRentalRequest);
+
+    return () => {
+      window.removeEventListener("rental-request-received", handleRentalRequest);
+    };
   }, []);
 
   const updateRental = async (rentalId: string, action: "accept" | "reject") => {

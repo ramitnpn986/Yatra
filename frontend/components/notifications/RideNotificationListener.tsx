@@ -22,6 +22,12 @@ export default function RideNotificationListener() {
             setRideRequest(request);
         };
 
+        const handleRentalRequest = (request: { rentalId: string; vehicleType?: string }) => {
+            console.log("New rental request received:", request);
+            toast.info(`New rental request${request.vehicleType ? ` for ${request.vehicleType}` : ""}`);
+            window.dispatchEvent(new Event("rental-request-received"));
+        };
+
         const handleConnectError = (error: Error) => {
             console.error(
                 "Transporter socket connection error:",
@@ -32,6 +38,7 @@ export default function RideNotificationListener() {
         socket.on("connect", handleConnect);
         socket.on("connect_error", handleConnectError);
         socket.on("new_ride_request", handleRideRequest);
+        socket.on("new_rental_request", handleRentalRequest);
 
         if (!socket.connected) {
             socket.connect();
@@ -41,6 +48,7 @@ export default function RideNotificationListener() {
             socket.off("connect", handleConnect);
             socket.off("connect_error", handleConnectError);
             socket.off("new_ride_request", handleRideRequest);
+            socket.off("new_rental_request", handleRentalRequest);
         };
     }, []);
 

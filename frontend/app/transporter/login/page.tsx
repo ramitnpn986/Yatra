@@ -12,18 +12,16 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  
   try {
 
     const res = await fetch("/api/transporter/login", {
-      method: "POST",
-      headers: {
+       method: "POST",
+       headers: {
         "Content-Type": "application/json",
-      },
+       },
       credentials: "include",
       body: JSON.stringify({
         phone,

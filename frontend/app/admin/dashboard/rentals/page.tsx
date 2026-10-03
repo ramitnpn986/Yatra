@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CalendarDays, RefreshCw } from "lucide-react";
 
 type Rental = {
   _id: string;
@@ -75,8 +76,8 @@ export default function AdminRentalsPage() {
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left">
-            <thead><tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500"><th className="px-6 py-4">Booking</th><th className="px-6 py-4">Vehicle</th><th className="px-6 py-4">Dates</th><th className="px-6 py-4">Total</th><th className="px-6 py-4">Payment</th><th className="px-6 py-4">Status</th></tr></thead>
-            <tbody>{rentals.map((rental) => <tr key={rental._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50"><td className="px-6 py-4"><div className="flex items-center gap-2 font-semibold text-slate-800"><CalendarDays size={17} className="text-[#ee8d39]" />{rental.bookingNumber || rental._id.slice(-8)}</div></td><td className="px-6 py-4 text-sm text-slate-600">{rental.vehicleType} · {rental.rentalType}</td><td className="px-6 py-4 text-sm text-slate-600">{formatDate(rental.startDate)} - {formatDate(rental.endDate)}<br /><span className="text-xs text-slate-400">{rental.rentalDays || "-"} days</span></td><td className="px-6 py-4 font-semibold text-slate-800">Rs. {rental.totalPrice.toFixed(2)}</td><td className="px-6 py-4"><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold capitalize text-amber-700">{rental.paymentStatus || "unpaid"}</span></td><td className="px-6 py-4"><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">{rental.status}</span></td></tr>)}</tbody>
+            <thead><tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500"><th className="px-6 py-4">Booking</th><th className="px-6 py-4">Vehicle</th><th className="px-6 py-4">Dates</th><th className="px-6 py-4">Total</th><th className="px-6 py-4">Payment</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Action</th></tr></thead>
+            <tbody>{rentals.map((rental) => <tr key={rental._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50"><td className="px-6 py-4"><div className="flex items-center gap-2 font-semibold text-slate-800"><CalendarDays size={17} className="text-[#ee8d39]" />{rental.bookingNumber || rental._id.slice(-8)}</div></td><td className="px-6 py-4 text-sm text-slate-600">{rental.vehicleType} · {rental.rentalType}</td><td className="px-6 py-4 text-sm text-slate-600">{formatDate(rental.startDate)} - {formatDate(rental.endDate)}<br /><span className="text-xs text-slate-400">{rental.rentalDays || "-"} days</span></td><td className="px-6 py-4 font-semibold text-slate-800">Rs. {rental.totalPrice.toFixed(2)}</td><td className="px-6 py-4"><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold capitalize text-amber-700">{rental.paymentStatus || "unpaid"}</span></td><td className="px-6 py-4"><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">{rental.status}</span></td><td className="px-6 py-4"><Link href={`/admin/dashboard/rentals/${rental._id}`} className="inline-flex items-center gap-1 rounded-lg bg-[#0F172A] px-3 py-2 text-sm font-semibold text-white">View <ArrowRight size={15} /></Link></td></tr>)}</tbody>
           </table>
         </div>
       )}

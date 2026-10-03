@@ -1,6 +1,13 @@
 import mongoose, {Schema} from "mongoose";
 
 const vehicleRentalSchema=new mongoose.Schema({
+    bookingNumber: {
+         type: String,
+         required: true,
+         unique: true,
+         trim: true,
+
+    },
     customer:{
         type:Schema.Types.ObjectId,
         ref:"Customer",
@@ -11,7 +18,12 @@ const vehicleRentalSchema=new mongoose.Schema({
         ref:"Transporter",
         required:true,
     },
-     vehicleType: {
+    vehicle:{
+        type:Schema.Types.ObjectId,
+        ref:"Vehicle",
+        required:true,
+    },
+    vehicleType: {
         type: String,
         enum: ["Bike", "Car", "Truck", "Bus"],
         required: true,
@@ -43,6 +55,12 @@ const vehicleRentalSchema=new mongoose.Schema({
     endDate: {
         type: Date,
         required: true,
+    },
+
+    rentalDays: {
+        type: Number,
+        required: true,
+        min: 1,
     },
  
     pricePerDay: {

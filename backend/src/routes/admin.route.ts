@@ -4,7 +4,7 @@ import {
     updateAdminProfile, changeAdminPassword, getAllTransportersVerified, deleteTransportProvider,
     getTransportProviderById, verifyTransportProviderKYC, rejectTransportProviderKYC, blockUnBlockTransportProvider, getPendingKYCProviders,
     getBlockedTransportProviders, getAllCustomers, getCustomerById, blockUnBlockCustomer, deleteCustomer, getAllRides, getRideById, getActiveRides, getCancelledRides, getCompletedRides, viewRideDetails, getCancelRideById,
-    getDashboardStats
+    getDashboardStats, getAllVehicleRetals, getVehicleRentalById
 } from "../controllers/AdminController.js";
 import { uploadImage } from "../middleware/upload.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
@@ -41,5 +41,7 @@ router.get("/rides/completed", isAuthenticated, isAdmin, getCompletedRides);
 router.get("/rides/view/:id", isAuthenticated, isAdmin, viewRideDetails);
 router.get("/rides/cancelled", isAuthenticated, isAdmin, getCancelRideById);
 router.get("/get-stats", isAuthenticated, isAdmin, getDashboardStats);
+router.get("/vehicle-rentals", isAuthenticated, isAdmin, getAllVehicleRetals);
+router.get("/vehicle-rental/:vehicleRentalId", isAuthenticated, isAdmin, getVehicleRentalById);
 
 export default router;

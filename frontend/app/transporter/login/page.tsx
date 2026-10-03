@@ -3,11 +3,12 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("rider");
 
   const router = useRouter();
 
@@ -35,13 +36,14 @@ const handleLogin = async (e: React.FormEvent) => {
     const data = await res.json();
 
     if (!res.ok) {
-      console.log(data.message);
+      toast.error(data.message || "Transporter login failed");
       return;
     }
 
     router.push("/transporter/profile");
   } catch (err) {
     console.log("Error at login logic:", err);
+    toast.error("Unable to connect to backend");
   }
 };
 

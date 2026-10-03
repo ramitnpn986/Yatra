@@ -56,7 +56,7 @@ export const registerTransporter = async (req: Request, res: Response) => {
             name,
             phone,
             password: hashedPassword,
-            role
+            transporterRole: role
         })
 
         await newUser.save();
@@ -98,7 +98,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
             });
         }
 
-        if(transporter.transporterRole !== role) {
+        if (transporter.transporterRole !== role) {
             return res.status(400).json({
                 message: "Invalid role",
                 success: false
@@ -125,7 +125,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
             {
                 transporterId: transporter._id,
                 role: "transporter",
-                transporterRole: transporter.transporterRole ,
+                transporterRole: transporter.transporterRole,
             },
             process.env.JWT_SECRET!,
             {
@@ -142,10 +142,12 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         return res.status(200).cookie('token', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         }).json({
             message: "Login successful",

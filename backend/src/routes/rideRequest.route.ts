@@ -11,8 +11,6 @@ import {
     getPendingRentalRequests,
     cancelRideRequest,
     getRentalProviders,
-    startRental,
-    completeRental,
 } from "../controllers/RideRequestController.js";
 
 import { Router } from "express";
@@ -30,8 +28,6 @@ router.get("/get-ride-request/:rideRequestId", isAuthenticated, isCustomer, getR
 router.post("/rental/create", isAuthenticated, isCustomer, vehicleRentalRequest);
 router.get("/rental/providers", isAuthenticated, isCustomer, getRentalProviders);
 router.post("/rental/accept/:rentalId", isAuthenticated, isTransporter, acceptRentalRequest);
-router.post("/rental/start/:rentalId", isAuthenticated, isTransporter, startRental);
-router.post("/rental/complete/:rentalId", isAuthenticated, isTransporter, completeRental);
 router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRentalRequest);
 router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); 
 router.get(

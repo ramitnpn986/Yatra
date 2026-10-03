@@ -860,12 +860,12 @@ export const getPendingRentalRequests = async (
 
         const rentals = await VehicleRental.find({
             transporter: transporterId,
-            status: { $in: ["pending", "confirmed", "active"] },
+            status: "pending",
         }).sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
-            message: "Active rental requests fetched successfully",
+            message: "Pending rental requests fetched successfully",
             count: rentals.length,
             rentals,
         });
@@ -918,51 +918,5 @@ export const getRentalProviders = async (req: Request, res: Response) => {
     } catch (err) {
         console.error("Get rental providers error:", err);
         return res.status(500).json({ success: false, message: "Failed to fetch rental providers" });
-    }
-};
-
-export const startRental = async (req: Request, res: Response) => {
-    try {
-        const transporterId = req.user?.transporterId;
-        const rentalId = String(req.params.rentalId);
-
-        if (!transporterId) return res.status(401).json({ success: false, message: "Transporter authentication required" });
-        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
-
-        const rental = await VehicleRental.findOneAndUpdate(
-            { _id: rentalId, transporter: transporterId, status: "confirmed" },
-            { $set: { status: "active", startedAt: new Date() } },
-            { new: true },
-        );
-
-        if (!rental) return res.status(409).json({ success: false, message: "Only confirmed rentals can be started" });
-        req.app.get("io")?.to(`customer:${rental.customer}`).emit("rental_started", { rentalId: rental._id, status: rental.status });
-        return res.status(200).json({ success: true, message: "Rental started", rental });
-    } catch (err) {
-        console.error("Start rental error:", err);
-        return res.status(500).json({ success: false, message: "Failed to start rental" });
-    }
-};
-
-export const completeRental = async (req: Request, res: Response) => {
-    try {
-        const transporterId = req.user?.transporterId;
-        const rentalId = String(req.params.rentalId);
-
-        if (!transporterId) return res.status(401).json({ success: false, message: "Transporter authentication required" });
-        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
-
-        const rental = await VehicleRental.findOneAndUpdate(
-            { _id: rentalId, transporter: transporterId, status: "active" },
-            { $set: { status: "completed", completedAt: new Date() } },
-            { new: true },
-        );
-
-        if (!rental) return res.status(409).json({ success: false, message: "Only active rentals can be completed" });
-        req.app.get("io")?.to(`customer:${rental.customer}`).emit("rental_completed", { rentalId: rental._id, status: rental.status });
-        return res.status(200).json({ success: true, message: "Rental completed", rental });
-    } catch (err) {
-        console.error("Complete rental error:", err);
-        return res.status(500).json({ success: false, message: "Failed to complete rental" });
     }
 };

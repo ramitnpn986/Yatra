@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken'
 import { TransportProvider } from '../models/TransportProvider.js';
 import Customer from '../models/Customer.js';
 import { Ride } from '../models/Ride.js';
+import { VehicleRental } from "../models/VehicleRentals.js";
+import mongoose from "mongoose";
 
 export const getAllRides = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -807,7 +809,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<Re
             await Promise.all([
                 Customer.countDocuments(),
                 TransportProvider.countDocuments(),
-                TransportProvider.countDocuments({ isKycDataSubmitted: true,  verificationStatus: "pending" }),
+                TransportProvider.countDocuments({ isKycDataSubmitted: true, verificationStatus: "pending" }),
                 Ride.countDocuments({
                     status: {
                         $in: [
@@ -820,13 +822,6 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<Re
                     }
                 })
             ]);
-
-            console.log("Dashboard Stats:", {
-                totalCustomers,
-                totalTransporters,
-                kycPending,
-                activeRides
-            });
 
         return res.status(200).json({
             success: true,
@@ -846,5 +841,49 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<Re
             success: false,
             message: "Failed to fetch dashboard statistics"
         });
+    }
+}
+
+export const getAllVehicleRetals = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const vehicleRentals = await VehicleRental.find();
+        return res.status(200).json({
+            success: true,
+            vehicleRentals: vehicleRentals || []
+        })
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
+
+export const getVehicleRentalById = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const vehicleRentalId = req.params.vehicleRentalId;
+
+        if (!vehicleRentalId || !mongoose.isValidObjectId(vehicleRentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid vehicle rental ID",
+            });
+        }
+
+        const vehicleRental = await VehicleRental.findById(vehicleRentalId);
+
+        if(!vehicleRental){
+             return res.status(404).json({
+                success: false,
+                message: "Vehicle rental not found",
+             })
+        }
+
+        return res.status(200).json({
+            success: true,
+            vehicleRental
+        })
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
     }
 }

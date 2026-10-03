@@ -24,8 +24,8 @@ router.get("/transport-provider/:transporterId", isAuthenticated, isAdmin, getTr
 router.get("/transport-providers/pending-kyc", isAuthenticated, isAdmin, getPendingKYCProviders);
 router.get("/transport-providers/blocked", isAuthenticated, isAdmin, getBlockedTransportProviders);
 
-router.patch("/transport-provider/:transporterId/verify-kyc", isAuthenticated, isAdmin, verifyTransportProviderKYC);
-router.patch("/transport-provider/:transporterId/reject-kyc", isAuthenticated, isAdmin, rejectTransportProviderKYC);
+router.patch("/transport-provider/:transporterId/verify", isAuthenticated, isAdmin, verifyTransportProviderKYC);
+router.patch("/transport-provider/:transporterId/reject", isAuthenticated, isAdmin, rejectTransportProviderKYC);
 router.patch("/transport-provider/:transporterId/block-unblock", isAuthenticated, isAdmin, blockUnBlockTransportProvider);
 router.delete("/transport-provider/:transporterId/delete", isAuthenticated, isAdmin, deleteTransportProvider);
 

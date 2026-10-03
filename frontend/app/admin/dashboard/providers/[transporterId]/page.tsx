@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface Transporter {
   _id: string;
@@ -67,8 +68,7 @@ export default function ProviderDetail() {
       try {
         setLoading(true);
 
-        const res = await fetch(
-          `/api/admin/dashboard/transport-providers/${transporterId}`,
+        const res = await fetch(`/api/admin/dashboard/transport-providers/${transporterId}`,
           {
             method: "GET",
             credentials: "include",
@@ -95,16 +95,23 @@ export default function ProviderDetail() {
     loadTransporter();
   }, [transporterId]);
 
-  const handleStatusUpdate = async (
-    status: "approved" | "rejected"
-  ) => {
+  const handleStatusUpdate = async (status: "verify" | "reject") => {
     if (!transporter) return;
 
     try {
       setActionLoading(true);
 
-      const res = await fetch(
-        `/api/admin/dashboard/transport-providers/${transporter._id}/verify`,
+      let endpoint = "";
+
+      if (status === "verify") {
+        endpoint = `/api/admin/dashboard/transport-providers/${transporter._id}/verify`;
+      }
+
+      if (status === "reject") {
+        endpoint = `/api/admin/dashboard/transport-providers/${transporter._id}/reject`;
+      }
+
+      const res = await fetch(endpoint,
         {
           method: "PATCH",
           headers: {
@@ -113,22 +120,31 @@ export default function ProviderDetail() {
           body: JSON.stringify({ status }),
         }
       );
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error("Failed to update status");
+        throw new Error(data?.message || "Failed to update status");
       }
 
       setTransporter((prev) =>
         prev
           ? {
-              ...prev,
-              verificationStatus: status,
-              isVerified: status === "approved",
-            }
+            ...prev,
+            verificationStatus:
+              status === "verify" ? "approved" : "rejected",
+            isVerified: status === "verify",
+            isKycCompleted: status === "verify",
+            verifiedAt:
+              status === "verify"
+                ? new Date().toISOString()
+                : prev.verifiedAt,
+          }
           : null
       );
+
     } catch (err) {
-      alert("Error updating verification status");
+      console.error(err);
+      toast.error("Failed to update transporter status. Please try again.");
     } finally {
       setActionLoading(false);
     }
@@ -227,11 +243,10 @@ export default function ProviderDetail() {
               </span>
 
               <span
-                className={`mt-1 block font-bold ${
-                  transporter.isAvailable
-                    ? "text-green-400"
-                    : "text-slate-300"
-                }`}
+                className={`mt-1 block font-bold ${transporter.isAvailable
+                  ? "text-green-400"
+                  : "text-slate-300"
+                  }`}
               >
                 {transporter.isAvailable
                   ? "Online / Available"
@@ -259,13 +274,12 @@ export default function ProviderDetail() {
               </span>
 
               <span
-                className={`mt-1 block font-bold capitalize ${
-                  transporter.verificationStatus === "approved"
-                    ? "text-green-400"
-                    : transporter.verificationStatus === "rejected"
-                      ? "text-red-400"
-                      : "text-[#ee8d39]"
-                }`}
+                className={`mt-1 block font-bold capitalize ${transporter.verificationStatus === "approved"
+                  ? "text-green-400"
+                  : transporter.verificationStatus === "rejected"
+                    ? "text-red-400"
+                    : "text-[#ee8d39]"
+                  }`}
               >
                 {transporter.verificationStatus}
               </span>
@@ -502,7 +516,7 @@ export default function ProviderDetail() {
                 </dt>
 
                 {transporter.serviceAreas &&
-                transporter.serviceAreas.length > 0 ? (
+                  transporter.serviceAreas.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {transporter.serviceAreas.map((area, idx) => (
                       <span
@@ -563,7 +577,7 @@ export default function ProviderDetail() {
                   <button
                     type="button"
                     disabled={actionLoading}
-                    onClick={() => handleStatusUpdate("rejected")}
+                    onClick={() => handleStatusUpdate("reject")}
                     className="rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Reject
@@ -572,7 +586,7 @@ export default function ProviderDetail() {
                   <button
                     type="button"
                     disabled={actionLoading}
-                    onClick={() => handleStatusUpdate("approved")}
+                    onClick={() => handleStatusUpdate("verify")}
                     className="rounded-lg bg-[#0F172A] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#0b2c54] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Approve Verification

@@ -13,7 +13,9 @@ interface PendingKyc {
   _id: string;
   name: string;
   phone: number;
-  vehicle?: string;
+  vehicle: {
+    type?: string;
+  };
   isKycCompleted: boolean;
   isKycDataSubmitted: boolean;
 }
@@ -190,7 +192,7 @@ export default function AdminDashboard() {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-slate-600">
-                      {provider.vehicle || "N/A"}
+                      {provider.vehicle.type || "N/A"}
                     </td>
 
                     <td className="px-6 py-4">

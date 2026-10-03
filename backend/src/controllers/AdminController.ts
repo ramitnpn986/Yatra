@@ -326,7 +326,7 @@ export const getTransportProviderById = async (req: Request, res: Response): Pro
 
 export const verifyTransportProviderKYC = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const transporterId = req.params.id;
+        const transporterId = req.params.transporterId;
 
         const transporter = await TransportProvider.findById(transporterId);
 
@@ -378,7 +378,7 @@ export const verifyTransportProviderKYC = async (req: Request, res: Response): P
 export const rejectTransportProviderKYC = async (req: Request, res: Response): Promise<Response> => {
     try {
 
-        const transporterId = req.params.id;
+        const transporterId = req.params.transporterId;
 
         const transporter = await TransportProvider.findById(transporterId);
 
@@ -506,7 +506,7 @@ export const getPendingKYCProviders = async (req: Request, res: Response): Promi
     try {
 
         const transporters = await TransportProvider.find({
-            isKycCompleted: false,
+            verificationStatus: "pending",
             isKycDataSubmitted: true
 
         }).select("-password");
@@ -807,7 +807,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<Re
             await Promise.all([
                 Customer.countDocuments(),
                 TransportProvider.countDocuments(),
-                TransportProvider.countDocuments({ kycStatus: "pending" }),
+                TransportProvider.countDocuments({ isKycDataSubmitted: true,  verificationStatus: "pending" }),
                 Ride.countDocuments({
                     status: {
                         $in: [
@@ -820,6 +820,13 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<Re
                     }
                 })
             ]);
+
+            console.log("Dashboard Stats:", {
+                totalCustomers,
+                totalTransporters,
+                kycPending,
+                activeRides
+            });
 
         return res.status(200).json({
             success: true,

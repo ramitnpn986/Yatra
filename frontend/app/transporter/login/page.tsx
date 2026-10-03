@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("passenger");
+  const [role, setRole] = useState("");
 
   const router = useRouter();
 
@@ -15,8 +15,7 @@ export default function LoginPage() {
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  const startTime = performance.now();
-
+  
   try {
 
     const res = await fetch("/api/transporter/login", {
@@ -28,6 +27,7 @@ const handleLogin = async (e: React.FormEvent) => {
       body: JSON.stringify({
         phone,
         password,
+        role
       }),
     });
 
@@ -39,17 +39,7 @@ const handleLogin = async (e: React.FormEvent) => {
       return;
     }
 
-    console.log(
-      "3. Before navigation:",
-      `${(performance.now() - startTime).toFixed(0)}ms`
-    );
-
     router.push("/transporter/profile");
-
-    console.log(
-      "4. Navigation triggered:",
-      `${(performance.now() - startTime).toFixed(0)}ms`
-    );
   } catch (err) {
     console.log("Error at login logic:", err);
   }
@@ -84,7 +74,7 @@ const handleLogin = async (e: React.FormEvent) => {
           className="border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
         >
           <option value="rider">Rider</option>
-          <option value="booking_partner">Booking Partner</option>
+          <option value="booking-partner">Booking Partner</option>
         </select>
 
         <p className="text-sm text-gray-600 text-center">

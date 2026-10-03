@@ -8,6 +8,7 @@ import {
   Truck,
   Users,
   Route,
+  CalendarDays,
   UserCircle,
   LogOut,
   Lock,
@@ -36,6 +37,11 @@ const navItems = [
     label: "Rides",
     href: "/admin/dashboard/rides",
     icon: Route,
+  },
+  {
+    label: "Rentals",
+    href: "/admin/dashboard/rentals",
+    icon: CalendarDays,
   },
   {
     label: "Profile",

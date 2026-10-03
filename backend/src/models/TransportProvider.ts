@@ -8,6 +8,7 @@ const transportProviderSchema = new mongoose.Schema(
             required: true,
             trim: true,
             minlength: [4, "Transporter name must consist at least 4 characters"],
+            maxLength: [50, "Transporter name must not exceed 50 characters"],
         },
 
         password: {
@@ -33,20 +34,21 @@ const transportProviderSchema = new mongoose.Schema(
             },
         },
 
-        role: {
+        transporterRole: {
             type: String,
             enum: ["rider", "booking-partner"],
-            default: "rider"
+            default: "rider",
+            required: true,
         },
-
-        location: {   
+    
+        location: {
             type: {
                 type: String,
                 enum: ["Point"],
                 default: "Point",
             },
             coordinates: {
-                type: [Number], 
+                type: [Number],
                 required: true,
             },
 
@@ -116,7 +118,7 @@ const transportProviderSchema = new mongoose.Schema(
             required: false,
         },
 
-        currentLocation: { 
+        currentLocation: {
             type: {
                 type: String,
                 enum: ["Point"],

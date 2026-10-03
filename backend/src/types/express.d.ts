@@ -6,6 +6,7 @@ declare global {
                 customerId?: string;
                 transporterId?: string;
                 role: "admin" | "customer" | "transporter";
+                transporterRole?: "rider" | "booking-partner";
             };
 
             files?: {

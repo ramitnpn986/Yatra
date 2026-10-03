@@ -1,15 +1,15 @@
 import { TransportProvider } from "../models/TransportProvider.js";
 import bcrypt from "bcryptjs";
-import jwt  from "jsonwebtoken";
-import {Request,Response} from "express";
+import jwt from "jsonwebtoken";
+import { Request, Response } from "express";
 import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 import { Vehicle } from "../models/Vehicle.js";
 
 
-const generateOtp=()=>{
-    return Math.floor( 100000 +Math.random()*900000).toString();
+const generateOtp = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
 };
 interface TransportationCostParams {
     transporterLat: number;
@@ -27,7 +27,7 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
         const { name, phone, password, role } = req.body;
 
-        if(role==="rider" || role==="passenger" || role==="admin"){
+        if (role === "rider" || role === "passenger" || role === "admin") {
             return res.status(400).json({
                 message: "Invalid role",
                 success: false
@@ -79,10 +79,7 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
 export const loginTransporter = async (req: Request, res: Response) => {
     try {
-
-        console.log("i am hitted");
-        const { phone, password } = req.body;
-  
+        const { phone, password, role } = req.body;
 
         if (!phone || !password) {
             return res.status(400).json({
@@ -97,6 +94,13 @@ export const loginTransporter = async (req: Request, res: Response) => {
         if (!transporter) {
             return res.status(400).json({
                 message: "Invalid phone or password",
+                success: false
+            });
+        }
+
+        if(transporter.transporterRole !== role) {
+            return res.status(400).json({
+                message: "Invalid role",
                 success: false
             });
         }
@@ -118,10 +122,16 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { transporterId: transporter._id.toString(), role: 'transporter' },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        )
+            {
+                transporterId: transporter._id,
+                role: "transporter",
+                transporterRole: transporter.transporterRole ,
+            },
+            process.env.JWT_SECRET!,
+            {
+                expiresIn: "7d",
+            }
+        );
 
         const transporterData = {
             id: transporter._id,
@@ -141,7 +151,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
             message: "Login successful",
             success: true,
             transporter: transporterData,
-            role:"transporter"
+            role: "transporter"
         });
 
 
@@ -217,11 +227,11 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
 
         if (!transporter.location || !transporter.location.coordinates || transporter.location.coordinates.length !== 2) {
-               return res.status(400).json({
+            return res.status(400).json({
                 success: false,
                 message: "Please set your base location before submitting KYC",
                 code: "BASE_LOCATION_REQUIRED",
-             });
+            });
         }
 
         if (transporter.isKycCompleted && transporter.verificationStatus !== "rejected") {
@@ -234,9 +244,9 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
         const citizenshipRes = await uploadImage(citizenshipCard[0].buffer, "Yatra/kyc/citizenship");
         const drivingLicenseRes = await uploadImage(drivingLicense[0].buffer, "Yatra/kyc/driving-license")
         const vehicleRegistrationRes = await uploadImage(vehicleRegistration[0].buffer, "Yatra/kyc/vehicle-registration");
-        const vehiclePhotoRes = await uploadImage( vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
-  
-       
+        const vehiclePhotoRes = await uploadImage(vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
+
+
         transporter.documents = {
             citizenshipCard: citizenshipRes.secure_url,
             drivingLicense: drivingLicenseRes.secure_url,
@@ -300,7 +310,7 @@ export const getTransporterProfile = async (req: Request, res: Response): Promis
 
         return res.status(200).json({
 
-            message:"Transporter profile fetched successfully",
+            message: "Transporter profile fetched successfully",
             success: true,
             transporter
         })
@@ -332,17 +342,17 @@ export const updateTransporterProfile = async (req: Request, res: Response): Pro
         transporter.name = name.trim();
 
         if (req.file) {
-            if(transporter.profileImage?.public_id){
+            if (transporter.profileImage?.public_id) {
                 await deleteImage(transporter.profileImage.public_id);
             }
 
             const result = await uploadImage(req.file.buffer, "Yatra/transporters");
-            
+
             transporter.profileImage = {
                 url: result.secure_url,
                 public_id: result.public_id,
             };
-          
+
         }
 
         await transporter.save();
@@ -523,28 +533,28 @@ export const updateCurrentLocation = async (req: Request, res: Response): Promis
             });
         }
 
-        const [longitude, latitude] = coordinates; 
+        const [longitude, latitude] = coordinates;
 
-        if(longitude < -180 || longitude > 180 || latitude < -90 || latitude >90){
-                return res.status(400).json({
-                    message:"Invalid longitude or latitude",
-                    success: false
-                })
+        if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+            return res.status(400).json({
+                message: "Invalid longitude or latitude",
+                success: false
+            })
         }
 
         const transporter = await TransportProvider.findByIdAndUpdate(transporterId,
             {
-                $set:{
-                     "currentLocation.type": "Point",
+                $set: {
+                    "currentLocation.type": "Point",
                     "currentLocation.coordinates": [
                         longitude,
                         latitude,
                     ],
                     "currentLocation.lastUpdatedAt": new Date(),
                 }
-            },{
-                select: "-password"
-            }
+            }, {
+            select: "-password"
+        }
         );
 
 

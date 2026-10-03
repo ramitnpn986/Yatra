@@ -813,6 +813,30 @@ export const cancelRentalRequest = async (req: Request, res: Response) => {
     }
 }
 
+export const payRentalDeposit = async (req: Request, res: Response) => {
+    try {
+        const customerId = req.user?.customerId;
+        const rentalId = String(req.params.rentalId);
+
+        if (!customerId) return res.status(401).json({ success: false, message: "Customer authentication required" });
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
+
+        const rental = await VehicleRental.findOne({ _id: rentalId, customer: customerId });
+        if (!rental) return res.status(404).json({ success: false, message: "Rental not found" });
+        if (!["confirmed", "active"].includes(rental.status)) return res.status(400).json({ success: false, message: "Deposit can be paid after rental confirmation" });
+        if (rental.paymentStatus !== "unpaid") return res.status(400).json({ success: false, message: `Deposit is already ${rental.paymentStatus}` });
+
+        rental.paymentStatus = "deposit_paid";
+        await rental.save();
+
+        req.app.get("io")?.to(`transporter:${rental.transporter}`).emit("rental_deposit_paid", { rentalId: rental._id, paymentStatus: rental.paymentStatus });
+        return res.status(200).json({ success: true, message: "Security deposit paid", rental });
+    } catch (err) {
+        console.error("Pay rental deposit error:", err);
+        return res.status(500).json({ success: false, message: "Failed to pay security deposit" });
+    }
+};
+
 export const getMyRentals = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;

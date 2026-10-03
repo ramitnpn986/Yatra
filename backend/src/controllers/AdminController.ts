@@ -868,7 +868,10 @@ export const getVehicleRentalById = async (req: Request, res: Response): Promise
             });
         }
 
-        const vehicleRental = await VehicleRental.findById(vehicleRentalId);
+        const vehicleRental = await VehicleRental.findById(vehicleRentalId)
+            .populate("customer", "name phone")
+            .populate({ path: "transporter", model: "TransportProvider", select: "name phone" })
+            .populate("vehicle", "brand model seats vehicleType year");
 
         if(!vehicleRental){
              return res.status(404).json({

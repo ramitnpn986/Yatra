@@ -16,9 +16,17 @@ import {
     Loader2,
 } from "lucide-react";
 
+type PopulatedPerson = string | { _id: string; name?: string; phone?: string };
+type DetailedRide = Omit<Ride, "transporter"> & { transporter: PopulatedPerson };
+
+const personLabel = (person: PopulatedPerson) =>
+    typeof person === "string"
+        ? person
+        : `${person.name || "Unknown"}${person.phone ? ` · ${person.phone}` : ""}`;
+
 const Page = ({  params }: { params: Promise<{ rideId: string }>;}) => {
     const [rideId, setRideId] = useState("");
-    const [ride, setRide] = useState<Ride | null>(null);
+    const [ride, setRide] = useState<DetailedRide | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -246,7 +254,7 @@ const Page = ({  params }: { params: Promise<{ rideId: string }>;}) => {
                             </div>
                             <div>
                                 <p className="text-xs text-slate-400"> Transporter ID</p>
-                                <p className="text-sm font-medium text-slate-800 font-mono break-all"> {ride.transporter}</p>
+                                <p className="text-sm font-medium text-slate-800 break-all"> {personLabel(ride.transporter)}</p>
                             </div>
                         </div>
                     </div>

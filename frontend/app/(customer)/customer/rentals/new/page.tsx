@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 
-type Provider = { _id: string; name: string; vehicle?: { type?: string } };
+type Provider = { _id: string; name: string; vehicles: { _id: string; vehicleType: string; brand: string; model: string; seats: number }[] };
 
 export default function NewRentalPage() {
     const router = useRouter();
     const [providers, setProviders] = useState<Provider[]>([]);
     const [providerId, setProviderId] = useState("");
+    const [vehicleId, setVehicleId] = useState("");
     const [rentalType, setRentalType] = useState("with-driver");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -34,7 +35,8 @@ export default function NewRentalPage() {
         event.preventDefault();
         setError("");
         const provider = providers.find((item) => item._id === providerId);
-        if (!provider?.vehicle?.type) return setError("Select a provider");
+        const vehicle = provider?.vehicles?.find((item) => item._id === vehicleId);
+        if (!provider || !vehicle) return setError("Select a provider with an available vehicle");
 
         try {
             setSaving(true);
@@ -44,7 +46,8 @@ export default function NewRentalPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     transporterId: provider._id,
-                    vehicleType: provider.vehicle.type,
+                    vehicleId: vehicle._id,
+                    vehicleType: vehicle.vehicleType,
                     rentalType,
                     pickupLocation: { address: pickupAddress, coordinates: [85.324, 27.7172] },
                     returnLocation: { address: returnAddress, coordinates: [85.324, 27.7172] },
@@ -71,7 +74,8 @@ export default function NewRentalPage() {
                 <h1 className="text-2xl font-bold text-[#0F172A]">Request a Rental</h1>
                 <p className="mt-1 text-sm text-slate-500">Choose an approved provider and rental dates.</p>
                 <form onSubmit={submit} className="mt-6 grid gap-4">
-                    <label className="grid gap-1 text-sm font-semibold text-slate-700">Provider<select required value={providerId} onChange={(event) => setProviderId(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal"><option value="">Select provider</option>{providers.map((provider) => <option key={provider._id} value={provider._id}>{provider.name} · {provider.vehicle?.type}</option>)}</select></label>
+                    <label className="grid gap-1 text-sm font-semibold text-slate-700">Provider<select required value={providerId} onChange={(event) => { setProviderId(event.target.value); setVehicleId(""); }} className="rounded-lg border border-slate-200 px-3 py-3 font-normal"><option value="">Select provider</option>{providers.map((provider) => <option key={provider._id} value={provider._id}>{provider.name}</option>)}</select></label>
+                    <label className="grid gap-1 text-sm font-semibold text-slate-700">Vehicle<select required value={vehicleId} onChange={(event) => setVehicleId(event.target.value)} disabled={!providerId} className="rounded-lg border border-slate-200 px-3 py-3 font-normal disabled:bg-slate-100"><option value="">Select vehicle</option>{providers.find((provider) => provider._id === providerId)?.vehicles?.map((vehicle) => <option key={vehicle._id} value={vehicle._id}>{vehicle.brand} {vehicle.model} · {vehicle.vehicleType} · {vehicle.seats} seats</option>)}</select></label>
                     <div className="grid gap-4 sm:grid-cols-2"><label className="grid gap-1 text-sm font-semibold text-slate-700">Start date<input required type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal" /></label><label className="grid gap-1 text-sm font-semibold text-slate-700">End date<input required type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal" /></label></div>
                     <label className="grid gap-1 text-sm font-semibold text-slate-700">Rental type<select value={rentalType} onChange={(event) => setRentalType(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal"><option value="with-driver">With driver</option><option value="self-drive">Self drive</option></select></label>
                     <div className="grid gap-4 sm:grid-cols-2"><label className="grid gap-1 text-sm font-semibold text-slate-700">Pickup address<input required value={pickupAddress} onChange={(event) => setPickupAddress(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal" /></label><label className="grid gap-1 text-sm font-semibold text-slate-700">Return address<input required value={returnAddress} onChange={(event) => setReturnAddress(event.target.value)} className="rounded-lg border border-slate-200 px-3 py-3 font-normal" /></label></div>

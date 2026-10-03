@@ -101,9 +101,7 @@ const RideRequestsPage = () => {
                         Ride Requests
                     </h1>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                        View and track all your ride requests.
-                    </p>
+                
                 </div>
 
                 <button

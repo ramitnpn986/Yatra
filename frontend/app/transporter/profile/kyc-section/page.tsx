@@ -55,6 +55,10 @@ const Page = () => {
         vehicleRegistration: null,
         vehiclePhoto: null,
         vehicleType: "",
+        vehicleBrand: "",
+        vehicleModel: "",
+        vehicleSeats: "",
+        vehicleYear: "",
         numberPlate: "",
         capacityKg: "",
         serviceAreas: "",
@@ -165,6 +169,10 @@ const Page = () => {
             data.append("vehiclePhoto", vehiclePhoto);
 
             data.append("vehicleType", formData.vehicleType);
+            data.append("vehicleBrand", formData.vehicleBrand);
+            data.append("vehicleModel", formData.vehicleModel);
+            data.append("vehicleSeats", formData.vehicleSeats);
+            data.append("vehicleYear", formData.vehicleYear);
             data.append("numberPlate", formData.numberPlate);
             data.append("capacityKg", formData.capacityKg);
             data.append("serviceAreas", formData.serviceAreas);
@@ -298,6 +306,26 @@ const Page = () => {
                                     {errors.vehicleType && (
                                         <p className="text-[10px] font-medium text-red-500">  {errors.vehicleType} </p>
                                     )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#0a1f39]">Brand</label>
+                                    <input required name="vehicleBrand" value={formData.vehicleBrand} placeholder="e.g. Toyota" onChange={handleChange} className="w-full rounded-xl border border-[#0b2c54]/10 bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none focus:border-[#ee8d39]" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#0a1f39]">Model</label>
+                                    <input required name="vehicleModel" value={formData.vehicleModel} placeholder="e.g. Hiace" onChange={handleChange} className="w-full rounded-xl border border-[#0b2c54]/10 bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none focus:border-[#ee8d39]" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#0a1f39]">Seats</label>
+                                    <input required min="1" type="number" name="vehicleSeats" value={formData.vehicleSeats} placeholder="e.g. 4" onChange={handleChange} className="w-full rounded-xl border border-[#0b2c54]/10 bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none focus:border-[#ee8d39]" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#0a1f39]">Manufacture Year</label>
+                                    <input required min="1900" max={new Date().getFullYear()} type="number" name="vehicleYear" value={formData.vehicleYear} placeholder="e.g. 2022" onChange={handleChange} className="w-full rounded-xl border border-[#0b2c54]/10 bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none focus:border-[#ee8d39]" />
                                 </div>
 
                                 <div className="space-y-2">

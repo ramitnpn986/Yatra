@@ -5,6 +5,7 @@ import {Request,Response} from "express";
 import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
+import { Vehicle } from "../models/Vehicle.js";
 
 
 const generateOtp=()=>{
@@ -192,9 +193,9 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
         const { citizenshipCard, drivingLicense, vehicleRegistration, vehiclePhoto } = files || {};
 
-        let { vehicleType, numberPlate, capacityKg, serviceAreas } = req.body;
+        let { vehicleType, vehicleBrand, vehicleModel, vehicleSeats, vehicleYear, numberPlate, capacityKg, serviceAreas } = req.body;
 
-         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !numberPlate || !capacityKg ) {
+         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !vehicleBrand || !vehicleModel || !vehicleSeats || !vehicleYear || !numberPlate || !capacityKg ) {
            return res.status(400).json({
               success: false,
                message: "All fields are required",
@@ -248,6 +249,20 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
             capacityKg,
             vehiclePhoto: vehiclePhotoRes.secure_url,
         };
+
+        await Vehicle.findOneAndUpdate(
+            { transporter: transporterId },
+            {
+                transporter: transporterId,
+                vehicleType,
+                brand: vehicleBrand,
+                model: vehicleModel,
+                images: [vehiclePhotoRes.secure_url],
+                seats: Number(vehicleSeats),
+                year: Number(vehicleYear),
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true },
+        );
 
         transporter.serviceAreas = serviceAreas || [];
         transporter.pricePerKm = vehicleType === "Bike" ? 30 : vehicleType === "Car" ? 40 : vehicleType === "Truck" ? 70 : vehicleType === "Bus" ? 100 : 0;

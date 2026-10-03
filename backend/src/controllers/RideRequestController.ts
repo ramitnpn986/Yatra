@@ -6,6 +6,7 @@ import Customer from "../models/Customer.js";
 
 import mongoose from 'mongoose';
 import { VehicleRental } from "../models/VehicleRentals.js";
+import { Vehicle } from "../models/Vehicle.js";
 
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
@@ -444,6 +445,7 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
 
         const {
             transporterId,
+            vehicleId,
             vehicleType,
             rentalType,
             pickupLocation,
@@ -454,10 +456,10 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             securityDeposit,
         } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(transporterId)) {
+        if (!mongoose.Types.ObjectId.isValid(transporterId) || !mongoose.Types.ObjectId.isValid(vehicleId)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid transporter ID",
+            message: "Invalid transporter or vehicle ID",
             });
         }
 
@@ -499,6 +501,19 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             });
         }
 
+        const vehicle = await Vehicle.findOne({
+            _id: vehicleId,
+            transporter: transporterId,
+            vehicleType,
+        });
+
+        if (!vehicle) {
+            return res.status(404).json({
+                success: false,
+                message: "Selected vehicle not found",
+            });
+        }
+
         const start = new Date(startDate);
         const end = new Date(endDate);
 
@@ -524,10 +539,13 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
 
         const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
         const totalPrice = days * pricePerDay;
+        const bookingNumber = `YR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
         const rental = await VehicleRental.create({
+            bookingNumber,
             customer: customerId,
             transporter: transporterId,
+            vehicle: vehicle._id,
             vehicleType,
             rentalType,
             pickupLocation: {
@@ -542,6 +560,7 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             },
             startDate: start,
             endDate: end,
+            rentalDays: days,
             pricePerDay,
             totalPrice,
             securityDeposit: securityDeposit || 0,
@@ -868,9 +887,34 @@ export const getRentalProviders = async (req: Request, res: Response) => {
             isKycCompleted: true,
             verificationStatus: "approved",
             "vehicle.type": { $exists: true },
-        }).select("name phone vehicle pricePerKm").sort({ name: 1 });
+        }).select("name phone vehicle pricePerKm").sort({ name: 1 }).lean();
 
-        return res.status(200).json({ success: true, providers });
+        const providersWithVehicles = await Promise.all(providers.map(async (provider) => {
+            let vehicle = await Vehicle.findOne({ transporter: provider._id }).lean();
+
+            if (!vehicle && provider.vehicle?.type) {
+                vehicle = await Vehicle.findOneAndUpdate(
+                    { transporter: provider._id },
+                    {
+                        transporter: provider._id,
+                        vehicleType: provider.vehicle.type,
+                        brand: "Yatra Fleet",
+                        model: provider.vehicle.type,
+                        images: provider.vehicle.vehiclePhoto ? [provider.vehicle.vehiclePhoto] : [],
+                        seats: provider.vehicle.type === "Bike" ? 1 : provider.vehicle.type === "Bus" ? 30 : 4,
+                        year: new Date().getFullYear(),
+                    },
+                    { upsert: true, new: true, setDefaultsOnInsert: true },
+                ).lean();
+            }
+
+            return {
+                ...provider,
+                vehicles: vehicle ? [vehicle] : [],
+            };
+        }));
+
+        return res.status(200).json({ success: true, providers: providersWithVehicles });
     } catch (err) {
         console.error("Get rental providers error:", err);
         return res.status(500).json({ success: false, message: "Failed to fetch rental providers" });

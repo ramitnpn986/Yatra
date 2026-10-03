@@ -1,11 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 
-const isTransporter = (  req: Request,  res: Response,  next: NextFunction) => {
+const isBookingPartner = ( req: Request, res: Response, next: NextFunction) => {
     try {
-        if (req.user?.role !== "transporter") {
+        if ( req.user?.role !== "transporter" || req.user?.transporterRole !== "booking-partner") {
             return res.status(403).json({
                 success: false,
-                message: "You are not authorized as a transporter",
+                message: "Only booking partners can access this resource",
             });
         }
 
@@ -20,4 +20,4 @@ const isTransporter = (  req: Request,  res: Response,  next: NextFunction) => {
     }
 };
 
-export default isTransporter;
+export default isBookingPartner;

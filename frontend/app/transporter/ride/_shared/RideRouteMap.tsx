@@ -1,17 +1,5 @@
 "use client";
 
-/**
- * Adapted from (customer)/components/RideMap.tsx — same icon setup and
- * route-fitting behavior, stripped down for the transporter side:
- * no vehicle markers (that's a customer-only "pick a nearby vehicle"
- * concept), no click-to-set-destination (transporter doesn't choose
- * pickup/dropoff, the ride request already contains them).
- *
- * Fetches the real road route via OSRM, same as the customer dashboard
- * does, so the polyline matches an actual road path rather than a
- * straight line.
- */
-
 import { useEffect, useState } from "react";
 import {
     MapContainer,

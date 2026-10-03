@@ -14,6 +14,7 @@ type Rental = {
   endDate: string;
   totalPrice: number;
   securityDeposit: number;
+  paymentStatus: "unpaid" | "deposit_paid" | "fully_paid" | "refunded";
   status: "pending" | "confirmed" | "rejected" | "active" | "completed" | "cancelled";
 };
 
@@ -67,6 +68,16 @@ export default function CustomerRentalsPage() {
     await loadRentals();
   };
 
+  const payDeposit = async (rentalId: string) => {
+    const response = await fetch(`/api/passenger/rentals/${rentalId}/pay-deposit`, {
+      method: "POST",
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) throw new Error(data.message || "Failed to pay deposit");
+    await loadRentals();
+  };
+
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -93,7 +104,7 @@ export default function CustomerRentalsPage() {
                     className="text-red-500" />{rental.returnLocation.address}</p><p>Dates: {date(rental.startDate)}
                      - {date(rental.endDate)}</p><p>Total: Rs. {rental.totalPrice.toFixed(2)} 
                         · Deposit: Rs. {rental.securityDeposit.toFixed(2)}</p>
-                        </div>{["pending", "confirmed", "active"].includes(rental.status) &&
+                        </div>{["confirmed", "active"].includes(rental.status) && rental.paymentStatus === "unpaid" && rental.securityDeposit > 0 && <button type="button" onClick={() => payDeposit(rental._id).catch((err) => setError(err.message))} className="mt-5 mr-3 rounded-lg bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700">Pay deposit · Rs. {rental.securityDeposit.toFixed(2)}</button>}{["pending", "confirmed", "active"].includes(rental.status) &&
                          <button type="button" onClick={() => cancelRental(rental._id).catch((err) => setError(err.message))} 
                          className="mt-5 inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2
                           text-sm font-semibold text-red-600 hover:bg-red-50"><X size={16} /> Cancel rental</button>}</article>)}</div>}

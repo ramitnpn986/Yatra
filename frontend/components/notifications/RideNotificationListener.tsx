@@ -3,6 +3,7 @@
 import { getSocket } from "@/lib/socket";
 import RideRequestPopup from "./RideRequestPopup";
 import { NewRideRequest } from "@/types/rideRequest";
+import { SOCKET_EVENTS } from "@/types/socket";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -37,8 +38,8 @@ export default function RideNotificationListener() {
 
         socket.on("connect", handleConnect);
         socket.on("connect_error", handleConnectError);
-        socket.on("new_ride_request", handleRideRequest);
-        socket.on("new_rental_request", handleRentalRequest);
+        socket.on(SOCKET_EVENTS.RIDE.NEW_REQUEST, handleRideRequest);
+        socket.on(SOCKET_EVENTS.RENTAL.NEW_REQUEST, handleRentalRequest);
 
         if (!socket.connected) {
             socket.connect();
@@ -47,8 +48,8 @@ export default function RideNotificationListener() {
         return () => {
             socket.off("connect", handleConnect);
             socket.off("connect_error", handleConnectError);
-            socket.off("new_ride_request", handleRideRequest);
-            socket.off("new_rental_request", handleRentalRequest);
+            socket.off(SOCKET_EVENTS.RIDE.NEW_REQUEST, handleRideRequest);
+            socket.off(SOCKET_EVENTS.RENTAL.NEW_REQUEST, handleRentalRequest);
         };
     }, []);
 

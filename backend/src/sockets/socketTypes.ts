@@ -36,3 +36,9 @@ export interface LocationUpdatedPayload {
     speed?: number;
     timestamp: number;
 }
+
+export interface RentalNotificationPayload {
+    rentalId: string;
+    vehicleType?: "Bike" | "Car" | "Truck" | "Bus";
+    status?: "pending" | "confirmed" | "active" | "completed" | "cancelled" | "rejected";
+}

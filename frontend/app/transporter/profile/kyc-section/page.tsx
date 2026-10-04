@@ -13,12 +13,13 @@ type FileField =
 
 interface User {
     isVerified: boolean;
-    verificationStatus:
-    | "approved"
-    | "pending"
-    | "rejected"
-    | null;
+    isKycCompleted: boolean;
     isKycDataSubmitted: boolean;
+    verificationStatus:
+        | "approved"
+        | "pending"
+        | "rejected"
+        | null;
 }
 
 const Page = () => {
@@ -96,28 +97,24 @@ const Page = () => {
 
         if (!allowedTypes.includes(file.type)) {
             setErrors((prev) => ({
-                ...prev,
-                [fieldName]: "Only JPG, PNG or PDF allowed",
+                ...prev, [fieldName]: "Only JPG, PNG or PDF allowed",
             }));
             return;
         }
 
         if (file.size > 3 * 1024 * 1024) {
             setErrors((prev) => ({
-                ...prev,
-                [fieldName]: "File exceeds 3MB limit",
+                ...prev, [fieldName]: "File exceeds 3MB limit",
             }));
             return;
         }
 
         setFormData((prev) => ({
-            ...prev,
-            [fieldName]: file,
+            ...prev, [fieldName]: file,
         }));
 
         setPreviews((prev) => ({
-            ...prev,
-            [fieldName]: file.type.startsWith("image/")
+            ...prev, [fieldName]: file.type.startsWith("image/")
                 ? URL.createObjectURL(file)
                 : "pdf-placeholder",
         }));
@@ -425,13 +422,7 @@ const Page = () => {
                             Cancel
                         </button>
 
-                        <button
-                            type="submit"
-                            disabled={
-                                loading ||
-                                (user?.isKycDataSubmitted &&
-                                    user?.verificationStatus !== "rejected")
-                            }
+                        <button type="submit" disabled={loading || (user?.isKycDataSubmitted && user?.verificationStatus !== "rejected")}
                             className="rounded-xl bg-[#ee8d39] px-10 py-3.5 font-bold text-white shadow-lg shadow-[#ee8d39]/20 transition-all hover:bg-[#f59d50] active:scale-95 disabled:pointer-events-none disabled:opacity-70"
                         >
                             {loading ? (

@@ -139,7 +139,6 @@ export const createRideRequest = async (req: Request, res: Response) => {
     }
 }
 
-
 export const acceptRideRequest = async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
 
@@ -300,7 +299,6 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
     }
 };
 
-
 export const cancelRideRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.customerId) {
@@ -356,7 +354,6 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
     }
 }
 
-
 export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
@@ -386,7 +383,6 @@ export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
         });
     }
 }
-
 
 export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
     try {
@@ -673,6 +669,7 @@ export const acceptRentalRequest = async (req: Request, res: Response) => {
     }
 };
 
+
 export const rejectRentalRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.transporterId) {
@@ -738,6 +735,7 @@ export const rejectRentalRequest = async (req: Request, res: Response) => {
         });
     }
 };
+
 
 export const cancelRentalRequest = async (req: Request, res: Response) => {
     try {
@@ -837,6 +835,7 @@ export const payRentalDeposit = async (req: Request, res: Response) => {
     }
 };
 
+
 export const getMyRentals = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
@@ -867,6 +866,7 @@ export const getMyRentals = async (req: Request, res: Response) => {
         });
     }
 };
+
 
 export const getPendingRentalRequests = async (
     req: Request,
@@ -902,6 +902,7 @@ export const getPendingRentalRequests = async (
         });
     }
 };
+
 
 export const getRentalProviders = async (req: Request, res: Response) => {
     try {
@@ -945,6 +946,7 @@ export const getRentalProviders = async (req: Request, res: Response) => {
     }
 };
 
+
 export const startRental = async (req: Request, res: Response) => {
     try {
         const transporterId = req.user?.transporterId;
@@ -967,6 +969,7 @@ export const startRental = async (req: Request, res: Response) => {
         return res.status(500).json({ success: false, message: "Failed to start rental" });
     }
 };
+
 
 export const completeRental = async (req: Request, res: Response) => {
     try {

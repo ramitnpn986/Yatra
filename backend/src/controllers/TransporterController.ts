@@ -76,7 +76,6 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
 }
 
-
 export const loginTransporter = async (req: Request, res: Response) => {
     try {
         const { phone, password, role } = req.body;
@@ -167,7 +166,6 @@ export const loginTransporter = async (req: Request, res: Response) => {
     }
 }
 
-
 export const logout = async (req: Request, res: Response) => {
     try {
         res.clearCookie("token", {
@@ -191,11 +189,18 @@ export const logout = async (req: Request, res: Response) => {
     }
 }
 
-
 export const submitKyc = async (req: Request, res: Response): Promise<Response> => {
     try {
 
         const transporterId = req.user?.transporterId;
+
+        if (!transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
         const files = req.files as {
             citizenshipCard?: Express.Multer.File[];
             drivingLicense?: Express.Multer.File[];
@@ -207,15 +212,15 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
         let { vehicleType, vehicleBrand, vehicleModel, vehicleSeats, vehicleYear, numberPlate, capacityKg, serviceAreas } = req.body;
 
-         if( !citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !vehicleBrand || !vehicleModel || !vehicleSeats || !vehicleYear || !numberPlate || !capacityKg ) {
-           return res.status(400).json({
-              success: false,
-               message: "All fields are required",
-           }); 
-          } 
+        if (!citizenshipCard?.[0] || !drivingLicense?.[0] || !vehicleRegistration?.[0] || !vehiclePhoto?.[0] || !vehicleType || !vehicleBrand || !vehicleModel || !vehicleSeats || !vehicleYear || !numberPlate) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
 
         if (typeof (serviceAreas) === "string") {
-            serviceAreas = serviceAreas.split(',').map((area) => area.trim()).filter(area => area.length > 3);
+            serviceAreas = serviceAreas.split(',').map((area: string) => area.trim()).filter((area: string) => area.length > 3);
         }
 
         const transporter = await TransportProvider.findById(transporterId).select('-password');
@@ -252,51 +257,69 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
         transporter.documents = {
             citizenshipCard: citizenshipRes.secure_url,
             drivingLicense: drivingLicenseRes.secure_url,
-            vehicleRegistration: vehicleRegistrationRes.secure_url,
         }
 
-        transporter.vehicle = {
-            type: vehicleType,
-            numberPlate,
-            capacityKg,
-            vehiclePhoto: vehiclePhotoRes.secure_url,
-        };
+       transporter.serviceAreas = serviceAreas || [];
 
-        await Vehicle.findOneAndUpdate(
-            { transporter: transporterId },
-            {
-                transporter: transporterId,
-                vehicleType,
-                brand: vehicleBrand,
-                model: vehicleModel,
-                images: [vehiclePhotoRes.secure_url],
-                seats: Number(vehicleSeats),
-                year: Number(vehicleYear),
-            },
-            { upsert: true, new: true, setDefaultsOnInsert: true },
-        );
-
-        transporter.serviceAreas = serviceAreas || [];
-        transporter.pricePerKm = vehicleType === "Bike" ? 30 : vehicleType === "Car" ? 40 : vehicleType === "Truck" ? 70 : vehicleType === "Bus" ? 100 : 0;
+        transporter.pricePerKm =
+            vehicleType === "Bike"
+                ? 30
+                : vehicleType === "Car"
+                    ? 40
+                    : vehicleType === "Truck"
+                        ? 70
+                        : vehicleType === "Bus"
+                            ? 100
+                            : 0;
 
         transporter.isKycCompleted = true;
+        transporter.isKycDataSubmitted = true;
         transporter.verificationStatus = "pending";
         transporter.isVerified = false;
-        transporter.isKycDataSubmitted = true;
 
         await transporter.save();
 
+        // ---------------------------------------
+        // CREATE / UPDATE VEHICLE
+        // ---------------------------------------
+
+        await Vehicle.findOneAndUpdate(
+            {
+                transporter: transporterId,
+                numberPlate: numberPlate.trim(),
+            },
+            {
+                transporter: transporterId,
+                vehicleType,
+                brand: vehicleBrand.trim(),
+                model: vehicleModel.trim(),
+                numberPlate: numberPlate.trim(),
+                images: [vehiclePhotoRes.secure_url],
+                registrationDocument: vehicleRegistrationRes.secure_url,
+                seats: Number(vehicleSeats),
+                capacityKg: capacityKg? Number(capacityKg): undefined,
+                year: Number(vehicleYear),
+                isAvailable: true,
+                rentalAvailable: false,
+            },
+            {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true,
+            }
+        );
+
         return res.status(200).json({
+            success: true,
             status: 200,
-            message: "KYC submitted successfully !"
-        })
+            message: "KYC submitted successfully!",
+        });
 
     } catch (err) {
         console.log(err)
         return res.status(500).send("Internal Server Error");
     }
 }
-
 
 export const getTransporterProfile = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -507,21 +530,6 @@ export const updateAvailablity = async (req: Request, res: Response): Promise<Re
         return res.status(500).json({ message: "Internal Server Error", success: false });
     }
 }
-
-
-
-
-//   Transporter GPS
-//       ↓
-//    Socket.IO
-//       ↓
-//    Backend
-//       ↓
-//   Passenger Socket
-//       ↓
-//   Passenger Map
-
-
 
 export const updateCurrentLocation = async (req: Request, res: Response): Promise<Response> => {
     try {

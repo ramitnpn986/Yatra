@@ -1,4 +1,4 @@
-import validator from 'validator';
+
 import mongoose from "mongoose";
 
 const transportProviderSchema = new mongoose.Schema(
@@ -11,16 +11,23 @@ const transportProviderSchema = new mongoose.Schema(
             maxLength: [50, "Transporter name must not exceed 50 characters"],
         },
 
+        phone: {
+            type: String,
+            required: true,
+            match: [/^(98|97)\d{8}$/, "Please enter a valid Nepali mobile number"],
+        },
+
         password: {
             type: String,
             required: true,
             select: false,
         },
 
-        phone: {
+        transporterRole: {
             type: String,
+            enum: ["rider", "booking-partner"],
+            default: "rider",
             required: true,
-            match: [/^(98|97)\d{8}$/, "Please enter a valid Nepali mobile number"],
         },
 
         profileImage: {
@@ -34,13 +41,6 @@ const transportProviderSchema = new mongoose.Schema(
             },
         },
 
-        transporterRole: {
-            type: String,
-            enum: ["rider", "booking-partner"],
-            default: "rider",
-            required: true,
-        },
-    
         location: {
             type: {
                 type: String,
@@ -58,6 +58,23 @@ const transportProviderSchema = new mongoose.Schema(
             municipality: { type: String, },
             ward: { type: String, }
         },
+
+        currentLocation: {
+            type: {
+                type: String,
+                enum: ["Point"],
+                default: "Point",
+            },
+            coordinates: {
+                type: [Number],
+                default: [85.3240, 27.7172],
+            },
+            lastUpdatedAt: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+
 
         isVerified: {
             type: Boolean,
@@ -80,31 +97,10 @@ const transportProviderSchema = new mongoose.Schema(
             default: "pending",
         },
 
-        verifiedAt: Date,
 
         documents: {
             citizenshipCard: String,
             drivingLicense: String,
-            vehicleRegistration: String,
-        },
-
-        vehicle: {
-            type: {
-                type: String,
-                enum: ["Bike", "Car", "Truck", "Bus"],
-                required: false,
-            },
-            vehiclePhoto: {
-                type: String,
-            },
-            numberPlate: {
-                type: String,
-                required: false,
-            },
-            capacityKg: {
-                type: Number,
-                required: false,
-            },
         },
 
         serviceAreas: [
@@ -118,21 +114,7 @@ const transportProviderSchema = new mongoose.Schema(
             required: false,
         },
 
-        currentLocation: {
-            type: {
-                type: String,
-                enum: ["Point"],
-                default: "Point",
-            },
-            coordinates: {
-                type: [Number],
-                default: [85.3240, 27.7172],
-            },
-            lastUpdatedAt: {
-                type: Date,
-                default: Date.now,
-            },
-        },
+        verifiedAt: Date,
 
         isAvailable: {
             type: Boolean,
@@ -143,12 +125,7 @@ const transportProviderSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        resetOtp: {
-            type: String
-        },
-        otpExpire: {
-            type: Date
-        },
+
         isActive: {
             type: Boolean,
             default: true,

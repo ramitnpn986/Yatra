@@ -20,6 +20,16 @@ export const SOCKET_EVENTS = {
 
   SYSTEM:{
     ERROR: "socket:error"
+  },
+
+  RENTAL: {
+    NEW_REQUEST: "new_rental_request",
+    ACCEPTED: "rental_accepted",
+    REJECTED: "rental_rejected",
+    STARTED: "rental_started",
+    COMPLETED: "rental_completed",
+    CANCELLED: "rental_cancelled",
+    DEPOSIT_PAID: "rental_deposit_paid",
   }
 
 

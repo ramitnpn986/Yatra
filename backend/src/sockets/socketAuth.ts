@@ -2,7 +2,7 @@ import { Socket } from "socket.io" // this is just Typescript type for one conne
 import jwt from 'jsonwebtoken'    // normaly to verify 
 import { AuthenticatedSocket, SocketRole } from "./socketTypes.js"
 
-interface JwtPayload {    // expectted information inside our jwt
+interface JwtPayload {
     adminId?: string;
     customerId?: string;
     transporterId?: string;

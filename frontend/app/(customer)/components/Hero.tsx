@@ -6,7 +6,6 @@ export default function Hero() {
       <div className="mx-auto flex min-h-[80vh] max-w-6xl items-center">
         <div className="grid w-full items-center gap-10 md:grid-cols-2 md:gap-12">
 
-          {/* Text */}
           <div className="flex flex-col items-center text-center md:items-start md:text-left">
             <h1 className="text-3xl font-bold leading-tight tracking-tight text-[#ee8d39] sm:text-4xl md:text-5xl">
               Rides, deliveries and tours across Nepal

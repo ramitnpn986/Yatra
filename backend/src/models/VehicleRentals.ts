@@ -15,7 +15,7 @@ const vehicleRentalSchema=new mongoose.Schema({
     },
     transporter:{
         type:Schema.Types.ObjectId,
-        ref:"Transporter",
+        ref:"TransportProvider",
         required:true,
     },
     vehicle:{

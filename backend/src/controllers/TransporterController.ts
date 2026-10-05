@@ -279,10 +279,6 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
 
         await transporter.save();
 
-        // ---------------------------------------
-        // CREATE / UPDATE VEHICLE
-        // ---------------------------------------
-
         await Vehicle.findOneAndUpdate(
             {
                 transporter: transporterId,

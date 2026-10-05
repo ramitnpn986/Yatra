@@ -1,4 +1,4 @@
-import { Socket } from "socket.io" // this is just Typescript type for one connected Socket.IO client.
+import { Socket } from "socket.io"
 import jwt from 'jsonwebtoken'
 import { AuthenticatedSocket, SocketRole } from "./socketTypes.js"
 
@@ -9,19 +9,10 @@ interface JwtPayload {
     role?: "admin" | "customer" | "transporter";
 }
 
-
-// this middleware runs whenever a client tries to establish a socket.io connection
-
-// flow is : frontend -> socket.connect() -> socket.io server -> socketAuth() -> verify cookie -> allow or reject connection
-
 export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
     try {
 
-        const cookies = socket.handshake.headers.cookie;   // getting cookies from the socket.io handshake
-        //  when the browser establishes the socket.io connection, the browser sends http headers during handshake
-        //   socket.handshake.headers.cookie gives us that raw string
-
-
+        const cookies = socket.handshake.headers.cookie;
         if (!cookies) {
             return next(new Error("Authentication Required"));
         }
@@ -31,8 +22,6 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
             .map((cookie) => cookie.trim())
             .find((cookie) => cookie.startsWith("token="))
             ?.split("=")[1];
-
-        // if the cookie exists but doesn't contain 'token' the socket connection can not be authenticated 
 
         if (!token) {
             return next(new Error("Authentication token missing"));
@@ -47,9 +36,6 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
 
         const decoded = jwt.verify(token, secret) as JwtPayload;
 
-
-        // we don't know yet whether this is a customer or transporter
-
         let userId: string | undefined;
         let role: SocketRole | undefined;
 
@@ -62,17 +48,13 @@ export const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
             userId = decoded.transporterId;
             role = "transporter";
         }
-
-
-        //  we should have userId = mongodb id  and role 
+        
         if (!userId || !role) {
             return next(new Error("Invalid socket user"));
         }
 
-        // converting the normal socket into our custom authenticatedsocket
         const authenticatedSocket = socket as AuthenticatedSocket;
 
-        // storing authenticated user information on the socket . now other socket handlers can access it
         authenticatedSocket.user = {
             id: userId,
             role,

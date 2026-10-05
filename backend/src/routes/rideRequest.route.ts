@@ -13,7 +13,7 @@ import {
     getRentalProviders,
     startRental,
     completeRental,
-    payRentalDeposit,
+    payRentalDeposit,searchAvailableVehicles,
 } from "../controllers/RideRequestController.js";
 
 import { Router } from "express";
@@ -36,6 +36,7 @@ router.post("/rental/complete/:rentalId", isAuthenticated, isTransporter, comple
 router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRentalRequest);
 router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); 
 router.post("/rental/pay-deposit/:rentalId", isAuthenticated, isCustomer, payRentalDeposit);
+router.post("/rental/search", isAuthenticated, isCustomer, searchAvailableVehicles);
 router.get(
     "/rental/my-rentals",
     isAuthenticated,

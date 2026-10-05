@@ -345,13 +345,18 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
         }
 
 
-    } catch (err) {
-        console.error("Cancel ride request error:", err);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to cancel ride request",
-        });
-    }
+   return res.status(200).json({
+    success:true,
+    message:"Ride request cancelled successfully",
+    rideRequest,
+   });
+}catch(err){
+    console.error("Cancel ride request error:",err);
+    return res.status(500).json({
+        success:false,
+        message:"Failed to cancel ride request",
+    });
+}
 }
 
 export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
@@ -362,7 +367,7 @@ export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
         if (!customerId) {
             return res.status(401).json({
                 message: " User authentication is required",
-                success: "false"
+                success: false
             })
         }
 
@@ -392,8 +397,8 @@ export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
         if (!customerId) {
             return res.status(401).json({
                 message: " User authentication is required",
-                success: "false"
-            })
+                success: false
+            });
         }
 
         const rideRequest = await RideRequest.findOne({ customer: customerId, _id: rideRequestId });
@@ -991,5 +996,66 @@ export const completeRental = async (req: Request, res: Response) => {
     } catch (err) {
         console.error("Complete rental error:", err);
         return res.status(500).json({ success: false, message: "Failed to complete rental" });
+    }
+};
+
+export const searchAvailableVehicles = async (req: Request, res: Response) => {
+    try {
+        const { vehicleType, startDate, endDate } = req.body;
+
+        if (!vehicleType || !startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Vehicle type and rental dates are required",
+            });
+        }
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+            return res.status(400).json({
+                success: false,
+                message: "endDate must be after startDate",
+            });
+        }
+
+        const providers = await TransportProvider.find({
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+            "vehicle.type": vehicleType,
+        }).select("name phone vehicle pricePerKm");
+
+        const providerIds = providers.map((p) => p._id);
+
+        const overlappingRentals = await VehicleRental.find({
+            transporter: { $in: providerIds },
+            status: { $in: ["pending", "confirmed", "active"] },
+            startDate: { $lt: end },
+            endDate: { $gt: start },
+        }).select("transporter");
+
+        const bookedTransporterIds = new Set(
+            overlappingRentals.map((r) => r.transporter.toString())
+        );
+
+        const availableProviders = providers.filter(
+            (p) => !bookedTransporterIds.has(p._id.toString())
+        );
+
+        return res.status(200).json({
+            success: true,
+            count: availableProviders.length,
+            providers: availableProviders,
+        });
+
+    } catch (err) {
+        console.error("Search available vehicles error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to search available vehicles",
+        });
     }
 };

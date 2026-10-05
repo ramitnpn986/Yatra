@@ -141,17 +141,18 @@ export const createRideRequest = async (req: Request, res: Response) => {
 
 export const acceptRideRequest = async (req: Request, res: Response) => {
     const session = await mongoose.startSession();
+    let transactionStarted = false;
 
     try {
-        if (!req.user?.transporterId) {
+        const transporterId = req.user?.transporterId;
+        const rideRequestId = String(req.params.rideRequestId);
+
+        if (!transporterId) {
             return res.status(401).json({
                 success: false,
                 message: "Transporter authentication required",
             });
         }
-
-        const transporterId = req.user.transporterId;
-        const rideRequestId = String(req.params.rideRequestId);
 
         if (!mongoose.Types.ObjectId.isValid(rideRequestId)) {
             return res.status(400).json({
@@ -160,33 +161,35 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const transporter = await TransportProvider.findById(transporterId);
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+            isAvailable: true,
+        }).lean();
 
         if (!transporter) {
-            return res.status(404).json({
-                success: false,
-                message: "Transporter not found",
-            });
-        }
-
-        if (transporter.verificationStatus !== "approved") {
             return res.status(403).json({
                 success: false,
-                message: "Your KYC is not verified",
+                message: "Transporter is not authorized or is currently unavailable",
             });
         }
 
-        if (!transporter.isAvailable) {
-            return res.status(400).json({
-                success: false,
-                message: "You are currently unavailable",
-            });
-        }
+        const vehicle = await Vehicle.findOne({
+            transporter: transporterId,
+            isAvailable: true,
+            vehicleType: {
+                $in: ["Bike", "Car", "Truck", "Bus"],
+            },
+        }).lean();
 
-        if (transporter.isBlocked) {
+        if (!vehicle) {
             return res.status(400).json({
                 success: false,
-                message: "You are currently not able to accept this request",
+                message: "You do not have an available vehicle",
             });
         }
 
@@ -195,7 +198,7 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
             status: "pending",
             expiresAt: { $gt: new Date() },
             acceptedBy: null,
-        });
+        }).lean();
 
         if (!rideRequest) {
             return res.status(409).json({
@@ -204,7 +207,7 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
             });
         }
 
-        if (transporter.vehicle?.type !== rideRequest.vehicleType) {
+        if (vehicle.vehicleType !== rideRequest.vehicleType) {
             return res.status(403).json({
                 success: false,
                 message: "Your vehicle type does not match this ride",
@@ -214,29 +217,33 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
         const acceptedAt = new Date();
 
         session.startTransaction();
-        const acceptedRequest =  await RideRequest.findOneAndUpdate(
-                {
-                    _id: rideRequestId,
-                    status: "pending",
-                    expiresAt: { $gt: acceptedAt },
-                    acceptedBy: null,
-                    vehicleType: transporter.vehicle?.type,
+        transactionStarted = true;
+
+
+        const acceptedRequest = await RideRequest.findOneAndUpdate(
+            {
+                _id: rideRequestId,
+                status: "pending",
+                expiresAt: { $gt: acceptedAt },
+                acceptedBy: null,
+                vehicleType: vehicle.vehicleType,
+            },
+            {
+                $set: {
+                    status: "accepted",
+                    acceptedBy: transporterId,
+                    acceptedAt,
                 },
-                {
-                    $set: {
-                        status: "accepted",
-                        acceptedBy: transporterId,
-                        acceptedAt,
-                    },
-                },
-                {
-                    new: true,
-                    session,
-                }
-            );
+            },
+            {
+                new: true,
+                session,
+            }
+        );
 
         if (!acceptedRequest) {
             await session.abortTransaction();
+            transactionStarted = false;
 
             return res.status(409).json({
                 success: false,
@@ -249,23 +256,38 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
             rideRequest: acceptedRequest._id,
             customer: acceptedRequest.customer,
             transporter: transporterId,
+
             pickupLocation: acceptedRequest.pickupLocation,
             dropoffLocation: acceptedRequest.dropoffLocation,
+
             distanceKm: acceptedRequest.distanceKm,
             estimatedFare: acceptedRequest.estimatedFare,
+
             vehicleType: acceptedRequest.vehicleType,
             passengerCount: acceptedRequest.passengerCount,
+
             status: "confirmed",
+
             requestedAt: acceptedRequest.createdAt,
             acceptedAt,
         });
 
         await ride.save({ session });
 
-
-        await TransportProvider.findByIdAndUpdate(transporterId, { isAvailable: false }, { session });
+        await TransportProvider.findByIdAndUpdate(
+            transporterId,
+            {
+                $set: {
+                    isAvailable: false,
+                },
+            },
+            {
+                session,
+            }
+        );
 
         await session.commitTransaction();
+        transactionStarted = false;
 
         const io = req.app.get("io");
 
@@ -275,6 +297,9 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
                 {
                     rideId: ride._id,
                     rideRequestId: acceptedRequest._id,
+                    transporterId,
+                    vehicleId: vehicle._id,
+                    vehicleType: vehicle.vehicleType,
                     status: ride.status,
                 }
             );
@@ -287,11 +312,15 @@ export const acceptRideRequest = async (req: Request, res: Response) => {
         });
 
     } catch (err) {
-        await session.abortTransaction();
+        if (transactionStarted) {
+            await session.abortTransaction();
+        }
+
         console.error("Accept ride error:", err);
+
         return res.status(500).json({
             success: false,
-            message: "Internal Server Error",
+            message: "Failed to accept ride request",
         });
 
     } finally {
@@ -359,6 +388,7 @@ export const cancelRideRequest = async (req: Request, res: Response) => {
 }
 }
 
+
 export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
@@ -388,6 +418,7 @@ export const getAllRideReqsOfAnUser = async (req: Request, res: Response) => {
         });
     }
 }
+
 
 export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
     try {
@@ -425,93 +456,77 @@ export const getRideReqByIdOfAnUser = async (req: Request, res: Response) => {
     }
 }
 
-export const vehicleRentalRequest = async (req: Request, res: Response) => {
+
+export const vehicleRentalRequest = async ( req: Request, res: Response) => {
     try {
+      
         if (!req.user?.customerId) {
-            return res.status(400).json({
+            return res.status(401).json({
+                success: false,
                 message: "Customer authentication required",
-                success: false
             });
         }
 
-        const customerId = req.user?.customerId;
+        const customerId = req.user.customerId;
         const customer = await Customer.findById(customerId).select("-password");
 
-        if (customer?.isBlocked) {
-            return res.status(400).json({
-                message: "You can not make a rental request",
-                success: false
-            });
-        }
-
-        const {
-            transporterId,
-            vehicleId,
-            vehicleType,
-            rentalType,
-            pickupLocation,
-            returnLocation,
-            startDate,
-            endDate,
-            pricePerDay,
-            securityDeposit,
-        } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(transporterId) || !mongoose.Types.ObjectId.isValid(vehicleId)) {
-            return res.status(400).json({
-                success: false,
-            message: "Invalid transporter or vehicle ID",
-            });
-        }
-
-        if (!pickupLocation?.coordinates || pickupLocation.coordinates.length !== 2 ||
-            !returnLocation?.coordinates || returnLocation.coordinates.length !== 2) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid pickup or return coordinates"
-            })
-        }
-
-        if (!vehicleType || !rentalType || !startDate || !endDate || pricePerDay === undefined) {
-            return res.status(400).json({
-                success: false,
-                message: "Vehicle type, rental type, dates and price are required",
-            });
-        }
-
-        const transporter = await TransportProvider.findById(transporterId);
-
-        if (!transporter) {
+        if (!customer) {
             return res.status(404).json({
                 success: false,
-                message: "Transporter not found",
+                message: "Customer not found",
             });
         }
 
-        if (transporter.verificationStatus !== "approved") {
+        if (customer.isBlocked) {
             return res.status(403).json({
                 success: false,
-                message: "This provider's KYC is not verified",
+                message: "You cannot make a rental request",
             });
         }
 
-        if (transporter.vehicle?.type !== vehicleType) {
-            return res.status(403).json({
+
+        const { transporterId, vehicleId, vehicleType, rentalType, pickupLocation, returnLocation, startDate, endDate, pricePerDay, securityDeposit} = req.body;
+
+
+        if ( !mongoose.Types.ObjectId.isValid(transporterId) || !mongoose.Types.ObjectId.isValid(vehicleId)) {
+            return res.status(400).json({
                 success: false,
-                message: "Provider's vehicle type does not match this request",
+                message: "Invalid transporter or vehicle ID",
             });
         }
 
-        const vehicle = await Vehicle.findOne({
-            _id: vehicleId,
-            transporter: transporterId,
-            vehicleType,
-        });
-
-        if (!vehicle) {
-            return res.status(404).json({
+        if ( !vehicleType || !rentalType || !startDate || !endDate || pricePerDay === undefined) {
+            return res.status(400).json({
                 success: false,
-                message: "Selected vehicle not found",
+                message:"Vehicle type, rental type, dates and price are required",
+            });
+        }
+
+        if (
+            !pickupLocation?.coordinates || pickupLocation.coordinates.length !== 2 ||
+            !returnLocation?.coordinates || returnLocation.coordinates.length !== 2
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid pickup or return coordinates",
+            });
+        }
+
+        if (
+            typeof pickupLocation.coordinates[0] !== "number" || typeof pickupLocation.coordinates[1] !== "number" ||
+            typeof returnLocation.coordinates[0] !== "number" || typeof returnLocation.coordinates[1] !== "number"
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Coordinates must be numbers",
+            });
+        }
+
+     
+        if (!["self-drive", "with-driver"].includes(rentalType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental type",
             });
         }
 
@@ -521,81 +536,172 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
         if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
             return res.status(400).json({
                 success: false,
-                message: "endDate must be after startDate",
+                message: "Invalid rental dates",
             });
         }
 
-        const hasOtherPendingRequest = await VehicleRental.findOne({
-            customer: customerId,
-            status: "pending",
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isAvailable: true,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
         });
+
+        if (!transporter) {
+            return res.status(404).json({
+                success: false,
+                message: "Transporter is unavailable or not approved for rental service",
+            });
+        }
+
+        const vehicle = await Vehicle.findOne({
+            _id: vehicleId,
+            transporter: transporterId,
+            vehicleType,
+            isAvailable: true,
+            rentalAvailable: true,
+        });
+
+        if (!vehicle) {
+            return res.status(404).json({
+                success: false,
+                message: "Selected vehicle is unavailable or not available for rental",
+            });
+        }
+
+        const conflictingRental = await VehicleRental.findOne({
+            vehicle: vehicleId,
+            status: { $in: ["pending", "confirmed", "active"]},
+            startDate: {
+                $lt: end,
+            },
+            endDate: {
+                $gt: start,
+            },
+        });
+
+        if (conflictingRental) {
+            return res.status(409).json({
+                success: false,
+                message:"This vehicle is already booked for the selected dates",
+            });
+        }
+
+        const hasOtherPendingRequest =await VehicleRental.findOne({ customer: customerId, status: "pending",});
 
         if (hasOtherPendingRequest) {
             return res.status(409).json({
                 success: false,
-                message: "You already have a pending rental request",
+                message:"You already have a pending rental request",
                 rental: hasOtherPendingRequest,
             });
         }
 
-        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-        const totalPrice = days * pricePerDay;
-        const bookingNumber = `YR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const days = Math.ceil( (end.getTime() - start.getTime()) /(1000 * 60 * 60 * 24));
+
+        if (days < 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Rental duration must be at least one day",
+            });
+        }
+
+        const dailyPrice = Number(pricePerDay);
+
+        if (isNaN(dailyPrice) || dailyPrice < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid price per day",
+            });
+        }
+
+        const totalPrice = days * dailyPrice;
+        const deposit = Number(securityDeposit || 0);
+
+        if (isNaN(deposit) || deposit < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid security deposit",
+            });
+        }
+
+        const bookingNumber = `YR-${Date.now()}-${Math.floor(
+            Math.random() * 1000
+        )}`;
 
         const rental = await VehicleRental.create({
             bookingNumber,
             customer: customerId,
             transporter: transporterId,
             vehicle: vehicle._id,
-            vehicleType,
+            vehicleType: vehicle.vehicleType,
             rentalType,
             pickupLocation: {
-                address: pickupLocation.address,
+                address: pickupLocation.address || "",
                 type: "Point",
                 coordinates: pickupLocation.coordinates,
             },
+
             returnLocation: {
-                address: returnLocation.address,
+                address: returnLocation.address || "",
                 type: "Point",
                 coordinates: returnLocation.coordinates,
             },
+
             startDate: start,
             endDate: end,
             rentalDays: days,
-            pricePerDay,
+            pricePerDay: dailyPrice,
             totalPrice,
-            securityDeposit: securityDeposit || 0,
+            securityDeposit: deposit,
             status: "pending",
         });
 
+  
         const io = req.app.get("io");
+
         if (io) {
-            io.to(`transporter:${transporterId}`).emit("new_rental_request", {
-                rentalId: rental._id,
-                vehicleType: rental.vehicleType,
-                startDate: rental.startDate,
-                endDate: rental.endDate,
-                totalPrice: rental.totalPrice,
-            });
+            io.to(`transporter:${transporterId}`).emit(
+                "new_rental_request",
+                {
+                    rentalId: rental._id,
+                    bookingNumber: rental.bookingNumber,
+                    vehicleId: vehicle._id,
+                    vehicleType: rental.vehicleType,
+                    rentalType: rental.rentalType,
+                    pickupLocation: rental.pickupLocation,
+                    returnLocation: rental.returnLocation,
+                    startDate: rental.startDate,
+                    endDate: rental.endDate,
+                    rentalDays: rental.rentalDays,
+                    totalPrice: rental.totalPrice,
+                    securityDeposit: rental.securityDeposit,
+                }
+            );
         }
 
         return res.status(201).json({
             success: true,
-            message: "Rental request submitted",
+            message: "Rental request submitted successfully",
             rental,
         });
-
-    } catch (err) {
-        console.error("Create rental request error:", err);
+    } catch (error) {
+        console.error("Create vehicle rental request error:", error);
         return res.status(500).json({
+            success: false,
             message: "Internal Server Error",
-            success: false
         });
     }
-}
+};
 
-export const acceptRentalRequest = async (req: Request, res: Response) => {
+
+export const acceptRentalRequest = async ( req: Request, res: Response) => {
     try {
+
         if (!req.user?.transporterId) {
             return res.status(401).json({
                 success: false,
@@ -613,50 +719,85 @@ export const acceptRentalRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const transporter = await TransportProvider.findById(transporterId);
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+        });
 
         if (!transporter) {
-            return res.status(404).json({
+            return res.status(403).json({
                 success: false,
-                message: "Transporter not found",
+                message: "You are not authorized to accept rental requests",
             });
         }
 
-        if (transporter.isBlocked) {
-            return res.status(400).json({
-                success: false,
-                message: "You are currently not able to accept this request",
-            });
-        }
-
-        const rental = await VehicleRental.findOneAndUpdate(
-            {
-                _id: rentalId,
-                transporter: transporterId,
-                status: "pending",
-            },
-            {
-                $set: {
-                    status: "confirmed",
-                    acceptedAt: new Date(),
-                },
-            },
-            { new: true }
-        );
+        const rental = await VehicleRental.findOne({
+            _id: rentalId,
+            transporter: transporterId,
+            status: "pending",
+        });
 
         if (!rental) {
-            return res.status(409).json({
+            return res.status(404).json({
                 success: false,
-                message: "Rental request is no longer available",
+                message:"Rental request not found or is no longer pending",
             });
         }
 
-        const io = req.app.get("io");
-        if (io) {
-            io.to(`customer:${rental.customer}`).emit("rental_accepted", {
-                rentalId: rental._id,
-                status: rental.status,
+        const vehicle = await Vehicle.findOne({
+            _id: rental.vehicle,
+            transporter: transporterId,
+            isAvailable: true,
+            rentalAvailable: true,
+        });
+
+        if (!vehicle) {
+            return res.status(409).json({
+                success: false,
+                message: "The selected vehicle is no longer available for rental",
             });
+        }
+
+        const conflictingRental = await VehicleRental.findOne({
+            _id: { $ne: rental._id },
+            vehicle: rental.vehicle,
+            status: { $in: ["confirmed", "active"]},
+            startDate: {$lt: rental.endDate},
+            endDate: { $gt: rental.startDate},
+        });
+
+        if (conflictingRental) {
+            return res.status(409).json({
+                success: false,
+                message: "This vehicle is already booked for the requested dates",
+            });
+        }
+
+        rental.status = "confirmed";
+        rental.acceptedAt = new Date();
+
+        await rental.save();
+        const io = req.app.get("io");
+
+        if (io) {
+            io.to(`customer:${rental.customer}`).emit(
+                "rental_accepted",
+                {
+                    rentalId: rental._id,
+                    bookingNumber: rental.bookingNumber,
+                    vehicleId: rental.vehicle,
+                    transporterId: rental.transporter,
+                    status: rental.status,
+                    startDate: rental.startDate,
+                    endDate: rental.endDate,
+                    totalPrice: rental.totalPrice,
+                }
+            );
         }
 
         return res.status(200).json({
@@ -664,9 +805,12 @@ export const acceptRentalRequest = async (req: Request, res: Response) => {
             message: "Rental request accepted",
             rental,
         });
+    } catch (error) {
+        console.error(
+            "Accept rental request error:",
+            error
+        );
 
-    } catch (err) {
-        console.error("Accept rental request error:", err);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
@@ -677,6 +821,7 @@ export const acceptRentalRequest = async (req: Request, res: Response) => {
 
 export const rejectRentalRequest = async (req: Request, res: Response) => {
     try {
+
         if (!req.user?.transporterId) {
             return res.status(401).json({
                 success: false,
@@ -688,10 +833,29 @@ export const rejectRentalRequest = async (req: Request, res: Response) => {
         const rentalId = String(req.params.rentalId);
         const { reason } = req.body;
 
+
         if (!mongoose.Types.ObjectId.isValid(rentalId)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid rental ID",
+            });
+        }
+
+
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+        });
+
+        if (!transporter) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to reject rental requests",
             });
         }
 
@@ -705,25 +869,36 @@ export const rejectRentalRequest = async (req: Request, res: Response) => {
                 $set: {
                     status: "rejected",
                     rejectedAt: new Date(),
-                    ...(reason ? { rejectedReason: reason } : {}),
+                    ...(reason?.trim()
+                        ? { rejectedReason: reason.trim(),}
+                        : {}),
                 },
             },
-            { new: true }
+            {
+                new: true,
+            }
         );
 
         if (!rental) {
             return res.status(409).json({
                 success: false,
-                message: "Rental request is no longer available",
+                message: "Rental request not found or is no longer pending",
             });
         }
 
         const io = req.app.get("io");
+
         if (io) {
-            io.to(`customer:${rental.customer}`).emit("rental_rejected", {
-                rentalId: rental._id,
-                status: rental.status,
-            });
+            io.to(`customer:${rental.customer}`).emit(
+                "rental_rejected",
+                {
+                    rentalId: rental._id,
+                    bookingNumber: rental.bookingNumber,
+                    status: rental.status,
+                    rejectedReason:
+                        rental.rejectedReason || null,
+                }
+            );
         }
 
         return res.status(200).json({
@@ -731,15 +906,14 @@ export const rejectRentalRequest = async (req: Request, res: Response) => {
             message: "Rental request rejected",
             rental,
         });
-
-    } catch (err) {
-        console.error("Reject rental request error:", err);
+    } catch (error) {
+        console.error( "Reject rental request error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
         });
     }
-};
+}
 
 
 export const cancelRentalRequest = async (req: Request, res: Response) => {
@@ -773,32 +947,75 @@ export const cancelRentalRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const isOwner = customerId && rental.customer.toString() === customerId;
-        const isProvider = transporterId && rental.transporter.toString() === transporterId;
+        const isCustomer = !!customerId && rental.customer.toString() === customerId;
+        const isTransporter =  !!transporterId &&  rental.transporter.toString() === transporterId;
 
-        if (!isOwner && !isProvider) {
+        if (!isCustomer && !isTransporter) {
             return res.status(403).json({
                 success: false,
-                message: "Not authorized to cancel this rental",
+                message: "You are not authorized to cancel this rental",
             });
         }
 
-        if (["completed", "cancelled", "rejected"].includes(rental.status)) {
+        if (!["pending", "confirmed"].includes(rental.status)) {
             return res.status(400).json({
                 success: false,
-                message: `This rental is already ${rental.status} and cannot be cancelled`,
+                message: `Rental cannot be cancelled because its current status is ${rental.status}`,
             });
+        }
+
+        if (isTransporter) {
+            const transporter = await TransportProvider.findOne({
+                _id: transporterId,
+                transporterRole: "booking-partner",
+                isActive: true,
+                isBlocked: false,
+                isVerified: true,
+                isKycCompleted: true,
+                verificationStatus: "approved",
+            });
+
+            if (!transporter) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Transporter is not authorized to cancel this rental",
+                });
+            }
         }
 
         rental.status = "cancelled";
         rental.cancelledAt = new Date();
-        rental.cancelledBy = isOwner ? "customer" : "transporter";
-        if (reason) rental.cancelledReason = reason;
+
+        rental.cancelledBy = isCustomer? "customer": "transporter";
+
+        if (reason?.trim()) {
+            rental.cancelledReason = reason.trim();
+        }
+
         await rental.save();
 
         const io = req.app.get("io");
+
         if (io) {
-            io.emit("rental_cancelled", { rentalId: rental._id });
+            io.to(`customer:${rental.customer}`).emit(
+                "rental_cancelled",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    cancelledBy: rental.cancelledBy,
+                    reason: rental.cancelledReason || null,
+                }
+            );
+
+            io.to(`transporter:${rental.transporter}`).emit(
+                "rental_cancelled",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    cancelledBy: rental.cancelledBy,
+                    reason: rental.cancelledReason || null,
+                }
+            );
         }
 
         return res.status(200).json({
@@ -809,34 +1026,11 @@ export const cancelRentalRequest = async (req: Request, res: Response) => {
 
     } catch (err) {
         console.error("Cancel rental request error:", err);
+
         return res.status(500).json({
             success: false,
             message: "Failed to cancel rental request",
         });
-    }
-}
-
-export const payRentalDeposit = async (req: Request, res: Response) => {
-    try {
-        const customerId = req.user?.customerId;
-        const rentalId = String(req.params.rentalId);
-
-        if (!customerId) return res.status(401).json({ success: false, message: "Customer authentication required" });
-        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
-
-        const rental = await VehicleRental.findOne({ _id: rentalId, customer: customerId });
-        if (!rental) return res.status(404).json({ success: false, message: "Rental not found" });
-        if (!["confirmed", "active"].includes(rental.status)) return res.status(400).json({ success: false, message: "Deposit can be paid after rental confirmation" });
-        if (rental.paymentStatus !== "unpaid") return res.status(400).json({ success: false, message: `Deposit is already ${rental.paymentStatus}` });
-
-        rental.paymentStatus = "deposit_paid";
-        await rental.save();
-
-        req.app.get("io")?.to(`transporter:${rental.transporter}`).emit("rental_deposit_paid", { rentalId: rental._id, paymentStatus: rental.paymentStatus });
-        return res.status(200).json({ success: true, message: "Security deposit paid", rental });
-    } catch (err) {
-        console.error("Pay rental deposit error:", err);
-        return res.status(500).json({ success: false, message: "Failed to pay security deposit" });
     }
 };
 
@@ -852,9 +1046,7 @@ export const getMyRentals = async (req: Request, res: Response) => {
             });
         }
 
-        const rentals = await VehicleRental.find({
-            customer: customerId,
-        }).sort({ createdAt: -1 });
+        const rentals = await VehicleRental.find({ customer: customerId}).sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
@@ -873,10 +1065,7 @@ export const getMyRentals = async (req: Request, res: Response) => {
 };
 
 
-export const getPendingRentalRequests = async (
-    req: Request,
-    res: Response
-) => {
+export const getPendingRentalRequests = async ( req: Request, res: Response) => {
     try {
         const transporterId = req.user?.transporterId;
 
@@ -887,10 +1076,35 @@ export const getPendingRentalRequests = async (
             });
         }
 
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+        });
+
+        if (!transporter) {
+            return res.status(403).json({
+                success: false,
+                message: "Transporter is not authorized",
+            });
+        }
+
         const rentals = await VehicleRental.find({
             transporter: transporterId,
-            status: { $in: ["pending", "confirmed", "active"] },
-        }).sort({ createdAt: -1 });
+            status: {
+                $in: ["pending", "confirmed", "active"],
+            },
+        }).populate("customer", "name phone profileImage")
+            .populate(
+                "vehicle",
+                "vehicleType brand model numberPlate images seats capacityKg"
+            )
+            .sort({ createdAt: -1 })
+            .lean();
 
         return res.status(200).json({
             success: true,
@@ -898,12 +1112,13 @@ export const getPendingRentalRequests = async (
             count: rentals.length,
             rentals,
         });
+
     } catch (err) {
         console.error("Get pending rental requests error:", err);
 
         return res.status(500).json({
             success: false,
-            message: "Failed to fetch pending rental requests",
+            message: "Failed to fetch rental requests",
         });
     }
 };
@@ -911,43 +1126,41 @@ export const getPendingRentalRequests = async (
 
 export const getRentalProviders = async (req: Request, res: Response) => {
     try {
+
         const providers = await TransportProvider.find({
+            transporterRole: "booking-partner",
+            isActive: true,
             isBlocked: false,
+            isAvailable: true,
             isVerified: true,
             isKycCompleted: true,
             verificationStatus: "approved",
-            "vehicle.type": { $exists: true },
-        }).select("name phone vehicle pricePerKm").sort({ name: 1 }).lean();
+        }).select("name phone profileImage location serviceAreas pricePerKm").sort({ name: 1 }).lean();
 
-        const providersWithVehicles = await Promise.all(providers.map(async (provider) => {
-            let vehicle = await Vehicle.findOne({ transporter: provider._id }).lean();
 
-            if (!vehicle && provider.vehicle?.type) {
-                vehicle = await Vehicle.findOneAndUpdate(
-                    { transporter: provider._id },
-                    {
-                        transporter: provider._id,
-                        vehicleType: provider.vehicle.type,
-                        brand: "Yatra Fleet",
-                        model: provider.vehicle.type,
-                        images: provider.vehicle.vehiclePhoto ? [provider.vehicle.vehiclePhoto] : [],
-                        seats: provider.vehicle.type === "Bike" ? 1 : provider.vehicle.type === "Bus" ? 30 : 4,
-                        year: new Date().getFullYear(),
-                    },
-                    { upsert: true, new: true, setDefaultsOnInsert: true },
-                ).lean();
-            }
+        const providersWithVehicles = await Promise.all(
+            providers.map(async (provider) => {
+                const vehicles = await Vehicle.find({
+                    transporter: provider._id,
+                    isAvailable: true,
+                    rentalAvailable: true,
+                }).select("vehicleType brand model numberPlate images seats capacityKg year").sort({ createdAt: -1 }).lean();
 
-            return {
-                ...provider,
-                vehicles: vehicle ? [vehicle] : [],
-            };
-        }));
+                return {...provider, vehicles,};
+            })
+        );
 
-        return res.status(200).json({ success: true, providers: providersWithVehicles });
+        return res.status(200).json({
+            success: true,
+            providers: providersWithVehicles,
+        });
     } catch (err) {
         console.error("Get rental providers error:", err);
-        return res.status(500).json({ success: false, message: "Failed to fetch rental providers" });
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch rental providers",
+        });
     }
 };
 
@@ -957,21 +1170,96 @@ export const startRental = async (req: Request, res: Response) => {
         const transporterId = req.user?.transporterId;
         const rentalId = String(req.params.rentalId);
 
-        if (!transporterId) return res.status(401).json({ success: false, message: "Transporter authentication required" });
-        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
+        if (!transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+        });
+
+        if (!transporter) {
+            return res.status(403).json({
+                success: false,
+                message: "Transporter is not authorized to start this rental",
+            });
+        }
 
         const rental = await VehicleRental.findOneAndUpdate(
-            { _id: rentalId, transporter: transporterId, status: "confirmed" },
-            { $set: { status: "active", startedAt: new Date() } },
-            { new: true },
+            {
+                _id: rentalId,
+                transporter: transporterId,
+                status: "confirmed",
+            },
+            {
+                $set: {
+                    status: "active",
+                    startedAt: new Date(),
+                },
+            },
+            {
+                new: true,
+            }
         );
 
-        if (!rental) return res.status(409).json({ success: false, message: "Only confirmed rentals can be started" });
-        req.app.get("io")?.to(`customer:${rental.customer}`).emit("rental_started", { rentalId: rental._id, status: rental.status });
-        return res.status(200).json({ success: true, message: "Rental started", rental });
+        if (!rental) {
+            return res.status(409).json({
+                success: false,
+                message: "Only confirmed rentals can be started",
+            });
+        }
+
+        const io = req.app.get("io");
+
+        if (io) {
+            io.to(`customer:${rental.customer}`).emit(
+                "rental_started",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    startedAt: rental.startedAt,
+                }
+            );
+
+            io.to(`transporter:${rental.transporter}`).emit(
+                "rental_started",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    startedAt: rental.startedAt,
+                }
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rental started successfully",
+            rental,
+        });
+
     } catch (err) {
         console.error("Start rental error:", err);
-        return res.status(500).json({ success: false, message: "Failed to start rental" });
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to start rental",
+        });
     }
 };
 
@@ -981,78 +1269,318 @@ export const completeRental = async (req: Request, res: Response) => {
         const transporterId = req.user?.transporterId;
         const rentalId = String(req.params.rentalId);
 
-        if (!transporterId) return res.status(401).json({ success: false, message: "Transporter authentication required" });
-        if (!mongoose.Types.ObjectId.isValid(rentalId)) return res.status(400).json({ success: false, message: "Invalid rental ID" });
+        if (!transporterId) {
+            return res.status(401).json({
+                success: false,
+                message: "Transporter authentication required",
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+
+        const transporter = await TransportProvider.findOne({
+            _id: transporterId,
+            transporterRole: "booking-partner",
+            isActive: true,
+            isBlocked: false,
+            isVerified: true,
+            isKycCompleted: true,
+            verificationStatus: "approved",
+        });
+
+        if (!transporter) {
+            return res.status(403).json({
+                success: false,
+                message: "Transporter is not authorized to complete this rental",
+            });
+        }
+
 
         const rental = await VehicleRental.findOneAndUpdate(
-            { _id: rentalId, transporter: transporterId, status: "active" },
-            { $set: { status: "completed", completedAt: new Date() } },
-            { new: true },
+            {
+                _id: rentalId,
+                transporter: transporterId,
+                status: "active",
+            },
+            {
+                $set: {
+                    status: "completed",
+                    completedAt: new Date(),
+                },
+            },
+            {
+                new: true,
+            }
         );
 
-        if (!rental) return res.status(409).json({ success: false, message: "Only active rentals can be completed" });
-        req.app.get("io")?.to(`customer:${rental.customer}`).emit("rental_completed", { rentalId: rental._id, status: rental.status });
-        return res.status(200).json({ success: true, message: "Rental completed", rental });
+        if (!rental) {
+            return res.status(409).json({
+                success: false,
+                message: "Only active rentals can be completed",
+            });
+        }
+
+        const io = req.app.get("io");
+
+        if (io) {
+            io.to(`customer:${rental.customer}`).emit(
+                "rental_completed",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    completedAt: rental.completedAt,
+                }
+            );
+
+            io.to(`transporter:${rental.transporter}`).emit(
+                "rental_completed",
+                {
+                    rentalId: rental._id,
+                    status: rental.status,
+                    completedAt: rental.completedAt,
+                }
+            );
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Rental completed successfully",
+            rental,
+        });
+
     } catch (err) {
         console.error("Complete rental error:", err);
-        return res.status(500).json({ success: false, message: "Failed to complete rental" });
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to complete rental",
+        });
     }
 };
 
-export const searchAvailableVehicles = async (req: Request, res: Response) => {
-    try {
-        const { vehicleType, startDate, endDate } = req.body;
 
-        if (!vehicleType || !startDate || !endDate) {
+const calculateDistance = ( lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371;
+
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+    );
+
+    return R * c;
+};
+
+
+export const searchAvailable = async ( req: Request,  res: Response) => {
+    try {
+        const {  pickupLocation, vehicleType, passengers, startDate, endDate,} = req.body;
+
+
+        if ( !pickupLocation?.coordinates || !vehicleType || !startDate || !endDate) {
             return res.status(400).json({
                 success: false,
-                message: "Vehicle type and rental dates are required",
+                message: "Pickup location, vehicle type, start date and end date are required",
+            });
+        }
+
+        const [longitude, latitude] = pickupLocation.coordinates;
+
+        if (typeof longitude !== "number" || typeof latitude !== "number") {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid pickup coordinates",
             });
         }
 
         const start = new Date(startDate);
         const end = new Date(endDate);
 
-        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
             return res.status(400).json({
                 success: false,
-                message: "endDate must be after startDate",
+                message: "Invalid start or end date",
             });
         }
 
-        const providers = await TransportProvider.find({
+        if (start >= end) {
+            return res.status(400).json({
+                success: false,
+                message: "End date must be after start date",
+            });
+        }
+
+        const vehicleFilter: any = {
+            vehicleType,
+            isAvailable: true,
+            rentalAvailable: true,
+        };
+
+        if (passengers) {
+            vehicleFilter.seats = { $gte: Number(passengers) };
+        }
+
+        const vehicles = await Vehicle.find(vehicleFilter).lean();
+
+        if (!vehicles.length) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: [],
+            });
+        }
+
+  
+        const transporterIds = [
+            ...new Set(
+                vehicles.map((vehicle) =>
+                    vehicle.transporter.toString()
+                )
+            ),
+        ];
+
+        const transporters = await TransportProvider.find({
+            _id: { $in: transporterIds },
+            transporterRole: "booking-partner",
+            isAvailable: true,
+            isActive: true,
             isBlocked: false,
             isVerified: true,
             isKycCompleted: true,
             verificationStatus: "approved",
-            "vehicle.type": vehicleType,
-        }).select("name phone vehicle pricePerKm");
+        }).lean();
 
-        const providerIds = providers.map((p) => p._id);
+        const transporterMap = new Map(
+            transporters.map((transporter) => [
+                transporter._id.toString(),
+                transporter,
+            ])
+        );
 
-        const overlappingRentals = await VehicleRental.find({
-            transporter: { $in: providerIds },
-            status: { $in: ["pending", "confirmed", "active"] },
+        const validVehicles = vehicles.filter((vehicle) =>
+            transporterMap.has(vehicle.transporter.toString())
+        );
+
+        if (!validVehicles.length) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                data: [],
+            });
+        }
+
+        const vehicleIds = validVehicles.map(
+            (vehicle) => vehicle._id
+        );
+
+        const conflictingRentals = await VehicleRental.find({
+            vehicle: { $in: vehicleIds },
+            status: { $in: ["pending", "confirmed", "active"]},
             startDate: { $lt: end },
             endDate: { $gt: start },
-        }).select("transporter");
+        }).select("vehicle").lean();
 
-        const bookedTransporterIds = new Set(
-            overlappingRentals.map((r) => r.transporter.toString())
+        const bookedVehicleIds = new Set(
+            conflictingRentals.map((rental) =>
+                rental.vehicle.toString()
+            )
         );
 
-        const availableProviders = providers.filter(
-            (p) => !bookedTransporterIds.has(p._id.toString())
+        const availableVehicles = validVehicles.filter(
+            (vehicle) => !bookedVehicleIds.has(vehicle._id.toString())
         );
+
+        const results = availableVehicles.map((vehicle) => {
+            const transporter = transporterMap.get(
+                vehicle.transporter.toString()
+            );
+
+            let score = 0;
+
+            if (vehicle.vehicleType === vehicleType) {
+                score += 50;
+            }
+
+            if (passengers &&vehicle.seats &&vehicle.seats >= Number(passengers)) {
+                score += 10;
+            }
+
+            let distanceKm = 0;
+
+            if (transporter?.currentLocation?.coordinates) {
+                distanceKm = calculateDistance(
+                    latitude,
+                    longitude,
+                    transporter.currentLocation.coordinates[1],
+                    transporter.currentLocation.coordinates[0]
+                );
+
+                if (distanceKm <= 5) {
+                    score += 20;
+                } else if (distanceKm <= 15) {
+                    score += 10;
+                }
+            }
+
+            return {
+                score,
+                distanceKm: Number(distanceKm.toFixed(2)),
+
+                vehicle: {
+                    id: vehicle._id,
+                    vehicleType: vehicle.vehicleType,
+                    brand: vehicle.brand,
+                    model: vehicle.model,
+                    numberPlate: vehicle.numberPlate,
+                    images: vehicle.images,
+                    seats: vehicle.seats,
+                    capacityKg: vehicle.capacityKg,
+                    year: vehicle.year,
+                },
+
+                transporter: transporter
+                    ? {
+                          id: transporter._id,
+                          name: transporter.name,
+                          phone: transporter.phone,
+                          profileImage: transporter.profileImage,
+                          location: transporter.location,
+                          currentLocation: transporter.currentLocation,
+                      }
+                    : null,
+            };
+        });
+
+        results.sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            }
+
+            return a.distanceKm - b.distanceKm;
+        });
 
         return res.status(200).json({
             success: true,
-            count: availableProviders.length,
-            providers: availableProviders,
+            count: results.length,
+            data: results,
         });
+    } catch (error) {
+        console.error("Search available vehicles error:", error);
 
-    } catch (err) {
-        console.error("Search available vehicles error:", err);
         return res.status(500).json({
             success: false,
             message: "Failed to search available vehicles",

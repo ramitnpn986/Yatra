@@ -13,7 +13,11 @@ import {
     getRentalProviders,
     startRental,
     completeRental,
+<<<<<<< Updated upstream
     payRentalDeposit,searchAvailableVehicles,
+=======
+    searchAvailable
+>>>>>>> Stashed changes
 } from "../controllers/RideRequestController.js";
 
 import { Router } from "express";
@@ -35,20 +39,9 @@ router.post("/rental/start/:rentalId", isAuthenticated, isTransporter, startRent
 router.post("/rental/complete/:rentalId", isAuthenticated, isTransporter, completeRental);
 router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRentalRequest);
 router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); 
-router.post("/rental/pay-deposit/:rentalId", isAuthenticated, isCustomer, payRentalDeposit);
-router.post("/rental/search", isAuthenticated, isCustomer, searchAvailableVehicles);
-router.get(
-    "/rental/my-rentals",
-    isAuthenticated,
-    isCustomer,
-    getMyRentals
-);
+router.get( "/rental/my-rentals", isAuthenticated, isCustomer, getMyRentals);
+router.get("/rental/pending", isAuthenticated, isTransporter, getPendingRentalRequests);
+router.get("/search", isAuthenticated, isCustomer, searchAvailable);
 
-router.get(
-    "/rental/pending",
-    isAuthenticated,
-    isTransporter,
-    getPendingRentalRequests
-);
 
 export default router;

@@ -1,5 +1,5 @@
-import { Socket } from "socket.io" // this is just Typescript type for one connected Socket.IO client
-import jwt from 'jsonwebtoken'    // normaly to verify 
+import { Socket } from "socket.io" // this is just Typescript type for one connected Socket.IO client.
+import jwt from 'jsonwebtoken'
 import { AuthenticatedSocket, SocketRole } from "./socketTypes.js"
 
 interface JwtPayload {

@@ -26,8 +26,7 @@ const TransporterLocationSelection = () => {
     const [addressLoading, setAddressLoading] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
-    const [savedLocation, setSavedLocation] =
-        useState<LocationData | null>(null);
+    const [savedLocation, setSavedLocation] = useState<LocationData | null>(null);
 
     const router = useRouter();
 

@@ -17,6 +17,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import { useRideRequest } from "@/hooks/passenger/useRideRequest";
 import RideMap from "../components/RideMapClient";
+import { useRouter } from "next/navigation";
 
 type VehicleType = "car" | "ev" | "bike";
 
@@ -61,6 +62,8 @@ export default function Page() {
     const [calculatingRoute, setCalculatingRoute] = useState(false);
     const [requestingRide, setRequestingRide] = useState(false);
 
+    const router = useRouter()
+
     const getPlaceName = async (lat: number, lng: number) => {
         try {
             const response = await fetch(
@@ -78,7 +81,7 @@ export default function Page() {
     const { createRequest, loading, error } = useRideRequest();
 
     const handleSubmitRequest = async () => {
-        if (!destinationCoords || !selectedVehicleType || !roadDistance ) {
+        if (!destinationCoords || !selectedVehicleType || !roadDistance) {
             return;
         }
 
@@ -97,7 +100,7 @@ export default function Page() {
                 },
                 distanceKm: roadDistance,
                 estimatedFare: VEHICLE_PRICES[selectedVehicleType],
-                vehicleType: selectedVehicleType === "ev" ? "Car": selectedVehicleType === "car" ? "Car" : "Bike",
+                vehicleType: selectedVehicleType === "ev" ? "Car" : selectedVehicleType === "car" ? "Car" : "Bike",
                 passengerCount: 1,
             });
 
@@ -269,11 +272,19 @@ export default function Page() {
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6 text-gray-900 sm:px-6 md:px-10">
             <div className="mx-auto max-w-7xl">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold sm:text-3xl">Let's get a ride today</h1>
-                    <p className="mt-1 text-sm text-gray-500">
-                        Choose your pickup, destination and preferred vehicle.
-                    </p>
+                <div className="mb-6 flex justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold sm:text-3xl">Let's get a ride today</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Choose your pickup, destination and preferred vehicle.
+                        </p>
+                    </div>
+                    <div>
+                        <button onClick={()=>router.push("/customer/booking-filter")} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-300  font-semibold">
+                            Create Booking
+                        </button>
+                    </div>
+
                 </div>
 
                 <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -348,7 +359,7 @@ export default function Page() {
                                     <X size={18} />
                                 </button>
                             )}
-                            <button  onClick={handleSearch}  disabled={searching}  className="shrink-0 rounded-xl bg-black px-4 py-2.5 text-sm text-white disabled:opacity-50">
+                            <button onClick={handleSearch} disabled={searching} className="shrink-0 rounded-xl bg-black px-4 py-2.5 text-sm text-white disabled:opacity-50">
                                 {searching ? "Searching..." : "Search"}
                             </button>
                         </div>
@@ -476,7 +487,7 @@ export default function Page() {
 
                                 return (
                                     <button key={type} onClick={() => setSelectedVehicleType(type)}
-                                        className={`rounded-2xl   bg-[#102044] p-5 text-left transition ${selectedVehicleType === type ? "shadow-lg" : "shadow-sm hover:border-gray-300" }`}
+                                        className={`rounded-2xl   bg-[#102044] p-5 text-left transition ${selectedVehicleType === type ? "shadow-lg" : "shadow-sm hover:border-gray-300"}`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <Image
@@ -506,7 +517,7 @@ export default function Page() {
                     </div>
                 )}
 
-                { canRequestRide && (
+                {canRequestRide && (
                     <div className="sticky bottom-4 z-20 mt-6">
                         <div className="rounded-2xl  bg-white p-4 shadow-xl sm:p-5">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

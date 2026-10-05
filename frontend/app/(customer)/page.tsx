@@ -59,7 +59,7 @@ export default function Home() {
                   comfortably to your destination.
                 </p>
 
-                <Link href="/register"
+                <Link href="/login"
                   className="mt-6 inline-flex items-center gap-2 font-semibold text-indigo-600 transition hover:gap-3"
                 >
                   Book a Ride
@@ -96,7 +96,7 @@ export default function Home() {
                 </p>
 
                 <Link
-                  href="/register"
+                  href="/login"
                   className="mt-6 inline-flex items-center gap-2 font-semibold text-indigo-600 transition hover:gap-3"
                 >
                   Explore Rentals

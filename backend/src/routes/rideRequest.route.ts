@@ -13,11 +13,7 @@ import {
     getRentalProviders,
     startRental,
     completeRental,
-<<<<<<< Updated upstream
-    payRentalDeposit,searchAvailableVehicles,
-=======
-    searchAvailable
->>>>>>> Stashed changes
+    searchAvailable,
 } from "../controllers/RideRequestController.js";
 
 import { Router } from "express";

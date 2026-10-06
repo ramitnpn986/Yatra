@@ -69,7 +69,7 @@ export default function AdminRidesPage() {
 
   return (
     <div className="min-h-full bg-[#F8FAFC]">
-      {/* Page Header */}
+
       <div className="mb-8">
         <p className="mb-2 text-sm font-bold uppercase tracking-[0.15em] text-[#ee8d39]">
           Operations
@@ -84,7 +84,6 @@ export default function AdminRidesPage() {
         </p>
       </div>
 
-      {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-2">
         {(["all", "active", "completed", "cancelled"] as const).map(
           (filter) => (
@@ -103,9 +102,8 @@ export default function AdminRidesPage() {
         )}
       </div>
 
-      {/* Ride History Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Card Header */}
+
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
             <h2 className="text-xl font-black text-[#0F172A]">
@@ -117,7 +115,6 @@ export default function AdminRidesPage() {
             </p>
           </div>
 
-          {/* Ride Count */}
           <div className="rounded-full bg-[#FFF3E8] px-4 py-2">
             <span className="text-sm font-bold text-[#ee8d39]">
               {rides.length}
@@ -125,7 +122,6 @@ export default function AdminRidesPage() {
           </div>
         </div>
 
-        {/* Loading */}
         {loading ? (
           <div className="px-6 py-16 text-center">
             <p className="text-sm font-medium text-slate-500">
@@ -145,7 +141,6 @@ export default function AdminRidesPage() {
             </p>
           </div>
         ) : (
-          /* Table */
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1050px] text-left">
               <thead>
@@ -168,7 +163,6 @@ export default function AdminRidesPage() {
                       key={ride._id}
                       className="border-b border-slate-100 transition-colors hover:bg-[#F8FAFC]"
                     >
-                      {/* Ride */}
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#FFF3E8] text-[#ee8d39]">
@@ -187,7 +181,6 @@ export default function AdminRidesPage() {
                         </div>
                       </td>
 
-                      {/* Route */}
                       <td className="min-w-[300px] px-6 py-5">
                         <div className="space-y-3">
                           <p className="flex items-start gap-2 text-sm font-medium text-slate-600">
@@ -216,14 +209,12 @@ export default function AdminRidesPage() {
                         </div>
                       </td>
 
-                      {/* Customer */}
                       <td className="px-6 py-5">
                         <p className="text-sm font-bold text-[#0F172A]">
                           {getPersonName(ride.customer)}
                         </p>
                       </td>
 
-                      {/* Status */}
                       <td className="px-6 py-5">
                         <span
                           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold ${status.className}`}
@@ -233,14 +224,12 @@ export default function AdminRidesPage() {
                         </span>
                       </td>
 
-                      {/* Requested */}
                       <td className="whitespace-nowrap px-6 py-5">
                         <p className="text-sm font-medium text-slate-500">
                           {formatDate(ride.requestedAt)}
                         </p>
                       </td>
 
-                      {/* Action */}
                       <td className="px-6 py-5">
                         <Link
                           href={`/admin/dashboard/rides/${ride._id}`}
@@ -264,4 +253,3 @@ export default function AdminRidesPage() {
     </div>
   );
 }
-

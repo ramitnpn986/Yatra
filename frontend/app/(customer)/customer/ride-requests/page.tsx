@@ -40,10 +40,10 @@ type RideRequest = {
 };
 
 const statusStyles: Record<RideStatus, string> = {
-    pending: "bg-amber-50 text-amber-700 border-amber-200",
-    accepted: "bg-green-50 text-green-700 border-green-200",
-    expired: "bg-slate-100 text-slate-600 border-slate-200",
-    cancelled: "bg-red-50 text-red-700 border-red-200",
+    pending: "bg-warning/10 text-warning border-warning/30",
+    accepted: "bg-success/10 text-success border-success/30",
+    expired: "bg-background text-text-muted border-border",
+    cancelled: "bg-error/10 text-error border-error/30",
 };
 
 const vehicleIcons = {
@@ -94,20 +94,18 @@ const RideRequestsPage = () => {
     }, []);
 
     return (
-        <div className="mx-auto max-w-6xl">
+        <div className="mx-auto max-w-6xl overflow-x-hidden">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                    <h1 className="text-2xl font-bold tracking-tight text-primary">
                         Ride Requests
                     </h1>
-
-                
                 </div>
 
                 <button
                     onClick={fetchRideRequests}
                     disabled={loading}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#0F172A] shadow-sm transition hover:border-[#0F172A] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex shrink-0 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:border-primary hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     <RefreshCw
                         size={16}
@@ -118,44 +116,44 @@ const RideRequestsPage = () => {
             </div>
 
             {loading ? (
-                <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <div className="rounded-2xl border border-border bg-surface p-10 text-center shadow-sm">
                     <RefreshCw
                         size={28}
-                        className="mx-auto animate-spin text-[#0F172A]"
+                        className="mx-auto animate-spin text-primary"
                     />
 
-                    <p className="mt-3 text-sm font-medium text-slate-500">
+                    <p className="mt-3 text-sm font-medium text-text-muted">
                         Loading ride requests...
                     </p>
                 </div>
             ) : error ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
-                    <p className="font-medium text-red-700">{error}</p>
+                <div className="rounded-2xl border border-error/30 bg-error/10 p-6 text-center">
+                    <p className="font-medium text-error">{error}</p>
 
                     <button
                         onClick={fetchRideRequests}
-                        className="mt-4 rounded-xl bg-[#0F172A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b2c54]"
+                        className="mt-4 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
                     >
                         Try Again
                     </button>
                 </div>
             ) : rideRequests.length === 0 ? (
-                <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-[#0F172A]">
+                <div className="rounded-3xl border border-border bg-surface p-12 text-center shadow-sm">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-background text-primary">
                         <MapPin size={28} />
                     </div>
 
-                    <h2 className="mt-5 text-lg font-bold text-[#0F172A]">
+                    <h2 className="mt-5 text-lg font-bold text-primary">
                         No ride requests
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-text-muted">
                         You have not created any ride requests yet.
                     </p>
 
                     <Link
                         href="/dashboard"
-                        className="mt-5 inline-flex rounded-xl bg-[#ee8d39] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#EA7D24]"
+                        className="mt-5 inline-flex rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-dark"
                     >
                         Book a Ride
                     </Link>
@@ -171,17 +169,17 @@ const RideRequestsPage = () => {
                             <Link
                                 key={request._id}
                                 href={`/customer/ride-requests/${request._id}`}
-                                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#0F172A]/30 hover:shadow-md"
+                                className="group overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition hover:border-primary/30 hover:shadow-md"
                             >
                                 <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                                    <div className="flex gap-4">
-                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0F172A] text-white">
+                                    <div className="flex min-w-0 flex-1 gap-4">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
                                             <VehicleIcon size={22} />
                                         </div>
 
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
-                                                <h2 className="font-bold text-[#0F172A]">
+                                                <h2 className="font-bold text-primary">
                                                     {request.vehicleType || "Ride"}
                                                 </h2>
 
@@ -193,13 +191,13 @@ const RideRequestsPage = () => {
                                             </div>
 
                                             <div className="mt-3 space-y-2 text-sm">
-                                                <div className="flex items-start gap-2">
+                                                <div className="flex items-start gap-2 min-w-0">
                                                     <MapPin
                                                         size={16}
-                                                        className="mt-0.5 shrink-0 text-[#ee8d39]"
+                                                        className="mt-0.5 shrink-0 text-accent"
                                                     />
 
-                                                    <span className="truncate text-slate-600">
+                                                    <span className="block min-w-0 truncate text-text-muted">
                                                         {
                                                             request
                                                                 .pickupLocation
@@ -208,13 +206,13 @@ const RideRequestsPage = () => {
                                                     </span>
                                                 </div>
 
-                                                <div className="flex items-start gap-2">
+                                                <div className="flex items-start gap-2 min-w-0">
                                                     <MapPin
                                                         size={16}
-                                                        className="mt-0.5 shrink-0 text-red-500"
+                                                        className="mt-0.5 shrink-0 text-error"
                                                     />
 
-                                                    <span className="truncate text-slate-600">
+                                                    <span className="block min-w-0 truncate text-text-muted">
                                                         {
                                                             request
                                                                 .dropoffLocation
@@ -226,14 +224,14 @@ const RideRequestsPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-6 border-t border-slate-100 pt-4 md:border-t-0 md:pt-0">
+                                    <div className="flex shrink-0 items-center justify-between gap-6 border-t border-border pt-4 md:border-t-0 md:pt-0">
                                         <div className="text-sm">
-                                            <div className="font-bold text-[#0F172A]">
+                                            <div className="font-bold text-primary">
                                                 Rs.{" "}
                                                 {request.estimatedFare ?? "—"}
                                             </div>
 
-                                            <div className="mt-1 flex items-center gap-1 text-slate-500">
+                                            <div className="mt-1 flex items-center gap-1 text-text-muted">
                                                 <Clock size={14} />
                                                 {request.distanceKm.toFixed(1)}{" "}
                                                 km
@@ -242,7 +240,7 @@ const RideRequestsPage = () => {
 
                                         <ArrowRight
                                             size={20}
-                                            className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-[#ee8d39]"
+                                            className="shrink-0 text-text-muted transition group-hover:translate-x-1 group-hover:text-accent"
                                         />
                                     </div>
                                 </div>

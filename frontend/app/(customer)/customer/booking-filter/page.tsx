@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { MapPin, CalendarDays, Users, Car, Search, ArrowRight, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { MapPin, CalendarDays, Users, Car, Search, ArrowRight,  ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import RentalVehicleCard from "@/app/(customer)/components/RentalVehicleCard";
 
 type Coordinates = [number, number];
 
@@ -20,15 +21,15 @@ interface SelectedLocation {
 }
 
 interface Vehicle {
-     id: string;
-     vehicleType: "Bike" | "Car" | "Truck" | "Bus";
-     brand: string;
-     model:string;
-     numberPlate: string;
-     images: string[];
-     seats: number;
-     capacityKg: number;
-     year: number;
+    id: string;
+    vehicleType: "Bike" | "Car" | "Truck" | "Bus";
+    brand: string;
+    model: string;
+    numberPlate: string;
+    images: string[];
+    seats: number;
+    capacityKg: number;
+    year: number;
 }
 
 interface Transporter {
@@ -81,64 +82,64 @@ export default function RentalSearchForm() {
     }, [startDate, endDate]);
 
 
-   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    if (!pickupLocation) {
-        toast.error("Please select a pickup location");
-        return;
-    }
-
-    if (!vehicleType) {
-        toast.error("Please select a vehicle type");
-        return;
-    }
-
-    if (!startDate || !endDate) {
-        toast.error("Please select rental dates");
-        return;
-    }
-
-    if (totalDays <= 0) {
-        toast.error("End date must be after start date");
-        return;
-    }
-
-    const searchData = {
-        pickupLocation: pickupLocation.coordinates,
-        vehicleType,
-        passengers: Number(passengers),
-        startDate,
-        endDate,
-    };
-
-    try {
-        const res = await fetch("/api/customer/rental/search", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(searchData),
-        });
-
-        const data: RentalSearchResponse = await res.json();
-
-        if (!res.ok) {
-            toast.error((data as any).message || "Failed to search vehicles");
+        if (!pickupLocation) {
+            toast.error("Please select a pickup location");
             return;
         }
 
-        console.log("Available vehicles:", data);
+        if (!vehicleType) {
+            toast.error("Please select a vehicle type");
+            return;
+        }
 
-        toast.success("Vehicles found");
-        setVehicles(data.data);
+        if (!startDate || !endDate) {
+            toast.error("Please select rental dates");
+            return;
+        }
 
-    } catch (error) {
-        console.error("Rental search error:", error);
-        toast.error("Something went wrong while searching vehicles");
-    }
-};
+        if (totalDays <= 0) {
+            toast.error("End date must be after start date");
+            return;
+        }
+
+        const searchData = {
+            pickupLocation: pickupLocation.coordinates,
+            vehicleType,
+            passengers: Number(passengers),
+            startDate,
+            endDate,
+        };
+
+        try {
+            const res = await fetch("/api/customer/rental/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(searchData),
+            });
+
+            const data: RentalSearchResponse = await res.json();
+
+            if (!res.ok) {
+                toast.error((data as any).message || "Failed to search vehicles");
+                return;
+            }
+
+            console.log("Available vehicles:", data);
+
+            toast.success("Vehicles found");
+            setVehicles(data.data);
+
+        } catch (error) {
+            console.error("Rental search error:", error);
+            toast.error("Something went wrong while searching vehicles");
+        }
+    };
 
 
 
@@ -337,7 +338,7 @@ export default function RentalSearchForm() {
                                 </div>
                             )}
                         </div>
- 
+
                     </div>
 
 
@@ -427,6 +428,23 @@ export default function RentalSearchForm() {
                     </div>
                 </div>
             </form>
+
+            {vehicles.length > 0 && (
+                <div className="mt-8">
+                    <div className="mb-5">
+                        <h2 className="text-xl font-bold text-gray-900"> Available Vehicles </h2>
+                        <p className="text-sm text-gray-500"> {vehicles.length} vehicles available near your pickup location </p>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {vehicles.map((item) => (
+                            <RentalVehicleCard key={item.vehicle.id} item={item} onSelect={(selectedVehicle) => {
+                                console.log("Selected vehicle:", selectedVehicle);
+                            }}
+                            />))}
+                    </div>
+                </div>
+            )}
         </div>
 
     );

@@ -96,9 +96,6 @@ const LocationMarker = ({
                 const address = data.address || {};
                 const selectedLocation: SelectedLocation = {
                     type: "Point",
-
-                    // MongoDB GeoJSON:
-                    // [longitude, latitude]
                     coordinates: [
                         longitude,
                         latitude,
@@ -166,7 +163,6 @@ const LocationPicker1 = ({ onSelect, currentCoords, isEditable}: LocationPickerP
         <MapContainer center={position} zoom={13} className="h-full w-full">
             <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
             <ChangeView center={position} />
-
             <LocationMarker
                 position={position}
                 setPosition={setPosition}

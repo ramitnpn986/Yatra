@@ -19,15 +19,49 @@ interface SelectedLocation {
     ward: string;
 }
 
+interface Vehicle {
+     id: string;
+     vehicleType: "Bike" | "Car" | "Truck" | "Bus";
+     brand: string;
+     model:string;
+     numberPlate: string;
+     images: string[];
+     seats: number;
+     capacityKg: number;
+     year: number;
+}
+
+interface Transporter {
+    id: string;
+    name: string;
+    phone: string;
+    profileImage?: string;
+    location: SelectedLocation;
+}
+
+interface AvailableVehicle {
+    distanceKm: number;
+    vehicle: Vehicle;
+    transporter: Transporter;
+}
+
+interface RentalSearchResponse {
+    success: boolean;
+    count: number;
+    data: AvailableVehicle[];
+}
+
+
+
 const LocationPicker = dynamic(
     () => import("@/app/(customer)/components/LocationPicker1"),
     { ssr: false }
 );
 
 export default function RentalSearchForm() {
-    const [pickupLocation, setPickupLocation] = useState<SelectedLocation | null>(null);
-    const [returnLocation, setReturnLocation] = useState<SelectedLocation | null>(null);
 
+    const [vehicles, setVehicles] = useState<AvailableVehicle[]>([]);
+    const [pickupLocation, setPickupLocation] = useState<SelectedLocation | null>(null);
     const [vehicleType, setVehicleType] = useState("");
     const [passengers, setPassengers] = useState("1");
     const [startDate, setStartDate] = useState("");
@@ -47,47 +81,64 @@ export default function RentalSearchForm() {
     }, [startDate, endDate]);
 
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
+   const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        if (!pickupLocation) {
-            toast.error("Please select a pickup location");
-            return;
-        }
+    if (!pickupLocation) {
+        toast.error("Please select a pickup location");
+        return;
+    }
 
-        if (!returnLocation) {
-            toast.error("Please select a return location");
-            return;
-        }
+    if (!vehicleType) {
+        toast.error("Please select a vehicle type");
+        return;
+    }
 
-        if (!vehicleType) {
-            toast.error("Please select a vehicle type");
-            return;
-        }
+    if (!startDate || !endDate) {
+        toast.error("Please select rental dates");
+        return;
+    }
 
-        if (!startDate || !endDate) {
-            toast.error("Please select rental dates");
-            return;
-        }
+    if (totalDays <= 0) {
+        toast.error("End date must be after start date");
+        return;
+    }
 
-        if (totalDays <= 0) {
-            toast.error("End date must be after start date");
-            return;
-        }
-
-        const searchData = {
-            pickupLocation,
-            returnLocation,
-            vehicleType,
-            passengers: Number(passengers),
-            startDate,
-            endDate,
-            totalDays,
-        };
-
-        console.log("Search Payload:", searchData);
-
+    const searchData = {
+        pickupLocation: pickupLocation.coordinates,
+        vehicleType,
+        passengers: Number(passengers),
+        startDate,
+        endDate,
     };
+
+    try {
+        const res = await fetch("/api/customer/rental/search", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(searchData),
+        });
+
+        const data: RentalSearchResponse = await res.json();
+
+        if (!res.ok) {
+            toast.error((data as any).message || "Failed to search vehicles");
+            return;
+        }
+
+        console.log("Available vehicles:", data);
+
+        toast.success("Vehicles found");
+        setVehicles(data.data);
+
+    } catch (error) {
+        console.error("Rental search error:", error);
+        toast.error("Something went wrong while searching vehicles");
+    }
+};
 
 
 
@@ -247,10 +298,14 @@ export default function RentalSearchForm() {
 
                             <div className="h-[280px] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner">
                                 <LocationPicker
-                                    currentCoords={[
-                                        27.700769,
-                                        83.448349,
-                                    ]}
+                                    currentCoords={
+                                        pickupLocation
+                                            ? [
+                                                pickupLocation.coordinates[1],
+                                                pickupLocation.coordinates[0],
+                                            ]
+                                            : [27.700769, 83.448349]
+                                    }
                                     isEditable={true}
                                     onSelect={(location) => {
                                         setPickupLocation(location);
@@ -282,65 +337,7 @@ export default function RentalSearchForm() {
                                 </div>
                             )}
                         </div>
-
-                        <div className="flex flex-col">
-                            <div className="mb-2.5 flex items-center justify-between">
-                                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                    <MapPin
-                                        size={18}
-                                        className="text-rose-500"
-                                    />
-
-                                    Return Location
-                                </label>
-
-                                {returnLocation && (
-                                    <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] text-slate-500">
-                                        {returnLocation.municipality ||
-                                            returnLocation.district ||
-                                            "Selected"}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="h-[280px] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner">
-                                <LocationPicker
-                                    currentCoords={[
-                                        27.700769,
-                                        83.448349,
-                                    ]}
-                                    isEditable={true}
-                                    onSelect={(location) => {
-                                        setReturnLocation(location);
-                                    }}
-                                />
-                            </div>
-
-                            {returnLocation && (
-                                <div className="mt-3 rounded-xl bg-slate-50 p-3">
-                                    <p className="text-sm font-semibold text-slate-800">
-                                        {returnLocation.address}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-slate-500">
-                                        {returnLocation.municipality &&
-                                            `${returnLocation.municipality}, `}
-
-                                        {returnLocation.district &&
-                                            `${returnLocation.district}, `}
-
-                                        {returnLocation.province}
-                                    </p>
-
-                                    {returnLocation.ward && (
-                                        <p className="mt-1 text-xs text-slate-500">
-                                            Ward: {returnLocation.ward}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
+ 
                     </div>
 
 
@@ -393,7 +390,7 @@ export default function RentalSearchForm() {
                             />
                         </div>
 
-                        {/* End Date */}
+
                         <div>
                             <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 <CalendarDays size={16} />

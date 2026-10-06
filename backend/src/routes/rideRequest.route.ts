@@ -37,7 +37,7 @@ router.post("/rental/reject/:rentalId", isAuthenticated, isTransporter, rejectRe
 router.post("/rental/cancel/:rentalId", isAuthenticated, cancelRentalRequest); 
 router.get( "/rental/my-rentals", isAuthenticated, isCustomer, getMyRentals);
 router.get("/rental/pending", isAuthenticated, isTransporter, getPendingRentalRequests);
-router.get("/search", isAuthenticated, isCustomer, searchAvailable);
+router.get("/rental/search", isAuthenticated, searchAvailable);
 
 
 export default router;

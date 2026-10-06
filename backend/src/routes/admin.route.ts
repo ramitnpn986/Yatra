@@ -39,7 +39,7 @@ router.get("/ride/:id", isAuthenticated, isAdmin, getRideById);
 router.get("/rides/active", isAuthenticated, isAdmin, getActiveRides);
 router.get("/rides/completed", isAuthenticated, isAdmin, getCompletedRides);
 router.get("/rides/view/:id", isAuthenticated, isAdmin, viewRideDetails);
-router.get("/rides/cancelled", isAuthenticated, isAdmin, getCancelRideById);
+router.get("/rides/cancelled", isAuthenticated, isAdmin, getCancelledRides);
 router.get("/get-stats", isAuthenticated, isAdmin, getDashboardStats);
 router.get("/vehicle-rentals", isAuthenticated, isAdmin, getAllVehicleRetals);
 router.get("/vehicle-rental/:vehicleRentalId", isAuthenticated, isAdmin, getVehicleRentalById);

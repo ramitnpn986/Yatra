@@ -1,6 +1,5 @@
 // Shared validation helpers for frontend forms (register, login, contact, profile edit).
 // Each function returns an error message string, or "" if the field is valid.
-// Usage: const err = validatePhone(phone); if (err) { setPhoneError(err); return; }
 
 export function validateName(name: string): string {
     const trimmed = name.trim();

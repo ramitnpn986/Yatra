@@ -1,6 +1,3 @@
-// Shared validation helpers for frontend forms (register, login, contact, profile edit).
-// Each function returns an error message string, or "" if the field is valid.
-
 export function validateName(name: string): string {
     const trimmed = name.trim();
     if (!trimmed) return "Name is required";
@@ -42,8 +39,6 @@ export function validateConfirmPassword(password: string, confirmPassword: strin
     return "";
 }
 
-// Convenience: validate a register-style {name, phone, password} payload at once.
-// Returns an object of field -> error message (only for fields that failed).
 export function validateRegisterForm(fields: {
     name: string;
     phone: string;

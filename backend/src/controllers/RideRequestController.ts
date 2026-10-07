@@ -1728,4 +1728,3 @@ export const searchAvailable = async ( req: Request, res: Response) => {
     }
 };
 
-

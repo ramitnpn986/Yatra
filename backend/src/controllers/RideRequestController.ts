@@ -3,7 +3,6 @@ import RideRequest from "../models/RideRequest.js";
 import { Ride } from "../models/Ride.js";
 import { TransportProvider } from "../models/TransportProvider.js";
 import Customer from "../models/Customer.js";
-
 import mongoose from 'mongoose';
 import { VehicleRental } from "../models/VehicleRentals.js";
 import { Vehicle } from "../models/Vehicle.js";
@@ -1575,8 +1574,6 @@ const calculateRoute = async (locations: RentalLocation[]): Promise<RouteResult>
 
 }
 
-
-
 export const searchAvailable = async ( req: Request, res: Response) => {
     try {
 
@@ -1730,4 +1727,5 @@ export const searchAvailable = async ( req: Request, res: Response) => {
         });
     }
 };
+
 

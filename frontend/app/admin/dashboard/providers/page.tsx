@@ -4,16 +4,27 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+interface Vehicle {
+  _id: string;
+  vehicleType: "Bike" | "Car" | "Truck" | "Bus";
+  brand: string;
+  model: string;
+  numberPlate: string;
+  images?: string[];
+  registrationDocument?: string;
+  seats?: number;
+  capacityKg?: number;
+  year?: number;
+  isAvailable: boolean;
+  rentalAvailable: boolean;
+}
+
 interface Provider {
   _id: string;
   name: string;
   phone: string;
-  vehicle: {
-    type: string;
-    vehiclePhoto?: string;
-    numberPlate: string;
-    capacityKg: number;
-  };
+  transporterRole: "rider" | "booking-partner";
+  vehicles: Vehicle[];
   isKycCompleted: boolean;
   isKycDataSubmitted: boolean;
   isVerified: boolean;
@@ -142,7 +153,7 @@ export default function AdminProviders() {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-slate-600">
-                     {provider.vehicle?.type || "N/A"}
+                     {provider.vehicles[0]?.vehicleType || "N/A"}
                     </td>
 
                     <td className="px-6 py-4">

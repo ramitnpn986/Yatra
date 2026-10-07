@@ -1579,16 +1579,18 @@ const calculateRoute = async (locations: RentalLocation[]): Promise<RouteResult>
 
 export const searchAvailable = async ( req: Request, res: Response) => {
     try {
+
+        console.log("i am getting hits")
         const { pickupLocation,  vehicleType,  passengers, startDate, endDate } = req.body;
 
-        if ( !pickupLocation?.coordinates || !vehicleType || !startDate || !endDate) {
+        if ( !Array.isArray(pickupLocation) ||  pickupLocation.length !== 2  || !vehicleType || !startDate || !endDate) {
             return res.status(400).json({
                 success: false,
                 message: "Pickup location, vehicle type and rental dates are required",
             });
         }
 
-        const [pickupLongitude, pickupLatitude] = pickupLocation.coordinates;
+        const [pickupLongitude, pickupLatitude] = pickupLocation;
 
         if ( typeof pickupLongitude !== "number" || typeof pickupLatitude !== "number") {
             return res.status(400).json({
@@ -1712,6 +1714,7 @@ export const searchAvailable = async ( req: Request, res: Response) => {
         );
 
         results.sort((a, b) => a.distanceKm - b.distanceKm);
+        console.log(results)
 
         return res.status(200).json({
             success: true,

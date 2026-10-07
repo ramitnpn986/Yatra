@@ -7,7 +7,23 @@ import { TransportProvider } from '../models/TransportProvider.js';
 import Customer from '../models/Customer.js';
 import { Ride } from '../models/Ride.js';
 import { VehicleRental } from "../models/VehicleRentals.js";
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
+import { Vehicle } from "../models/Vehicle.js";
+
+const attachVehiclesToTransporters = async (transporters: any[]) => {
+    return Promise.all(
+        transporters.map(async (transporter) => {
+            const vehicles = await Vehicle.find({
+                transporter: transporter._id,
+            }).lean();
+
+            return {
+                ...transporter,
+                vehicles,
+            };
+        })
+    );
+};
 
 export const getAllRides = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -286,26 +302,49 @@ export const changeAdminPassword = async (req: Request, res: Response): Promise<
 
 }
 
-export const getAllTransportersVerified = async (req: Request, res: Response): Promise<Response> => {
+export const getAllTransportersVerified = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
     try {
-        const allTransportProviders = await TransportProvider.find().select('-password');
+        const transporters = await TransportProvider.find()
+            .select("-password")
+            .lean();
+
+        const transportersWithVehicles =
+            await attachVehiclesToTransporters(transporters);
+
         return res.status(200).json({
             success: true,
-            transporters: allTransportProviders
-        })
-
+            transporters: transportersWithVehicles,
+        });
     } catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: "Internal Server Error", success: false });
+        console.log(err);
+
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
     }
+};
 
-}
-
-export const getTransportProviderById = async (req: Request, res: Response): Promise<Response> => {
+export const getTransportProviderById = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
     try {
-
         const transporterId = req.params.transporterId;
-        const transporter = await TransportProvider.findById(transporterId);
+
+        if (!transporterId || !mongoose.isValidObjectId(transporterId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid transporter ID",
+            });
+        }
+
+        const transporter = await TransportProvider.findById(transporterId)
+            .select("-password")
+            .lean();
 
         if (!transporter) {
             return res.status(404).json({
@@ -314,17 +353,27 @@ export const getTransportProviderById = async (req: Request, res: Response): Pro
             });
         }
 
+        // Fetch vehicles using transporter ID
+        const vehicles = await Vehicle.find({
+            transporter: transporter._id,
+        }).lean();
+
         return res.status(200).json({
             success: true,
-            transporter
-        })
-
+            transporter: {
+                ...transporter,
+                vehicles,
+            },
+        });
     } catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: "Internal Server Error", success: false });
-    }
+        console.log(err);
 
-}
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
+    }
+};
 
 export const verifyTransportProviderKYC = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -504,45 +553,64 @@ export const blockUnBlockTransportProvider = async (req: Request, res: Response)
 
 }
 
-export const getPendingKYCProviders = async (req: Request, res: Response): Promise<Response> => {
+export const getPendingKYCProviders = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
     try {
-
         const transporters = await TransportProvider.find({
             verificationStatus: "pending",
-            isKycDataSubmitted: true
+            isKycDataSubmitted: true,
+        })
+            .select("-password")
+            .lean();
 
-        }).select("-password");
+        const transportersWithVehicles =
+            await attachVehiclesToTransporters(transporters);
 
         return res.status(200).json({
             success: true,
-            count: transporters.length,
-            transporters,
-        })
-
-    } catch (err) {
-        console.log(err)
-        return res.status(500).json({ message: "Internal Server Error", success: false });
-    }
-}
-
-export const getBlockedTransportProviders = async (req: Request, res: Response): Promise<Response> => {
-    try {
-
-        const transporters = await TransportProvider.find({
-            isBlocked: true,
-        }).select("-password");
-
-        return res.status(200).json({
-            success: true,
-            count: transporters.length,
-            transporters,
-        })
-
+            count: transportersWithVehicles.length,
+            transporters: transportersWithVehicles,
+        });
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ message: "Internal Server Error", success: false });
+
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
     }
-}
+};
+
+export const getBlockedTransportProviders = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
+    try {
+        const transporters = await TransportProvider.find({
+            isBlocked: true,
+        })
+            .select("-password")
+            .lean();
+
+        const transportersWithVehicles =
+            await attachVehiclesToTransporters(transporters);
+
+        return res.status(200).json({
+            success: true,
+            count: transportersWithVehicles.length,
+            transporters: transportersWithVehicles,
+        });
+    } catch (err) {
+        console.log(err);
+
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+        });
+    }
+};
 
 export const getAllCustomers = async (req: Request, res: Response): Promise<Response> => {
     try {

@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const transportProviderSchema = new mongoose.Schema(
@@ -51,12 +50,11 @@ const transportProviderSchema = new mongoose.Schema(
                 type: [Number],
                 required: true,
             },
-
-            address: { type: String, },
-            province: { type: String, },
-            district: { type: String, },
-            municipality: { type: String, },
-            ward: { type: String, }
+            address: String,
+            province: String,
+            district: String,
+            municipality: String,
+            ward: String,
         },
 
         currentLocation: {
@@ -74,7 +72,6 @@ const transportProviderSchema = new mongoose.Schema(
                 default: Date.now,
             },
         },
-
 
         isVerified: {
             type: Boolean,
@@ -96,7 +93,6 @@ const transportProviderSchema = new mongoose.Schema(
             enum: ["pending", "approved", "rejected"],
             default: "pending",
         },
-
 
         documents: {
             citizenshipCard: String,
@@ -132,9 +128,7 @@ const transportProviderSchema = new mongoose.Schema(
         },
     },
     { timestamps: true }
-
 );
-
 
 transportProviderSchema.pre("save", async function () {
     if (this.isNew && this.location?.coordinates) {
@@ -146,9 +140,11 @@ transportProviderSchema.pre("save", async function () {
     }
 });
 
-
 transportProviderSchema.index({
     currentLocation: "2dsphere",
 });
 
-export const TransportProvider = mongoose.model("TransportProvider", transportProviderSchema);
+export const TransportProvider = mongoose.model(
+    "TransportProvider",
+    transportProviderSchema
+);

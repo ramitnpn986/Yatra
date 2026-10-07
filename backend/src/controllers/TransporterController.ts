@@ -27,12 +27,12 @@ export const registerTransporter = async (req: Request, res: Response) => {
 
         const { name, phone, password, role } = req.body;
 
-        if (role === "rider" || role === "passenger" || role === "admin") {
-            return res.status(400).json({
-                message: "Invalid role",
-                success: false
-            })
-        }
+        if (!["rider", "booking-partner"].includes(role)) {
+    return res.status(400).json({
+        message: "Invalid transporter role",
+        success: false,
+    });
+}
 
         if (!name || !phone || !password) {
             return res.status(400).json({

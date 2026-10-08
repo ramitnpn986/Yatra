@@ -45,7 +45,9 @@ interface Transporter {
     _id: string;
     name: string;
     phone: string;
-    profileImage?: string;
+    profileImage?: {
+        url?: string;
+    }
     location?: {
         type: "Point";
         coordinates: [number, number];
@@ -81,6 +83,7 @@ export default function RentalSearchForm() {
     const [destinationLocation, setDestinationLocation] = useState<SelectedLocation | null>(null);
     const [destinationPlaces, setDestinationPlaces] = useState("");
     const [vehicleType, setVehicleType] = useState("");
+    const [rentalType, setRentalType] = useState("");
     const [passengers, setPassengers] = useState("1");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -126,9 +129,7 @@ export default function RentalSearchForm() {
             const data = await res.json();
 
             if (!res.ok || !data.success) {
-                throw new Error(
-                    data.message || "Failed to fetch vehicle details"
-                );
+                throw new Error(data.message || "Failed to fetch vehicle details");
             }
 
             setVehicleData(data.vehicle);
@@ -168,6 +169,12 @@ export default function RentalSearchForm() {
             return;
         }
 
+        if (!rentalType) {
+            toast.error("Please select a preferred rentalType");
+            return;
+        }
+
+
         if (!startDate || !endDate) {
             toast.error("Please select journey dates");
             return;
@@ -206,16 +213,7 @@ export default function RentalSearchForm() {
                 return;
             }
 
-            console.log("Rental search information:", {
-                pickupLocation,
-                destinationLocation,
-                destinationPlaces,
-                passengers,
-                vehicleType,
-                startDate,
-                endDate,
-                estimatedBudget,
-            });
+        
 
             toast.success("Vehicles found");
         } catch (error) {
@@ -333,7 +331,6 @@ export default function RentalSearchForm() {
                         </div>
                     </div>
 
-
                     <div>
                         <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                             <MapPin size={16} />
@@ -350,7 +347,6 @@ export default function RentalSearchForm() {
                             className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
                         />
                     </div>
-
 
                     <div className="grid gap-5 sm:grid-cols-2">
 
@@ -403,6 +399,7 @@ export default function RentalSearchForm() {
                             </select>
                         </div>
 
+
                     </div>
 
                     <div className="grid gap-5 sm:grid-cols-2">
@@ -441,28 +438,54 @@ export default function RentalSearchForm() {
 
                     </div>
 
-                    <div>
-                        <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                            <Wallet size={16} />
-                            Estimated Budget / Booking Cost
-                        </label>
+                    <div className="grid gap-5 sm:grid-cols-2">
 
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">
-                                Rs.
-                            </span>
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <Wallet size={16} />
+                                Estimated Budget / Booking Cost
+                            </label>
 
-                            <input
-                                type="number"
-                                min="0"
-                                value={estimatedBudget}
-                                onChange={(e) => setEstimatedBudget(e.target.value)}
-                                placeholder="Enter your estimated budget"
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-12 pr-4 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
-                            />
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-500">
+                                    Rs.
+                                </span>
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={estimatedBudget}
+                                    onChange={(e) => setEstimatedBudget(e.target.value)}
+                                    placeholder="Enter your estimated budget"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-12 pr-4 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
+                                />
+                            </div>
                         </div>
-                    </div>
 
+                        <div>
+                            <label className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                <Car size={16} />
+                                Preferred rentalType
+                            </label>
+
+                            <select
+                                value={rentalType}
+                                onChange={(e) => setRentalType(e.target.value)}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
+                            >
+                                <option value="">
+                                    Select vehicle
+                                </option>
+                                <option value="self-drive">
+                                    self-drive
+                                </option>
+                                <option value="with-driver">
+                                    with-driver
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
 
                     <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 sm:flex-row">
 

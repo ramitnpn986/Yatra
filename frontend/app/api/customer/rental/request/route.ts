@@ -1,30 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ vehicleId: string }> }) {
+export async function POST(req: NextRequest) {
     try {
-        
-        const { vehicleId } = await params;
-        if (!vehicleId) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Vehicle ID is required",
-                },
-                { status: 400 }
-            );
-        }
 
-        const res = await fetch(`${process.env.RIDE_REQUEST_URL}/vehicle/${vehicleId}`, {
-            method: "GET",
+        const body = await req.json();
+
+        const res = await fetch(`${process.env.RIDE_REQUEST_URL}/calculate`, {
+            method: "POST",
             headers: {
-                "Cookie": req.headers.get("cookie") || "",
+                "Content-Type": "application/json",
+                Cookie: req.headers.get("cookie") || "",
             },
+            body: JSON.stringify(body),
             cache: "no-store"
-        });
+        })
 
         const contentType = res.headers.get("content-type");
         const responseText = await res.text();
-
 
         if (contentType?.includes("application/json")) {
             const data = JSON.parse(responseText);
@@ -46,9 +38,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vehi
             }
         );
 
-    } catch (err) {
-        console.error("Vehicle details fetch error:", err);
 
+    } catch (err) {
+        console.error("rental request error: ", err);
         return NextResponse.json(
             {
                 success: false,
@@ -58,5 +50,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ vehi
                 status: 500,
             }
         );
+
     }
 }

@@ -30,7 +30,7 @@ interface Transporter {
     location?: {
         type: "Point";
         coordinates: [number, number];
-        address: string;
+        address: string; 
         province?: string;
         district?: string;
         municipality?: string;

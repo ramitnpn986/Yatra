@@ -11,8 +11,8 @@ import {
     Wallet,
     Send,
 } from "lucide-react";
-import Image from "next/image";
 import { toast } from "sonner";
+import VehicleTransporterDetails from "@/app/(customer)/components/VehicleTransporterDetails";
 
 type Coordinates = [number, number];
 
@@ -42,11 +42,19 @@ interface Vehicle {
 }
 
 interface Transporter {
-    id: string;
+    _id: string;
     name: string;
     phone: string;
     profileImage?: string;
-    location: SelectedLocation;
+    location?: {
+        type: "Point";
+        coordinates: [number, number];
+        address: string;
+        province?: string;
+        district?: string;
+        municipality?: string;
+        ward?: string;
+    };
 }
 
 interface AvailableVehicle {
@@ -125,7 +133,7 @@ export default function RentalSearchForm() {
 
             setVehicleData(data.vehicle);
             setTransporter(data.transporter);
-            console.log(data.vehicle , data.transporter);
+            console.log(data.vehicle, data.transporter);
 
         } catch (err) {
             console.log("errr: ", err);
@@ -219,11 +227,9 @@ export default function RentalSearchForm() {
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
 
-            <div className="relative mx-auto mt-4 min-h-[350px] w-full max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a1f39] via-[#0f2d52] to-[#071526] p-10 text-white shadow-2xl">
-
-                {/* basic information of transporter */}
-            </div>
-
+            {vehicleData && transporter && (
+                <VehicleTransporterDetails vehicle={vehicleData} transporter={transporter} />
+            )}
 
             <form id="rental-form" onSubmit={handleSearch} className="mx-auto my-8 max-w-5xl rounded-3xl bg-white p-6 shadow-xl sm:p-8">
                 <div className="mb-8 border-b border-slate-100 pb-5">

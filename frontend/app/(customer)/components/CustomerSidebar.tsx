@@ -95,7 +95,7 @@ export default function CustomerShell({
                 <Image
                     src="/yatralogo.png"
                     alt="Yatra"
-                    width={70}
+                    width={50}
                     height={10}
                     className=" object-contain rounded-full"
                 />
@@ -116,7 +116,7 @@ export default function CustomerShell({
                 />
             )}
 
-            <aside className={`fixed left-0 top-0 z-[1200] flex min-h-screen w-60 flex-col gap-8 bg-[#0F172A] p-6 text-white shadow-xl transition-transform duration-300 ease-in-out ${
+            <aside className={`fixed left-0 top-0 z-[1200]  flex h-screen w-50 flex-col gap-4 bg-[#0F172A] p-4 text-white shadow-xl transition-transform duration-300 ease-in-out ${
                     sidebarOpen
                         ? "translate-x-0"
                         : "-translate-x-full"
@@ -126,7 +126,7 @@ export default function CustomerShell({
                     <Image
                         src="/yatralogo.png"
                         alt="Yatra"
-                        width={70}
+                        width={50}
                         height={10}
                         className=" object-contain rounded-full"
                     />

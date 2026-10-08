@@ -2,6 +2,7 @@ import { TransportProvider } from "../models/TransportProvider.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
@@ -28,11 +29,11 @@ export const registerTransporter = async (req: Request, res: Response) => {
         const { name, phone, password, role } = req.body;
 
         if (!["rider", "booking-partner"].includes(role)) {
-    return res.status(400).json({
-        message: "Invalid transporter role",
-        success: false,
-    });
-}
+            return res.status(400).json({
+                message: "Invalid transporter role",
+                success: false,
+            });
+        }
 
         if (!name || !phone || !password) {
             return res.status(400).json({
@@ -88,7 +89,6 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const transporter = await TransportProvider.findOne({ phone }).select('+password')
-        console.log(transporter)
 
         if (!transporter) {
             return res.status(400).json({
@@ -105,7 +105,6 @@ export const loginTransporter = async (req: Request, res: Response) => {
         }
 
         const isPasswordValid = await bcrypt.compare(password, transporter.password);
-        console.log(isPasswordValid);
 
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -126,7 +125,7 @@ export const loginTransporter = async (req: Request, res: Response) => {
                 role: "transporter",
                 transporterRole: transporter.transporterRole,
             },
-            process.env.JWT_SECRET!,
+            JWT_SECRET,
             {
                 expiresIn: "7d",
             }
@@ -168,10 +167,12 @@ export const loginTransporter = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
     try {
+        const isProduction = process.env.NODE_ENV === "production";
+
         res.clearCookie("token", {
             httpOnly: true,
-            secure: true,
-            sameSite: 'none',
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             path: "/"
         });
 
@@ -181,7 +182,7 @@ export const logout = async (req: Request, res: Response) => {
         });
 
     } catch (err) {
-        console.error("Submit KYC error:", err);
+        console.error("Logout error:", err);
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
@@ -259,7 +260,7 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
             drivingLicense: drivingLicenseRes.secure_url,
         }
 
-       transporter.serviceAreas = serviceAreas || [];
+        transporter.serviceAreas = serviceAreas || [];
 
         transporter.pricePerKm =
             vehicleType === "Bike"
@@ -293,7 +294,7 @@ export const submitKyc = async (req: Request, res: Response): Promise<Response> 
                 images: [vehiclePhotoRes.secure_url],
                 registrationDocument: vehicleRegistrationRes.secure_url,
                 seats: Number(vehicleSeats),
-                capacityKg: capacityKg? Number(capacityKg): undefined,
+                capacityKg: capacityKg ? Number(capacityKg) : undefined,
                 year: Number(vehicleYear),
                 isAvailable: true,
                 rentalAvailable: false,
@@ -395,8 +396,6 @@ export const setBaseLocation = async (req: Request, res: Response): Promise<Resp
         const { location } = req.body;
         const { coordinates, address, province, district, municipality, ward } = location || {};
 
-        console.log(coordinates, address, province, district, municipality, ward);
-
         if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
             return res.status(400).json({
                 message: "Valid coordinates [longitude, latitude] are required",
@@ -443,8 +442,6 @@ export const changeTransporterPassword = async (req: Request, res: Response): Pr
         const transporterId = req.user?.transporterId;
 
         const { oldPassword, newPassword } = req.body;
-
-        console.log(oldPassword, newPassword);
 
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ message: "All fields are required", success: false });
@@ -516,7 +513,7 @@ export const updateAvailablity = async (req: Request, res: Response): Promise<Re
         transporter.isAvailable = status === "available";
         await transporter.save();
         return res.status(200).json({
-            message: "Password changed successfully",
+            message: "Availability updated successfully",
             success: true,
             isAvailable: transporter.isAvailable
         });
@@ -584,10 +581,79 @@ export const updateCurrentLocation = async (req: Request, res: Response): Promis
     }
 }
 
+export const getMyVehicles = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
 
+        if (!transporterId) {
+            return res.status(401).json({
+                message: "Transporter authentication required",
+                success: false
+            });
+        }
 
+        const vehicles = await Vehicle.find({ transporter: transporterId }).sort({ createdAt: -1 });
 
+        return res.status(200).json({
+            success: true,
+            count: vehicles.length,
+            vehicles
+        });
 
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
 
+export const updateVehicleRentalAvailability = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const vehicleId = String(req.params.vehicleId);
+        const { status } = req.body;
 
+        if (!transporterId) {
+            return res.status(401).json({
+                message: "Transporter authentication required",
+                success: false
+            });
+        }
 
+        if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+            return res.status(400).json({
+                message: "Invalid vehicle ID",
+                success: false
+            });
+        }
+
+        if (!["available", "unavailable"].includes(status)) {
+            return res.status(400).json({
+                message: "invalid action",
+                success: false
+            });
+        }
+
+        const vehicle = await Vehicle.findOneAndUpdate(
+            { _id: vehicleId, transporter: transporterId },
+            { $set: { rentalAvailable: status === "available" } },
+            { new: true }
+        );
+
+        if (!vehicle) {
+            return res.status(404).json({
+                message: "Vehicle not found",
+                success: false
+            });
+        }
+
+        return res.status(200).json({
+            message: `Vehicle is now ${status} for rental`,
+            success: true,
+            rentalAvailable: vehicle.rentalAvailable
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}

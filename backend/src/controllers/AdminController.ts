@@ -7,28 +7,8 @@ import { TransportProvider } from '../models/TransportProvider.js';
 import Customer from '../models/Customer.js';
 import { Ride } from '../models/Ride.js';
 import { VehicleRental } from "../models/VehicleRentals.js";
-<<<<<<< HEAD
-import mongoose, { model } from "mongoose";
-import { Vehicle } from "../models/Vehicle.js";
-
-const attachVehiclesToTransporters = async (transporters: any[]) => {
-    return Promise.all(
-        transporters.map(async (transporter) => {
-            const vehicles = await Vehicle.find({
-                transporter: transporter._id,
-            }).lean();
-
-            return {
-                ...transporter,
-                vehicles,
-            };
-        })
-    );
-};
-=======
 import mongoose from "mongoose";
 import { Vehicle } from "../models/Vehicle.js";
->>>>>>> 3e9bfa3 (some controllr is updated)
 
 export const getAllRides = async (req: Request, res: Response): Promise<Response> => {
     try {

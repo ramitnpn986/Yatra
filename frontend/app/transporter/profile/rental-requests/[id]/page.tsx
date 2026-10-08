@@ -301,7 +301,6 @@ export default function RentalRequestDetail() {
           </div>
         </div>
 
-        {/* Destinations */}
         <div className="mt-6 rounded-xl bg-slate-50 p-5">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
             Destinations
@@ -331,7 +330,6 @@ export default function RentalRequestDetail() {
           </div>
         </div>
 
-        {/* Rental information */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-slate-200 p-4">
             <Users size={17} className="mb-2 text-slate-500" />
@@ -405,7 +403,6 @@ export default function RentalRequestDetail() {
           </div>
         </div>
 
-        {/* Actions */}
         {isPending && (
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <button

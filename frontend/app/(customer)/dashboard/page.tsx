@@ -280,7 +280,7 @@ export default function Page() {
                         </p>
                     </div>
                     <div>
-                        <button onClick={()=>router.push("/customer/booking-filter")} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-300  font-semibold">
+                        <button onClick={()=>router.push("/customer/rental-search")} className="px-4 py-2 rounded bg-orange-400 text-white hover:bg-orange-300  font-semibold">
                             Create Booking
                         </button>
                     </div>

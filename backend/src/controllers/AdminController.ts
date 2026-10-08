@@ -7,6 +7,7 @@ import { TransportProvider } from '../models/TransportProvider.js';
 import Customer from '../models/Customer.js';
 import { Ride } from '../models/Ride.js';
 import { VehicleRental } from "../models/VehicleRentals.js";
+<<<<<<< HEAD
 import mongoose, { model } from "mongoose";
 import { Vehicle } from "../models/Vehicle.js";
 
@@ -24,6 +25,10 @@ const attachVehiclesToTransporters = async (transporters: any[]) => {
         })
     );
 };
+=======
+import mongoose from "mongoose";
+import { Vehicle } from "../models/Vehicle.js";
+>>>>>>> 3e9bfa3 (some controllr is updated)
 
 export const getAllRides = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -302,24 +307,33 @@ export const changeAdminPassword = async (req: Request, res: Response): Promise<
 
 }
 
-export const getAllTransportersVerified = async (
-    req: Request,
-    res: Response
-): Promise<Response> => {
+export const getAllTransportersVerified = async (  req: Request,  res: Response): Promise<Response> => {
     try {
-        const transporters = await TransportProvider.find()
-            .select("-password")
-            .lean();
+        const transporters = await TransportProvider.find().select("-password").lean();
 
-        const transportersWithVehicles =
-            await attachVehiclesToTransporters(transporters);
+        const transporterIds = transporters.map(
+            (transporter) => transporter._id
+        );
+
+        const vehicles = await Vehicle.find({
+            transporter: { $in: transporterIds },
+        }).lean();
+
+        const transportersWithVehicles = transporters.map((transporter) => ({
+            ...transporter,
+            vehicles: vehicles.filter(
+                (vehicle) =>
+                    vehicle.transporter.toString() ===
+                    transporter._id.toString()
+            ),
+        }));
 
         return res.status(200).json({
             success: true,
             transporters: transportersWithVehicles,
         });
     } catch (err) {
-        console.log(err);
+        console.error(err);
 
         return res.status(500).json({
             message: "Internal Server Error",
@@ -328,23 +342,12 @@ export const getAllTransportersVerified = async (
     }
 };
 
-export const getTransportProviderById = async (
-    req: Request,
-    res: Response
-): Promise<Response> => {
+export const getTransportProviderById = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const transporterId = req.params.transporterId;
 
-        if (!transporterId || !mongoose.isValidObjectId(transporterId)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid transporter ID",
-            });
-        }
+    const { transporterId } = req.params;
 
-        const transporter = await TransportProvider.findById(transporterId)
-            .select("-password")
-            .lean();
+        const transporter = await TransportProvider.findById(transporterId).select("-password").lean();
 
         if (!transporter) {
             return res.status(404).json({
@@ -353,18 +356,17 @@ export const getTransportProviderById = async (
             });
         }
 
-        // Fetch vehicles using transporter ID
         const vehicles = await Vehicle.find({
-            transporter: transporter._id,
+            transporter: transporterId,
         }).lean();
 
         return res.status(200).json({
             success: true,
             transporter: {
-                ...transporter,
-                vehicles,
+                ...transporter, vehicles,
             },
         });
+
     } catch (err) {
         console.log(err);
 

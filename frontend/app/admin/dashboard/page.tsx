@@ -9,13 +9,25 @@ interface StatsProps {
   activeRides: number;
 }
 
+interface Vehicle {
+  _id: string;
+  vehicleType: "Bike" | "Car" | "Truck" | "Bus";
+  brand: string;
+  model: string;
+  numberPlate: string;
+  seats?: number;
+  capacityKg?: number;
+  isAvailable: boolean;
+  rentalAvailable: boolean;
+}
+
 interface PendingKyc {
   _id: string;
   name: string;
-  phone: number;
-  vehicle: {
-    type?: string;
-  };
+  phone: string;
+
+  vehicles: Vehicle[];
+
   isKycCompleted: boolean;
   isKycDataSubmitted: boolean;
 }
@@ -192,7 +204,14 @@ export default function AdminDashboard() {
                     </td>
 
                     <td className="px-6 py-4 text-sm text-slate-600">
-                      {provider.vehicle?.type || "N/A"}
+                      {provider.vehicles?.length > 0
+                        ? provider.vehicles
+                          .map(
+                            (vehicle) =>
+                              `${vehicle.vehicleType} (${vehicle.brand} ${vehicle.model})`
+                          )
+                          .join(", ")
+                        : "No Vehicle"}
                     </td>
 
                     <td className="px-6 py-4">

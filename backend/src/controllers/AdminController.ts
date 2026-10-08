@@ -14,7 +14,7 @@ export const getAllRides = async (req: Request, res: Response): Promise<Response
     try {
         const rides = await Ride.find()
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle")
+            .populate("transporter", "name phone")
             .sort({ requestedAt: -1 });
 
         return res.status(200).json({
@@ -466,6 +466,8 @@ export const deleteTransportProvider = async (req: Request, res: Response): Prom
 
         }
 
+        await Vehicle.deleteMany({ transporter: transporterId });
+
         return res.status(200).json({
             message: "Trasporter removed successfully !",
             success: true
@@ -501,21 +503,25 @@ export const blockUnBlockTransportProvider = async (req: Request, res: Response)
             })
         }
 
-        if (action === "block" && transporter.isBlocked) {
-            return res.status(400).json({
-                message: "Transporter is already blocked",
-                success: false,
-            });
-        } else {
+        if (action === "block") {
+            if (transporter.isBlocked) {
+                return res.status(400).json({
+                    message: "Transporter is already blocked",
+                    success: false,
+                });
+            }
+
             transporter.isBlocked = true;
         }
 
-        if (action === "unblock" && !transporter.isBlocked) {
-            return res.status(400).json({
-                message: "Transporter is already unblocked",
-                success: false,
-            });
-        } else {
+        if (action === "unblock") {
+            if (!transporter.isBlocked) {
+                return res.status(400).json({
+                    message: "Transporter is already unblocked",
+                    success: false,
+                });
+            }
+
             transporter.isBlocked = false;
         }
 
@@ -697,7 +703,7 @@ export const blockUnBlockCustomer = async (req: Request, res: Response): Promise
 
 export const deleteCustomer = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const customerId = req.params.transporterId;
+        const customerId = req.params.customerId;
         const customer = await Customer.findByIdAndDelete(customerId);
 
         if (!customer) {
@@ -724,7 +730,7 @@ export const getRideById = async (req: Request, res: Response): Promise<Response
 
         const ride = await Ride.findById(id)
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle");
+            .populate("transporter", "name phone");
 
         if (!ride) {
             return res.status(404).json({
@@ -751,7 +757,7 @@ export const getActiveRides = async (req: Request, res: Response): Promise<Respo
 
         })
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle")
+            .populate("transporter", "name phone")
             .sort({ requestedAt: -1 });
 
         return res.status(200).json({
@@ -770,7 +776,7 @@ export const viewRideDetails = async (req: Request, res: Response): Promise<Resp
         const id = req.params.id;
         const ride = await Ride.findById(id)
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle");
+            .populate("transporter", "name phone");
 
         if (!ride) {
             return res.status(404).json({
@@ -793,7 +799,7 @@ export const getCancelRideById = async (req: Request, res: Response): Promise<Re
         const id = req.params.id;
         const ride = await Ride.findById(id)
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle");
+            .populate("transporter", "name phone");
 
         if (!ride) {
             return res.status(404).json({
@@ -821,7 +827,7 @@ export const getCancelledRides = async (req: Request, res: Response): Promise<Re
     try {
         const rides = await Ride.find({ status: "cancelled" })
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle")
+            .populate("transporter", "name phone")
             .sort({ cancelledAt: -1 });
 
         return res.status(200).json({
@@ -839,7 +845,7 @@ export const getCompletedRides = async (req: Request, res: Response): Promise<Re
     try {
         const rides = await Ride.find({ status: "completed" })
             .populate("customer", "name phone")
-            .populate("transporter", "name phone vehicle")
+            .populate("transporter", "name phone")
             .sort({ completedAt: -1 });
 
         return res.status(200).json({
@@ -923,11 +929,11 @@ export const getVehicleRentalById = async (req: Request, res: Response): Promise
             .populate({ path: "transporter", model: "TransportProvider", select: "name phone" })
             .populate("vehicle", "brand model seats vehicleType year");
 
-        if(!vehicleRental){
-             return res.status(404).json({
+        if (!vehicleRental) {
+            return res.status(404).json({
                 success: false,
                 message: "Vehicle rental not found",
-             })
+            })
         }
 
         return res.status(200).json({

@@ -499,10 +499,7 @@ export default function RentalSearchForm() {
 
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {vehicles.map((item) => (
-                            <RentalVehicleCard key={item.vehicle.id} item={item} onSelect={(selectedVehicle) => {
-                                console.log("Selected vehicle:", selectedVehicle);
-                            }}
-                            />))}
+                            <RentalVehicleCard key={item.vehicle.id} item={item}/>))}
                     </div>
                 </div>
             )}

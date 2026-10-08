@@ -11,6 +11,7 @@ import {
     CalendarDays,
     ShieldCheck,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Coordinates = [number, number];
 
@@ -55,13 +56,13 @@ interface RentalVehicleCardProps {
     onSelect?: (item: AvailableVehicle) => void;
 }
 
-export default function RentalVehicleCard({
-    item,
-    onSelect,
-}: RentalVehicleCardProps) {
+export default function RentalVehicleCard({ item}: RentalVehicleCardProps) {
     const { vehicle, transporter, distanceKm } = item;
 
     const vehicleImage = vehicle.images?.[0];
+
+    const router = useRouter()
+    const vehicleId= vehicle.id;
 
     return (
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
@@ -152,7 +153,7 @@ export default function RentalVehicleCard({
 
                 <button
                     type="button"
-                    onClick={() => onSelect?.(item)}
+                    onClick={() =>router.push(`/customer/rental/request/${vehicleId}`) }
                     className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
                 >
                     <CalendarDays className="h-4 w-4" />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
     MapPin,
@@ -26,8 +27,9 @@ interface SelectedLocation {
 }
 
 interface Vehicle {
-    id: string;
+    _id: string;
     vehicleType: "Bike" | "Car" | "Truck" | "Bus";
+    transporter?: string;
     brand: string;
     model: string;
     numberPlate: string;
@@ -35,6 +37,8 @@ interface Vehicle {
     seats: number;
     capacityKg: number;
     year: number;
+    isAvailable?: boolean;
+    rentalAvailable?: boolean;
 }
 
 interface Transporter {
@@ -73,6 +77,14 @@ export default function RentalSearchForm() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [estimatedBudget, setEstimatedBudget] = useState("");
+    const params = useParams();
+    const vehicleId = params.vehicleId as string;
+
+    const [vehicleData, setVehicleData] = useState<Vehicle | null>(null);
+    const [transporter, setTransporter] = useState<Transporter | null>(null);
+
+
+    const [fetchLoading, setFetchLoading] = useState(true);
 
     const today = new Date().toISOString().split("T")[0];
 
@@ -92,7 +104,41 @@ export default function RentalSearchForm() {
     }, [startDate, endDate]);
 
 
-    
+
+    const fetchVehicleDetails = async () => {
+        if (!vehicleId) return;
+        setFetchLoading(true);
+        try {
+            const res = await fetch(`/api/customer/rental/request/vehicle/${vehicleId}`, {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store"
+            })
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(
+                    data.message || "Failed to fetch vehicle details"
+                );
+            }
+
+            setVehicleData(data.vehicle);
+            setTransporter(data.transporter);
+            console.log(data.vehicle , data.transporter);
+
+        } catch (err) {
+            console.log("errr: ", err);
+            toast.error(err instanceof Error ? err.message : "Failed to fetch vehicle details");
+
+        } finally {
+            setFetchLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchVehicleDetails();
+    }, [vehicleId]);
 
 
 
@@ -148,7 +194,7 @@ export default function RentalSearchForm() {
                 await res.json();
 
             if (!res.ok) {
-                toast.error( (data as any).message ||"Failed to search vehicles");
+                toast.error((data as any).message || "Failed to search vehicles");
                 return;
             }
 
@@ -175,7 +221,7 @@ export default function RentalSearchForm() {
 
             <div className="relative mx-auto mt-4 min-h-[350px] w-full max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a1f39] via-[#0f2d52] to-[#071526] p-10 text-white shadow-2xl">
 
-               {/* basic information of transporter */}
+                {/* basic information of transporter */}
             </div>
 
 
@@ -192,7 +238,7 @@ export default function RentalSearchForm() {
                         <div>
                             <div className="mb-2.5 flex items-center justify-between">
                                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                    <MapPin size={18} className="text-[#ee8d39]"/>
+                                    <MapPin size={18} className="text-[#ee8d39]" />
                                     Pickup Location
                                 </label>
 
@@ -240,7 +286,7 @@ export default function RentalSearchForm() {
                         <div>
                             <div className="mb-2.5 flex items-center justify-between">
                                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                                    <MapPin size={18}  className="text-red-500"/>
+                                    <MapPin size={18} className="text-red-500" />
                                     Destination Location
                                 </label>
 
@@ -255,8 +301,8 @@ export default function RentalSearchForm() {
                                 <LocationPicker
                                     currentCoords={
                                         destinationLocation
-                                            ? [  destinationLocation.coordinates[1],
-                                                destinationLocation.coordinates[0]]: [27.7172, 85.3240]
+                                            ? [destinationLocation.coordinates[1],
+                                            destinationLocation.coordinates[0]] : [27.7172, 85.3240]
                                     }
                                     isEditable={true}
                                     onSelect={(location) => {
@@ -299,7 +345,7 @@ export default function RentalSearchForm() {
                         />
                     </div>
 
-    
+
                     <div className="grid gap-5 sm:grid-cols-2">
 
                         <div>
@@ -382,7 +428,7 @@ export default function RentalSearchForm() {
                                 type="date"
                                 min={startDate || today}
                                 value={endDate}
-                                onChange={(e) =>setEndDate(e.target.value)}
+                                onChange={(e) => setEndDate(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
                             />
                         </div>
@@ -404,7 +450,7 @@ export default function RentalSearchForm() {
                                 type="number"
                                 min="0"
                                 value={estimatedBudget}
-                                onChange={(e) => setEstimatedBudget(e.target.value) }
+                                onChange={(e) => setEstimatedBudget(e.target.value)}
                                 placeholder="Enter your estimated budget"
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-12 pr-4 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
                             />
@@ -420,7 +466,7 @@ export default function RentalSearchForm() {
                             </span>
 
                             <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-[#0a1f39] shadow-sm">
-                                {totalDays > 0? `${totalDays} ${ totalDays === 1? "day": "days"}`: "Select valid dates"}
+                                {totalDays > 0 ? `${totalDays} ${totalDays === 1 ? "day" : "days"}` : "Select valid dates"}
                             </span>
                         </div>
 
@@ -429,7 +475,7 @@ export default function RentalSearchForm() {
                             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
                         >
                             Request
-                            <Send size={18} className="rotate-45 text-blue-400" /> 
+                            <Send size={18} className="rotate-45 text-blue-400" />
                         </button>
                     </div>
                 </div>

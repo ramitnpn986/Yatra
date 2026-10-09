@@ -10,6 +10,7 @@ import {
     Car,
     Wallet,
     Send,
+    Calculator,
 } from "lucide-react";
 import { toast } from "sonner";
 import VehicleTransporterDetails from "@/app/(customer)/components/VehicleTransporterDetails";
@@ -84,12 +85,14 @@ export default function RentalSearchForm() {
     const [destinationPlaces, setDestinationPlaces] = useState("");
     const [vehicleType, setVehicleType] = useState("");
     const [rentalType, setRentalType] = useState("");
-    const [passengers, setPassengers] = useState("1");
+    const [totalPassengers, setPassengers] = useState("1");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [estimatedBudget, setEstimatedBudget] = useState("");
     const params = useParams();
     const vehicleId = params.vehicleId as string;
+    const [calculateLoading, setCalculateLoading] = useState(false);
+    const [routeCalculation, setRouteCalculation] = useState<any>(null);
 
     const [vehicleData, setVehicleData] = useState<Vehicle | null>(null);
     const [transporter, setTransporter] = useState<Transporter | null>(null);
@@ -150,8 +153,86 @@ export default function RentalSearchForm() {
     }, [vehicleId]);
 
 
+    const handleCalculate = async () => {
+        if (!pickupLocation) {
+            toast.error("Please select a pickup location");
+            return;
+        }
 
-    const handleSearch = async (e: React.FormEvent) => {
+        if (!destinationLocation) {
+            toast.error("Please select a return location");
+            return;
+        }
+
+        if (!destinationPlaces.trim()) {
+            toast.error("Please enter destination places");
+            return;
+        }
+
+        if (!vehicleType) {
+            toast.error("Please select a vehicle type");
+            return;
+        }
+
+        if (!rentalType) {
+            toast.error("Please select a rental type");
+            return;
+        }
+
+        if (!startDate || !endDate || totalDays <= 0) {
+            toast.error("Please select valid journey dates");
+            return;
+        }
+
+        const destinations = destinationPlaces.split(",").map((place) => place.trim()).filter(Boolean);
+        setCalculateLoading(true);
+        setRouteCalculation(null);
+
+        try {
+            const res = await fetch("/api/customer/rental/calculate",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                    cache: "no-store",
+                    body: JSON.stringify({
+                        pickupLocation,
+                        destinations,
+                        returnLocation: destinationLocation,
+                        vehicleType,
+                        rentalType,
+                        totalPassengers: Number(totalPassengers),
+                        startDate,
+                        endDate,
+                    }),
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(
+                    data.message || "Failed to calculate route and price"
+                );
+            }
+
+            setRouteCalculation(data.data);
+            toast.success("Distance and estimated price calculated");
+
+        } catch (err) {
+            console.error("Calculate rental error: ", err);
+            toast.error(err instanceof Error ? err.message : "Failed to calculate route and price");
+
+        } finally {
+            setCalculateLoading(false)
+        }
+
+    }
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!pickupLocation) {
@@ -213,7 +294,7 @@ export default function RentalSearchForm() {
                 return;
             }
 
-        
+
 
             toast.success("Vehicles found");
         } catch (error) {
@@ -229,7 +310,7 @@ export default function RentalSearchForm() {
                 <VehicleTransporterDetails vehicle={vehicleData} transporter={transporter} />
             )}
 
-            <form id="rental-form" onSubmit={handleSearch} className="mx-auto my-8 max-w-5xl rounded-3xl bg-white p-6 shadow-xl sm:p-8">
+            <div  className="mx-auto my-8 max-w-5xl rounded-3xl bg-white p-6 shadow-xl sm:p-8">
                 <div className="mb-8 border-b border-slate-100 pb-5">
                     <h2 className="text-2xl font-bold tracking-tight text-[#0a1f39] sm:text-3xl">
                         Rental Request
@@ -359,7 +440,7 @@ export default function RentalSearchForm() {
                             <input
                                 type="number"
                                 min="1"
-                                value={passengers}
+                                value={totalPassengers}
                                 onChange={(e) =>
                                     setPassengers(e.target.value)
                                 }
@@ -498,17 +579,27 @@ export default function RentalSearchForm() {
                                 {totalDays > 0 ? `${totalDays} ${totalDays === 1 ? "day" : "days"}` : "Select valid dates"}
                             </span>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button
+                                onClick={handleCalculate}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
+                            >
+                                Calculate
+                                <Calculator size={18} className=" text-blue-400" />
+                            </button>
 
-                        <button
-                            type="submit"
-                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
-                        >
-                            Request
-                            <Send size={18} className="rotate-45 text-blue-400" />
-                        </button>
+                            <button
+                                onClick={handleSubmit}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
+                            >
+                                Request
+                                <Send size={18} className="rotate-45 text-blue-400" />
+                            </button>
+
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }

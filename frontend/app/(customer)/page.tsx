@@ -3,14 +3,8 @@ import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import Image from "next/image";
 import {
-
-  Truck,
   ArrowRight,
   MapPin,
-  ShieldCheck,
-  Clock3,
-  Bike,
-  Bus,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -19,6 +13,11 @@ export default function Home() {
     <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
       <Hero />
+      <div className={`pointer-events-none relative -mb-px w-full overflow-hidden leading-none ${"bg-white"}`} aria-hidden="true" >
+        <svg className={`relative block h-[110px] w-full md:h-[120px] ${true ? "rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none" >
+          <path d="M0,40 C180,110 360,115 540,70 C760,15 900,5 1080,45 C1230,80 1340,95 1440,50 L1440,120 L0,120 Z" fill={"#0a1f39"} /> </svg>
+      </div>
+
 
       <section className="relative  px-6 py-16">
         <div className="mx-auto max-w-6xl">
@@ -108,6 +107,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+
 
 
       <section className="bg-white px-6 py-24">

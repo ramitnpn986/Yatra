@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
     registerTransporter, loginTransporter, setBaseLocation, logout, getTransporterProfile,
     changeTransporterPassword, updateAvailablity, updateCurrentLocation, updateTransporterProfile,
-    submitKyc, getMyVehicles, updateVehicleRentalAvailability
+    submitKyc, getMyVehicles, updateVehicleRentalAvailability, addVehicle, updateVehicle, deleteVehicle
 } from "../controllers/TransporterController.js";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import isTransporter from "../middleware/isTransporter.js";
@@ -24,6 +24,16 @@ router.post("/change-current-location", ...transporterAuth, updateCurrentLocatio
 router.put("/change-location", ...transporterAuth, setBaseLocation);
 
 router.get("/vehicles", ...transporterAuth, getMyVehicles);
+router.post("/vehicles", ...transporterAuth, uploadImage.fields([
+    { name: "vehiclePhoto", maxCount: 1 },
+    { name: "vehicleRegistration", maxCount: 1 },
+]), addVehicle);
+
+router.put("/vehicles/:vehicleId", ...transporterAuth, uploadImage.fields([
+    { name: "vehiclePhoto", maxCount: 1 },
+]), updateVehicle);
+
+router.delete("/vehicles/:vehicleId", ...transporterAuth, deleteVehicle);
 router.patch("/vehicles/:vehicleId/rental-availability", ...transporterAuth, updateVehicleRentalAvailability);
 
 router.post("/submit-kyc", ...transporterAuth, uploadImage.fields([

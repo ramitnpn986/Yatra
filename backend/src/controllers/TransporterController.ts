@@ -7,7 +7,7 @@ import { isAbaRouting } from "validator";
 import RideRequest from "../models/RideRequest.js";
 import { deleteImage, uploadImage } from "../utils/cloudinary.js";
 import { Vehicle } from "../models/Vehicle.js";
-
+import {VehicleRental} from "../models/VehicleRentals.js";
 
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -650,6 +650,236 @@ export const updateVehicleRentalAvailability = async (req: Request, res: Respons
             message: `Vehicle is now ${status} for rental`,
             success: true,
             rentalAvailable: vehicle.rentalAvailable
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
+
+const VEHICLE_TYPES = ["Bike", "Car", "Truck", "Bus"];
+
+export const addVehicle = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+
+        if (!transporterId) {
+            return res.status(401).json({
+                message: "Transporter authentication required",
+                success: false
+            });
+        }
+
+        const files = req.files as {
+            vehiclePhoto?: Express.Multer.File[];
+            vehicleRegistration?: Express.Multer.File[];
+        } | undefined;
+
+        const { vehicleType, brand, model, numberPlate, seats, year, capacityKg } = req.body;
+
+        if (!vehicleType || !brand || !model || !numberPlate || !seats || !year) {
+            return res.status(400).json({
+                message: "All required fields must be provided",
+                success: false
+            });
+        }
+
+        if (!VEHICLE_TYPES.includes(vehicleType)) {
+            return res.status(400).json({
+                message: "Invalid vehicle type",
+                success: false
+            });
+        }
+
+        if (!files?.vehiclePhoto?.[0]) {
+            return res.status(400).json({
+                message: "Vehicle photo is required",
+                success: false
+            });
+        }
+
+        const vehicleYear = Number(year);
+        const vehicleSeats = Number(seats);
+
+        if (!Number.isInteger(vehicleYear) || vehicleYear < 1900 || vehicleYear > new Date().getFullYear()) {
+            return res.status(400).json({
+                message: "Invalid vehicle year",
+                success: false
+            });
+        }
+
+        if (!Number.isInteger(vehicleSeats) || vehicleSeats < 1) {
+            return res.status(400).json({
+                message: "Invalid number of seats",
+                success: false
+            });
+        }
+
+        const plate = String(numberPlate).trim();
+
+        const existingVehicle = await Vehicle.findOne({ numberPlate: plate });
+
+        if (existingVehicle) {
+            return res.status(409).json({
+                message: "A vehicle with this number plate already exists",
+                success: false
+            });
+        }
+
+        const photoRes = await uploadImage(files.vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
+
+        let registrationUrl: string | undefined;
+
+        if (files.vehicleRegistration?.[0]) {
+            const regRes = await uploadImage(files.vehicleRegistration[0].buffer, "Yatra/kyc/vehicle-registration");
+            registrationUrl = regRes.secure_url;
+        }
+
+        const vehicle = await Vehicle.create({
+            transporter: transporterId,
+            vehicleType,
+            brand: String(brand).trim(),
+            model: String(model).trim(),
+            numberPlate: plate,
+            images: [photoRes.secure_url],
+            registrationDocument: registrationUrl,
+            seats: vehicleSeats,
+            capacityKg: capacityKg ? Number(capacityKg) : undefined,
+            year: vehicleYear,
+            isAvailable: true,
+            rentalAvailable: false,
+        });
+
+        return res.status(201).json({
+            message: "Vehicle added successfully",
+            success: true,
+            vehicle
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
+
+export const updateVehicle = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const vehicleId = String(req.params.vehicleId);
+
+        if (!transporterId) {
+            return res.status(401).json({
+                message: "Transporter authentication required",
+                success: false
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+            return res.status(400).json({
+                message: "Invalid vehicle ID",
+                success: false
+            });
+        }
+
+        const vehicle = await Vehicle.findOne({ _id: vehicleId, transporter: transporterId });
+
+        if (!vehicle) {
+            return res.status(404).json({
+                message: "Vehicle not found",
+                success: false
+            });
+        }
+
+        const files = req.files as {
+            vehiclePhoto?: Express.Multer.File[];
+        } | undefined;
+
+        const { brand, model, seats, year, capacityKg } = req.body;
+
+        if (brand) vehicle.brand = String(brand).trim();
+        // if (model) vehicle.model = String(model).trim();
+
+        if (seats) {
+            const vehicleSeats = Number(seats);
+            if (!Number.isInteger(vehicleSeats) || vehicleSeats < 1) {
+                return res.status(400).json({ message: "Invalid number of seats", success: false });
+            }
+            vehicle.seats = vehicleSeats;
+        }
+
+        if (year) {
+            const vehicleYear = Number(year);
+            if (!Number.isInteger(vehicleYear) || vehicleYear < 1900 || vehicleYear > new Date().getFullYear()) {
+                return res.status(400).json({ message: "Invalid vehicle year", success: false });
+            }
+            vehicle.year = vehicleYear;
+        }
+
+        if (capacityKg) vehicle.capacityKg = Number(capacityKg);
+
+        if (files?.vehiclePhoto?.[0]) {
+            const photoRes = await uploadImage(files.vehiclePhoto[0].buffer, "Yatra/kyc/vehicle-photo");
+            vehicle.images = [photoRes.secure_url];
+        }
+
+        await vehicle.save();
+
+        return res.status(200).json({
+            message: "Vehicle updated successfully",
+            success: true,
+            vehicle
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Internal Server Error", success: false });
+    }
+}
+
+export const deleteVehicle = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const transporterId = req.user?.transporterId;
+        const vehicleId = String(req.params.vehicleId);
+
+        if (!transporterId) {
+            return res.status(401).json({
+                message: "Transporter authentication required",
+                success: false
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
+            return res.status(400).json({
+                message: "Invalid vehicle ID",
+                success: false
+            });
+        }
+
+        const activeRental = await VehicleRental.findOne({
+            vehicle: vehicleId,
+            status: { $in: ["pending", "confirmed", "active"] },
+        });
+
+        if (activeRental) {
+            return res.status(409).json({
+                message: "This vehicle has an ongoing rental and cannot be deleted",
+                success: false
+            });
+        }
+
+        const vehicle = await Vehicle.findOneAndDelete({ _id: vehicleId, transporter: transporterId });
+
+        if (!vehicle) {
+            return res.status(404).json({
+                message: "Vehicle not found",
+                success: false
+            });
+        }
+
+        return res.status(200).json({
+            message: "Vehicle deleted successfully",
+            success: true
         });
 
     } catch (err) {

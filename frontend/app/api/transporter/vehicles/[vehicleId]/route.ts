@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+type Context = { params: Promise<{ vehicleId: string }> };
+
+export async function PUT(req: NextRequest, { params }: Context) {
     try {
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/vehicles`, {
-            method: "GET",
+        const { vehicleId } = await params;
+        const formData = await req.formData();
+
+        const res = await fetch(`${process.env.TRANSPORTER_URL}/vehicles/${vehicleId}`, {
+            method: "PUT",
             headers: { Cookie: req.headers.get("cookie") || "" },
-            cache: "no-store",
+            body: formData,
         });
 
         const data = await res.json();
@@ -19,14 +24,13 @@ export async function GET(req: NextRequest) {
     }
 }
 
-export async function POST(req: NextRequest) {
+export async function DELETE(req: NextRequest, { params }: Context) {
     try {
-        const formData = await req.formData();
+        const { vehicleId } = await params;
 
-        const res = await fetch(`${process.env.TRANSPORTER_URL}/vehicles`, {
-            method: "POST",
+        const res = await fetch(`${process.env.TRANSPORTER_URL}/vehicles/${vehicleId}`, {
+            method: "DELETE",
             headers: { Cookie: req.headers.get("cookie") || "" },
-            body: formData,
         });
 
         const data = await res.json();

@@ -89,14 +89,17 @@ const vehicleRentalSchema = new mongoose.Schema(
                 message: "At least one destination is required",
             },
         },
-
+        totalPassengers :{
+              type: Number,
+              required: true,
+        },
 
         returnLocation: {
             type: locationSchema,
             required: true,
         },
 
-        totalDistanceKm: {
+        totalEstimatedDistanceKm: {
             type: Number,
             required: true,
             min: 0,
@@ -123,6 +126,54 @@ const vehicleRentalSchema = new mongoose.Schema(
             min: 1,
         },
 
+        status: {
+            type: String,
+            enum: [
+                "pending",
+                "confirmed",
+                "rejected",
+                "active",
+                "completed",
+                "cancelled",
+            ],
+            default: "pending",
+        },
+
+        rejectedReason: {
+            type: String,
+            trim: true,
+        },
+
+        baseRentalPrice: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+
+        includedDistanceKm: {
+            type: Number,
+            required: true,
+            min: 0,
+        },
+
+        extraDistanceKm: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
+        extraDistanceCost: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
+        driverCost: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+
         pricePerDay: {
             type: Number,
             required: true,
@@ -141,23 +192,6 @@ const vehicleRentalSchema = new mongoose.Schema(
             min: 0,
         },
 
-        status: {
-            type: String,
-            enum: [
-                "pending",
-                "confirmed",
-                "rejected",
-                "active",
-                "completed",
-                "cancelled",
-            ],
-            default: "pending",
-        },
-
-        rejectedReason: {
-            type: String,
-            trim: true,
-        },
 
         cancelledBy: {
             type: String,

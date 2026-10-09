@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
 
-        const res = await fetch(`${process.env.RIDE_REQUEST_URL}/calculate-price`, {
+        const res = await fetch(`${process.env.RIDE_REQUEST_URL}/rental/request`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

@@ -154,6 +154,7 @@ export default function RentalSearchForm() {
     }, [vehicleId]);
 
 
+
     const handleCalculate = async () => {
         if (!pickupLocation) {
             toast.error("Please select a pickup location");
@@ -170,13 +171,8 @@ export default function RentalSearchForm() {
             return;
         }
 
-        if (!vehicleType) {
-            toast.error("Please select a vehicle type");
-            return;
-        }
-
-        if (!rentalType) {
-            toast.error("Please select a rental type");
+        if (!vehicleType || !rentalType) {
+            toast.error("Please select a vehicle type and rental type");
             return;
         }
 
@@ -185,31 +181,33 @@ export default function RentalSearchForm() {
             return;
         }
 
-        const destinations = destinationPlaces.split(",").map((place) => place.trim()).filter(Boolean);
+        const destinations = destinationPlaces
+            .split(",")
+            .map((place) => place.trim())
+            .filter(Boolean);
+
         setCalculateLoading(true);
         setRouteCalculation(null);
 
         try {
-            const res = await fetch("/api/customer/rental/calculate",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    cache: "no-store",
-                    body: JSON.stringify({
-                        pickupLocation,
-                        destinations,
-                        returnLocation: destinationLocation,
-                        vehicleType,
-                        rentalType,
-                        totalPassengers: Number(totalPassengers),
-                        startDate,
-                        endDate,
-                    }),
-                }
-            );
+            const res = await fetch("/api/customer/rental/calculate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                cache: "no-store",
+                body: JSON.stringify({
+                    pickupLocation,
+                    destinations,
+                    returnLocation: destinationLocation,
+                    vehicleType,
+                    rentalType,
+                    totalPassengers: Number(totalPassengers),
+                    startDate,
+                    endDate,
+                }),
+            });
 
             const data = await res.json();
 
@@ -219,92 +217,123 @@ export default function RentalSearchForm() {
                 );
             }
 
-            setRouteCalculation(data.data);
-            toast.success("Distance and estimated price calculated");
-
-        } catch (err) {
-            console.error("Calculate rental error: ", err);
-            toast.error(err instanceof Error ? err.message : "Failed to calculate route and price");
-
-        } finally {
-            setCalculateLoading(false)
-        }
-
-    }
-
-
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!pickupLocation) {
-            toast.error("Please select a pickup location");
-            return;
-        }
-
-        if (!destinationLocation) {
-            toast.error("Please select a destination location");
-            return;
-        }
-
-        if (!vehicleType) {
-            toast.error("Please select a preferred vehicle");
-            return;
-        }
-
-        if (!rentalType) {
-            toast.error("Please select a preferred rentalType");
-            return;
-        }
-
-
-        if (!startDate || !endDate) {
-            toast.error("Please select journey dates");
-            return;
-        }
-
-        if (totalDays <= 0) {
-            toast.error("End date must be after start date");
-            return;
-        }
-
-        const searchData = {
-            pickupLocation: pickupLocation.coordinates,
-            vehicleType,
-            passengers: Number(passengers),
-            startDate,
-            endDate,
-        };
-
-        try {
-            const res = await fetch("/api/customer/rental/search",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify(searchData),
-                }
-            );
-
-            const data: RentalSearchResponse =
-                await res.json();
-
-            if (!res.ok) {
-                toast.error((data as any).message || "Failed to search vehicles");
+            // Do not allow a booking estimate with unresolved destinations.
+            if (data.data.invalidPlaces?.length > 0) {
+                setRouteCalculation(data.data);
+                toast.error(
+                    `Please correct invalid destinations: ${data.data.invalidPlaces.join(", ")} `
+                );
                 return;
             }
 
-
-
-            toast.success("Vehicles found");
+            setRouteCalculation(data.data);
+            toast.success("Route and estimated price calculated");
         } catch (error) {
-            console.error("Rental search error:", error);
-            toast.error("Something went wrong while searching vehicles");
+            console.error("Calculate rental error:", error);
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to calculate route and price"
+            );
+        } finally {
+            setCalculateLoading(false);
         }
     };
+
+    const handleSubmit = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+
+        if (!routeCalculation) {
+            toast.error("Please calculate the route and price first");
+            return;
+        }
+
+        if (routeCalculation.invalidPlaces?.length > 0) {
+            toast.error("Please correct invalid destinations and calculate again");
+            return;
+        }
+
+        if (!pickupLocation || !destinationLocation) {
+            toast.error("Please select pickup and return locations");
+            return;
+        }
+
+        if (!transporter?._id || !vehicleId) {
+            toast.error("Vehicle or transporter information is missing");
+            return;
+        }
+
+        if (!vehicleType || !rentalType) {
+            toast.error("Please select vehicle and rental types");
+            return;
+        }
+
+        if (!startDate || !endDate || totalDays <= 0) {
+            toast.error("Please select valid journey dates");
+            return;
+        }
+
+        const destinations = routeCalculation.destinations.map(
+            (destination: {
+                name: string;
+                coordinates: [number, number];
+            }) => ({
+                name: destination.name,
+                address: destination.name,
+                type: "Point" as const,
+                coordinates: destination.coordinates,
+            })
+        );
+
+        if (destinations.length === 0) {
+            toast.error("No valid destinations were calculated");
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/customer/rental/request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                cache: "no-store",
+                body: JSON.stringify({
+                    transporterId: transporter._id,
+                    vehicleId,
+                    vehicleType,
+                    rentalType,
+                    pickupLocation,
+                    destinations,
+                    returnLocation: destinationLocation,
+                    startDate,
+                    endDate,
+
+                    // Results from the successful calculation.
+                    distanceKm: routeCalculation.distanceKm,
+                    durationMinutes: routeCalculation.durationMinutes,
+                    totalPassengers: Number(totalPassengers),
+                }),
+            });
+
+            const result = await res.json();
+
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || "Rental request failed");
+            }
+
+            toast.success("Rental request submitted successfully");
+        } catch (error) {
+            console.error("Rental request error:", error);
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to submit rental request"
+            );
+        }
+    };
+
+
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
@@ -339,14 +368,7 @@ export default function RentalSearchForm() {
 
                             <div className="h-[280px] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-inner">
                                 <LocationPicker
-                                    currentCoords={
-                                        pickupLocation
-                                            ? [
-                                                pickupLocation.coordinates[1],
-                                                pickupLocation.coordinates[0],
-                                            ]
-                                            : [27.700769, 83.448349]
-                                    }
+                                    currentCoords={pickupLocation ? [pickupLocation.coordinates[1], pickupLocation.coordinates[0]] : [27.700769, 83.448349]}
                                     isEditable={true}
                                     onSelect={(location) => { setPickupLocation(location); }}
                                 />
@@ -359,12 +381,8 @@ export default function RentalSearchForm() {
                                     </p>
 
                                     <p className="mt-1 text-xs text-slate-500">
-                                        {pickupLocation.municipality &&
-                                            `${pickupLocation.municipality}, `}
-
-                                        {pickupLocation.district &&
-                                            `${pickupLocation.district}, `}
-
+                                        {pickupLocation.municipality && `${pickupLocation.municipality}, `}
+                                        {pickupLocation.district && `${pickupLocation.district}, `}
                                         {pickupLocation.province}
                                     </p>
                                 </div>
@@ -498,9 +516,7 @@ export default function RentalSearchForm() {
                                 type="date"
                                 min={today}
                                 value={startDate}
-                                onChange={(e) =>
-                                    setStartDate(e.target.value)
-                                }
+                                onChange={(e) => setStartDate(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-[#0a1f39] focus:bg-white focus:ring-2 focus:ring-[#0a1f39]/10"
                             />
                         </div>
@@ -570,7 +586,7 @@ export default function RentalSearchForm() {
                         </div>
 
                     </div>
-                    
+
                     <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 sm:flex-row">
 
                         <div className="flex items-center gap-3">
@@ -579,26 +595,29 @@ export default function RentalSearchForm() {
                             </span>
 
                             <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-[#0a1f39] shadow-sm">
-                                {totalDays > 0 ? `${totalDays} ${totalDays === 1 ? "day" : "days"}` : "Select valid dates"}
+                                {totalDays > 0 ? `${totalDays} ${totalDays === 1 ? "day" : "days"} ` : "Select valid dates"}
                             </span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <button
+                                type="button"
                                 onClick={handleCalculate}
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
+                                disabled={calculateLoading}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#132d4d] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
-                                Calculate
-                                <Calculator size={18} className=" text-blue-400" />
+                                {calculateLoading ? "Calculating..." : "Calculate"}
+                                <Calculator size={18} className="text-blue-400" />
                             </button>
 
                             <button
-                                onClick={handleSubmit}
-                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0a1f39]/10 transition hover:bg-[#132d4d] active:scale-[0.99] sm:w-auto"
+                                type="button"
+                                onClick={() => handleSubmit()}
+                                disabled={!routeCalculation || calculateLoading}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#132d4d] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                             >
                                 Request
                                 <Send size={18} className="rotate-45 text-blue-400" />
                             </button>
-
                         </div>
                     </div>
                 </div>

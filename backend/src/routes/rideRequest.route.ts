@@ -30,7 +30,7 @@ router.post("/accept/:rideRequestId", isAuthenticated, isTransporter, acceptRide
 router.post("/cancel/:rideRequestId", isAuthenticated, isCustomer, cancelRideRequest);
 router.get("/get-all-ride-requests", isAuthenticated, isCustomer, getAllRideReqsOfAnUser);
 router.get("/get-ride-request/:rideRequestId", isAuthenticated, isCustomer, getRideReqByIdOfAnUser);
-router.post("/rental/create", isAuthenticated, isCustomer, vehicleRentalRequest);
+router.post("/rental/request", isAuthenticated, isCustomer, vehicleRentalRequest);
 router.get("/rental/providers", isAuthenticated, isCustomer, getRentalProviders);
 router.post("/rental/accept/:rentalId", isAuthenticated, isTransporter, acceptRentalRequest);
 router.post("/rental/start/:rentalId", isAuthenticated, isTransporter, startRental);

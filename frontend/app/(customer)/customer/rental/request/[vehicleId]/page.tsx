@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import VehicleTransporterDetails from "@/app/(customer)/components/VehicleTransporterDetails";
+import RentalPriceCard from "@/app/(customer)/components/RentalPriceCard";
 
 type Coordinates = [number, number];
 
@@ -232,6 +233,8 @@ export default function RentalSearchForm() {
     }
 
 
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -310,7 +313,7 @@ export default function RentalSearchForm() {
                 <VehicleTransporterDetails vehicle={vehicleData} transporter={transporter} />
             )}
 
-            <div  className="mx-auto my-8 max-w-5xl rounded-3xl bg-white p-6 shadow-xl sm:p-8">
+            <div className="mx-auto my-8 max-w-5xl rounded-3xl bg-white p-6 shadow-xl sm:p-8">
                 <div className="mb-8 border-b border-slate-100 pb-5">
                     <h2 className="text-2xl font-bold tracking-tight text-[#0a1f39] sm:text-3xl">
                         Rental Request
@@ -567,7 +570,7 @@ export default function RentalSearchForm() {
                         </div>
 
                     </div>
-
+                    
                     <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 sm:flex-row">
 
                         <div className="flex items-center gap-3">
@@ -599,6 +602,18 @@ export default function RentalSearchForm() {
                         </div>
                     </div>
                 </div>
+
+            </div>
+
+            <div className="mt-10">
+                {routeCalculation && (
+                    <RentalPriceCard
+                        data={routeCalculation}
+                        pickupAddress={pickupLocation?.address}
+                        destinationAddress={destinationLocation?.address}
+                        onConfirm={() => handleSubmit}
+                    />
+                )}
             </div>
         </div>
     );

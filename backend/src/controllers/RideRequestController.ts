@@ -28,6 +28,45 @@ interface RouteResult {
     estimatedDurationMinutes: number;
 }
 
+
+const RENTAL_PRICING = {
+    Bike: {
+        pricePerDay: 1500,
+        includedKmPerDay: 100,
+        extraKmPrice: 10,
+        driverAllowancePerDay: 0,
+        securityDeposit: 3000,
+    },
+
+    Car: {
+        pricePerDay: 3500,
+        includedKmPerDay: 100,
+        extraKmPrice: 25,
+        driverAllowancePerDay: 1200,
+        securityDeposit: 5000,
+    },
+
+    Truck: {
+        pricePerDay: 8000,
+        includedKmPerDay: 100,
+        extraKmPrice: 60,
+        driverAllowancePerDay: 1500,
+        securityDeposit: 15000,
+    },
+
+    Bus: {
+        pricePerDay: 12000,
+        includedKmPerDay: 100,
+        extraKmPrice: 80,
+        driverAllowancePerDay: 2000,
+        securityDeposit: 20000,
+    },
+} as const;
+
+
+
+
+
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.customerId) {
@@ -661,20 +700,10 @@ export const calculateRentalRouteAndPrice = async (req: Request, res: Response) 
             )
         );
 
-        const vehicle = await Vehicle.findOne({
-            vehicleType,
-            rentalAvailable: true,
-            isAvailable: true,
-        }).lean();
 
-        if (!vehicle) {
-            return res.status(404).json({
-                success: false,
-                message: "No rental vehicle is available for this vehicle type.",
-            });
-        }
 
-        const pricing = (vehicle as any).rentalPricing;
+
+        const pricing = RENTAL_PRICING[ vehicleType as keyof typeof RENTAL_PRICING];
 
         if (
             !pricing ||
@@ -714,10 +743,9 @@ export const calculateRentalRouteAndPrice = async (req: Request, res: Response) 
             baseRentalPrice + extraDistanceCost + driverCost
         );
 
-        // Deposit is shown separately because it may be refundable.
         const estimatedTotal = rentalCost + securityDeposit;
 
-        console.log("estimated data : " + {
+        console.log("estimated data : " + JSON.stringify({
             distanceKm,
             durationMinutes,
             rentalDays,
@@ -740,7 +768,7 @@ export const calculateRentalRouteAndPrice = async (req: Request, res: Response) 
                 securityDeposit,
                 estimatedTotal,
             },
-        });
+        }));
 
         return res.status(200).json({
             success: true,

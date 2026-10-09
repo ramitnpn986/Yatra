@@ -152,22 +152,34 @@ export const createRideRequest = async (req: Request, res: Response) => {
             expiresAt,
         });
 
-        const nearbyTransporters = await TransportProvider.find({
-            isAvailable: true,
-            isVerified: true,
-            isKycCompleted: true,
-            verificationStatus: "approved",
-            "vehicle.type": vehicleType,
-            currentLocation: {
-                $near: {
-                    $geometry: {
-                        type: "Point",
-                        coordinates: pickupLocation.coordinates,
-                    },
-                    $maxDistance: 5000
-                }
-            }
-        }).limit(5);
+        const matchingVehicles = await Vehicle.find({
+    vehicleType,
+    isAvailable: true,
+}).select("transporter").lean();
+
+const matchingTransporterIds = Array.from(
+    new Set(matchingVehicles.map((vehicle) => vehicle.transporter.toString()))
+);
+
+const nearbyTransporters = await TransportProvider.find({
+    _id: { $in: matchingTransporterIds },
+    transporterRole: "rider",
+    isActive: true,
+    isBlocked: false,
+    isAvailable: true,
+    isVerified: true,
+    isKycCompleted: true,
+    verificationStatus: "approved",
+    currentLocation: {
+        $near: {
+            $geometry: {
+                type: "Point",
+                coordinates: pickupLocation.coordinates,
+            },
+            $maxDistance: 5000
+        }
+    }
+}).select("-password").limit(5);
 
         const io = req.app.get("io");
 
@@ -838,16 +850,37 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const { transporterId, vehicleId, vehicleType, rentalType, pickupLocation, destinations, returnLocation, startDate, endDate } = req.body;
+        const {
+            transporterId,
+            vehicleId,
+            vehicleType,
+            rentalType,
+            pickupLocation,
+            destinations,
+            returnLocation,
+            startDate,
+            endDate,
+        } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(transporterId) || !mongoose.Types.ObjectId.isValid(vehicleId)) {
+        if (
+            !mongoose.Types.ObjectId.isValid(transporterId) ||
+            !mongoose.Types.ObjectId.isValid(vehicleId)
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid transporter or vehicle ID",
             });
         }
 
-        if (!vehicleType || !rentalType || !startDate || !endDate || !pickupLocation || !returnLocation || !Array.isArray(destinations)) {
+        if (
+            !vehicleType ||
+            !rentalType ||
+            !startDate ||
+            !endDate ||
+            !pickupLocation ||
+            !returnLocation ||
+            !Array.isArray(destinations)
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Vehicle, rental type, locations and dates are required",
@@ -897,7 +930,10 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
         }
 
         for (const destination of destinations) {
-            if (!destination?.name || !validateCoordinates(destination.coordinates)) {
+            if (
+                !destination?.name ||
+                !validateCoordinates(destination.coordinates)
+            ) {
                 return res.status(400).json({
                     success: false,
                     message: "Every destination must have a name and valid coordinates",
@@ -915,14 +951,21 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
 
-        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+        if (
+            Number.isNaN(start.getTime()) ||
+            Number.isNaN(end.getTime()) ||
+            end <= start
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid rental dates",
             });
         }
 
-        const rentalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        const rentalDays = Math.ceil(
+            (end.getTime() - start.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
 
         if (rentalDays < 1) {
             return res.status(400).json({
@@ -967,10 +1010,18 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
         const conflictingRental = await VehicleRental.findOne({
             vehicle: vehicleId,
             status: {
-                $in: ["pending", "confirmed", "active"],
+                $in: [
+                    "pending",
+                    "confirmed",
+                    "active",
+                ],
             },
-            startDate: { $lt: end },
-            endDate: { $gt: start },
+            startDate: {
+                $lt: end,
+            },
+            endDate: {
+                $gt: start,
+            },
         });
 
         if (conflictingRental) {
@@ -999,9 +1050,16 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             returnLocation
         ];
 
-        const coordinates = routeLocations.map((location) => `${location.coordinates[0]},${location.coordinates[1]}`).join(";");
+        const coordinates = routeLocations
+            .map(
+                (location) =>
+                    `${location.coordinates[0]},${location.coordinates[1]}`
+            )
+            .join(";");
 
-        const routeUrl = `https://router.project-osrm.org/route/v1/driving/` + `${coordinates}?overview=false&steps=false`;
+        const routeUrl =
+            `https://router.project-osrm.org/route/v1/driving/` +
+            `${coordinates}?overview=false&steps=false`;
 
         const routeResponse = await fetch(routeUrl);
 
@@ -1021,17 +1079,35 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
             });
         }
 
-        const totalDistanceKm = Number((routeData.routes[0].distance / 1000).toFixed(2));
+        const totalDistanceKm = Number(
+            (routeData.routes[0].distance / 1000).toFixed(2)
+        );
 
-        const estimatedDurationMinutes = Math.round(routeData.routes[0].duration / 60);
+        const estimatedDurationMinutes = Math.round(
+            routeData.routes[0].duration / 60
+        );
 
         const rentalPricing = (vehicle as any).rentalPricing;
-        const pricePerDay = Number(rentalPricing?.pricePerDay || 0);
 
-        const includedKmPerDay = Number(rentalPricing?.includedKmPerDay || 0);
-        const extraKmPrice = Number(rentalPricing?.extraKmPrice || 0);
-        const driverAllowancePerDay = Number(rentalPricing?.driverAllowancePerDay || 0);
-        const securityDeposit = Number(rentalPricing?.securityDeposit || 0);
+        const pricePerDay = Number(
+            rentalPricing?.pricePerDay || 0
+        );
+
+        const includedKmPerDay = Number(
+            rentalPricing?.includedKmPerDay || 0
+        );
+
+        const extraKmPrice = Number(
+            rentalPricing?.extraKmPrice || 0
+        );
+
+        const driverAllowancePerDay = Number(
+            rentalPricing?.driverAllowancePerDay || 0
+        );
+
+        const securityDeposit = Number(
+            rentalPricing?.securityDeposit || 0
+        );
 
         if (pricePerDay <= 0) {
             return res.status(400).json({
@@ -1042,12 +1118,25 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
 
         const baseRentalPrice = pricePerDay * rentalDays;
         const includedDistanceKm = includedKmPerDay * rentalDays;
-        const extraDistanceKm = Math.max(0, totalDistanceKm - includedDistanceKm);
+        const extraDistanceKm = Math.max(
+            0,
+            totalDistanceKm - includedDistanceKm
+        );
 
         const extraDistanceCost = extraDistanceKm * extraKmPrice;
-        const driverCost = rentalType === "with-driver" ? driverAllowancePerDay * rentalDays : 0;
-        const totalPrice = baseRentalPrice + extraDistanceCost + driverCost;
-        const bookingNumber = `YR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+        const driverCost =
+            rentalType === "with-driver"
+                ? driverAllowancePerDay * rentalDays
+                : 0;
+
+        const totalPrice =
+            baseRentalPrice +
+            extraDistanceCost +
+            driverCost;
+
+        const bookingNumber =
+            `YR-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
         const rental = await VehicleRental.create({
             bookingNumber,
@@ -1125,7 +1214,10 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
         });
 
     } catch (error) {
-        console.error("Create vehicle rental request error:", error);
+        console.error(
+            "Create vehicle rental request error:",
+            error
+        );
 
         return res.status(500).json({
             success: false,

@@ -51,7 +51,6 @@ interface Rental {
   status: string;
 }
 
-// Next.js proxy route (rental-requests page ma pani yehi use bhayeko cha)
 const RENTALS_API = "/api/transporter/rentals";
 const PLACEHOLDER_IMAGE = "/vehicle-placeholder.jpg";
 
@@ -79,7 +78,6 @@ export default function ActiveRentalsPage() {
       }
 
       const list: Rental[] = data.rentals || [];
-      // Pending haru Rental Requests page ma dekhinchha, yaha confirmed + active matra
       setRentals(list.filter((r) => r.status === "confirmed" || r.status === "active"));
     } catch (error) {
       console.error("Active rentals error:", error);
@@ -172,7 +170,7 @@ export default function ActiveRentalsPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 md:px-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a1f39] via-[#0f2d52] to-[#071526] px-6 py-10 text-white shadow-xl md:px-10">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -200,7 +198,6 @@ export default function ActiveRentalsPage() {
           </div>
         </section>
 
-        {/* Empty state */}
         {rentals.length === 0 ? (
           <div className="mt-8 rounded-3xl border border-gray-100 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#0a1f39]">
@@ -220,7 +217,7 @@ export default function ActiveRentalsPage() {
                 key={rental._id}
                 className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition hover:shadow-xl"
               >
-                {/* Image */}
+
                 <div className="relative h-44 overflow-hidden bg-gray-100">
                   <img
                     src={rental.vehicle?.images?.[0] || PLACEHOLDER_IMAGE}
@@ -258,7 +255,6 @@ export default function ActiveRentalsPage() {
                     {rental.rentalType === "with-driver" ? "With driver" : "Self drive"}
                   </p>
 
-                  {/* Customer */}
                   <div className="mt-4 flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0a1f39]">
                       <User className="h-5 w-5 text-white" />
@@ -278,7 +274,6 @@ export default function ActiveRentalsPage() {
                     </div>
                   </div>
 
-                  {/* Dates */}
                   <div className="mt-4 grid grid-cols-2 gap-3">
                     <div className="rounded-2xl border border-gray-100 p-3">
                       <div className="flex items-center gap-2">
@@ -300,7 +295,6 @@ export default function ActiveRentalsPage() {
                     </div>
                   </div>
 
-                  {/* Locations */}
                   <div className="mt-4 space-y-2">
                     <div className="flex gap-3 rounded-2xl bg-slate-50 p-3">
                       <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#ee8d39]" />
@@ -330,7 +324,6 @@ export default function ActiveRentalsPage() {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#0a1f39] p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ee8d39]">
@@ -351,7 +344,6 @@ export default function ActiveRentalsPage() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   {rental.status === "confirmed" && (
                     <button
                       type="button"

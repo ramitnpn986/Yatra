@@ -17,6 +17,11 @@ export const SOCKET_EVENTS = {
         CANCELLED: "ride:cancelled",
 
     },
+    TRANSPORTER: {
+        JOIN: "transporter:join",
+        JOINED: "transporter:joined",
+        ERROR: "transporter:error",
+    },
 
     LOCATION: {
         UPDATE: "location:update",

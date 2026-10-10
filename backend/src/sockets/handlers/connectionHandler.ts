@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { registerRideHandlers } from "./rideHandler.js";
 import { registerLocationHandlers } from "./locationHandler.js";
-import { registerTransporterHandlers } from "./transporterHandler.js";
+
 import { AuthenticatedSocket } from "../socketTypes.js";
 
 export const handleSocketConnection = (io: Server, socket: Socket) => {
@@ -16,7 +16,7 @@ export const handleSocketConnection = (io: Server, socket: Socket) => {
 
     registerRideHandlers(socket);
     registerLocationHandlers(socket);
-    // registerTransporterHandlers(socket); 
+
 
     socket.on("disconnect", (reason) => {
         console.log(`Socket disconnected: ${authenticatedSocket.id}`);

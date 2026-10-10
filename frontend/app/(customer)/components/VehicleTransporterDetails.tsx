@@ -1,7 +1,7 @@
-"use Client";
+"use client";
 
 import {
-    Car, MapPin, Phone, User, CalendarDays, Users, Weight, BadgeCheck, FileText,
+    Car, MapPin, Phone, User, CalendarDays, Users, Weight, BadgeCheck,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -26,11 +26,11 @@ interface Transporter {
     phone: string;
     profileImage?: {
         url?: string;
-    }
+    };
     location?: {
         type: "Point";
         coordinates: [number, number];
-        address: string; 
+        address: string;
         province?: string;
         district?: string;
         municipality?: string;
@@ -43,11 +43,10 @@ interface Props {
     transporter: Transporter;
 }
 
-
 export default function VehicleTransporterDetails({ vehicle, transporter }: Props) {
     return (
         <div className="my-4 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Transporter Details Card */}
+
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div className="border-b border-gray-100 px-6 py-5">
                     <div className="flex items-center gap-3">
@@ -65,9 +64,9 @@ export default function VehicleTransporterDetails({ vehicle, transporter }: Prop
 
                 <div className="p-6">
                     <div className="flex items-center gap-4">
-                        {transporter.profileImage ? (
+                        {transporter.profileImage?.url ? (
                             <Image
-                                src={transporter.profileImage?.url}
+                                src={transporter.profileImage.url}
                                 alt={transporter.name}
                                 width={72}
                                 height={72}
@@ -84,47 +83,65 @@ export default function VehicleTransporterDetails({ vehicle, transporter }: Prop
                     </div>
 
                     <div className="mt-6 space-y-4">
-                        <InfoRow
-                            icon={<Phone size={18} />}
-                            label="Phone"
-                            value={transporter.phone}
-                        />
-                        <InfoRow
-                            icon={<MapPin size={18} />}
-                            label="Registered Location"
-                            value={transporter.location?.address || "Location not available"}
-                        />
-                        <div className="px-4 grid grid-cols-1 gap-4">
-                            {transporter.location?.district && (
-                                <InfoRow
-                                    icon={""}
-                                    label="District"
-                                    value={transporter.location.district}
-                                />
-                            )}
-                            {transporter.location?.municipality && (
-                                <InfoRow
-                                    icon={""}
-                                    label="Municipality"
-                                    value={transporter.location.municipality}
-                                />
-                            )}
-                            {transporter.location?.ward && (
-                                <InfoRow
-                                    icon={""}
-                                    label="Ward"
-                                    value={` ${transporter.location.ward}`}
-                                />
-                            )}
-
+                 
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 text-gray-500">
+                                <Phone size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> Phone </p>
+                                <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {transporter.phone} </p>
+                            </div>
                         </div>
 
+       
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 text-gray-500">
+                                <MapPin size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> Registered Location </p>
+                                <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {transporter.location?.address || "Location not available"} </p>
+                            </div>
+                        </div>
+
+                        <div className="px-4 grid grid-cols-1 gap-4">
+                            {transporter.location?.district && (
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 text-gray-500"></div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> District </p>
+                                        <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {transporter.location.district} </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {transporter.location?.municipality && (
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 text-gray-500"></div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> Municipality </p>
+                                        <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {transporter.location.municipality} </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {transporter.location?.ward && (
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 text-gray-500"></div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> Ward </p>
+                                        <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {` ${transporter.location.ward}`} </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
+
                     <div className="flex mt-10 items-center gap-3">
                         <BadgeCheck className="text-green-600" size={18} />
                         <p className="font-medium text-green-800">Verified Transporter</p>
                     </div>
-
                 </div>
             </div>
 
@@ -162,26 +179,39 @@ export default function VehicleTransporterDetails({ vehicle, transporter }: Prop
                     </div>
 
                     <div className="mt-6 grid grid-cols-2 gap-3">
-                        <SpecCard
-                            icon={<Car size={18} />}
-                            label="Vehicle Type"
-                            value={vehicle.vehicleType}
-                        />
-                        <SpecCard
-                            icon={<Users size={18} />}
-                            label="Seats"
-                            value={`${vehicle.seats} Seats`}
-                        />
-                        <SpecCard
-                            icon={<Weight size={18} />}
-                            label="Capacity"
-                            value={`${vehicle.capacityKg} kg`}
-                        />
-                        <SpecCard
-                            icon={<CalendarDays size={18} />}
-                            label="Year"
-                            value={vehicle.year.toString()}
-                        />
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500">
+                                <Car size={18} />
+                                <span className="text-xs">Vehicle Type</span>
+                            </div>
+                            <p className="mt-2 font-semibold text-gray-900">{vehicle.vehicleType}</p>
+                        </div>
+
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500">
+                                <Users size={18} />
+                                <span className="text-xs">Seats</span>
+                            </div>
+                            <p className="mt-2 font-semibold text-gray-900">{`${vehicle.seats} Seats`}</p>
+                        </div>
+
+   
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500">
+                                <Weight size={18} />
+                                <span className="text-xs">Capacity</span>
+                            </div>
+                            <p className="mt-2 font-semibold text-gray-900">{`${vehicle.capacityKg} kg`}</p>
+                        </div>
+
+            
+                        <div className="rounded-xl border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500">
+                                <CalendarDays size={18} />
+                                <span className="text-xs">Year</span>
+                            </div>
+                            <p className="mt-2 font-semibold text-gray-900">{vehicle.year.toString()}</p>
+                        </div>
                     </div>
 
                     <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -197,27 +227,3 @@ export default function VehicleTransporterDetails({ vehicle, transporter }: Prop
         </div>
     );
 }
-
-
-function InfoRow({ icon, label, value, }: { icon: React.ReactNode; label: string; value: string; }) {
-    return (<div className="flex items-start gap-3">
-        <div className="mt-0.5 text-gray-500">{icon}</div>
-        <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-400"> {label} </p>
-            <p className="mt-0.5 break-words text-sm font-medium text-gray-800"> {value} </p>
-        </div>
-    </div>);
-
-}
-
-
-function SpecCard({ icon, label, value, }: { icon: React.ReactNode; label: string; value: string; }) {
-
-    return (<div className="rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center gap-2 text-gray-500"> {icon} <span className="text-xs">{label}</span> </div>
-        <p className="mt-2 font-semibold text-gray-900">{value}</p>
-    </div>);
-}
-
-
-function StatusBadge({ label, active, activeText, inactiveText, }: { label: string; active: boolean; activeText: string; inactiveText: string; }) { return (<div className="rounded-xl border border-gray-200 p-4"> <p className="text-xs text-gray-500">{label}</p> <div className="mt-2 flex items-center gap-2"> <span className={`h-2.5 w-2.5 rounded-full ${active ? "bg-green-500" : "bg-red-500"}`} /> <span className={`text-sm font-semibold ${active ? "text-green-700" : "text-red-700"}`} > {active ? activeText : inactiveText} </span> </div> </div>); }

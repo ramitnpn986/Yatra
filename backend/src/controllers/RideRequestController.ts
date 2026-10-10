@@ -66,7 +66,6 @@ const RENTAL_PRICING = {
 
 
 
-
 export const createRideRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.customerId) {
@@ -568,7 +567,6 @@ async function geocodePlace(place: string): Promise<[number, number]> {
 }
 
 
-
 export const calculateRentalRouteAndPrice = async (req: Request, res: Response) => {
     try {
         const customerId = req.user?.customerId;
@@ -808,7 +806,6 @@ export const calculateRentalRouteAndPrice = async (req: Request, res: Response) 
         });
     }
 }
-
 
 
 export const vehicleRentalRequest = async (req: Request, res: Response) => {
@@ -1078,7 +1075,6 @@ export const vehicleRentalRequest = async (req: Request, res: Response) => {
 };
 
 
-
 export const acceptRentalRequest = async (req: Request, res: Response) => {
     try {
         if (!req.user?.transporterId) {
@@ -1211,6 +1207,49 @@ export const acceptRentalRequest = async (req: Request, res: Response) => {
         });
     }
 };
+
+
+export const getVehicleRentalRequestById = async (req: Request, res: Response) => {
+    try {
+        const rentalId = String(req.params.rentalId);
+
+        if (!mongoose.Types.ObjectId.isValid(rentalId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid rental ID",
+            });
+        }
+
+        const rentalRequest = await VehicleRental.findById(rentalId).populate("customer", "name email phone profileImage")
+            .populate("transporter", "name email phone profileImage location").populate(
+                "vehicle", "vehicleType brand model numberPlate images seats capacityKg year"
+            )
+            .lean();
+
+
+        if (!rentalRequest) {
+            return res.status(404).json({
+                success: false,
+                message: "Vehicle rental request not found",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicle rental request fetched successfully",
+            data: rentalRequest,
+        });
+
+
+    } catch (err) {
+        console.error("Get rental request details error:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+}
 
 
 export const rejectRentalRequest = async (req: Request, res: Response) => {
@@ -1538,12 +1577,7 @@ export const getRentalProviders = async (req: Request, res: Response) => {
             isVerified: true,
             isKycCompleted: true,
             verificationStatus: "approved",
-        })
-            .select(
-                "name phone profileImage location serviceAreas pricePerKm"
-            )
-            .sort({ name: 1 })
-            .lean();
+        }).select("name phone profileImage location serviceAreas pricePerKm").sort({ name: 1 }).lean();
 
         const providersWithVehicles = await Promise.all(
             providers.map(async (provider) => {
@@ -1551,12 +1585,8 @@ export const getRentalProviders = async (req: Request, res: Response) => {
                     transporter: provider._id,
                     isAvailable: true,
                     rentalAvailable: true,
-                })
-                    .select(
-                        "vehicleType brand model numberPlate images seats capacityKg year"
-                    )
-                    .sort({ createdAt: -1 })
-                    .lean();
+                }).select("vehicleType brand model numberPlate images seats capacityKg year"
+                ).sort({ createdAt: -1 }).lean();
 
                 return {
                     ...provider,

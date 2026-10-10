@@ -217,12 +217,9 @@ export default function RentalSearchForm() {
                 );
             }
 
-            // Do not allow a booking estimate with unresolved destinations.
             if (data.data.invalidPlaces?.length > 0) {
                 setRouteCalculation(data.data);
-                toast.error(
-                    `Please correct invalid destinations: ${data.data.invalidPlaces.join(", ")} `
-                );
+                toast.error(`Please correct invalid destinations: ${data.data.invalidPlaces.join(", ")} `);
                 return;
             }
 

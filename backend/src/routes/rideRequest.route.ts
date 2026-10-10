@@ -15,7 +15,8 @@ import {
     completeRental,
     searchAvailable,
     getVehicleWithTransporter,
-    calculateRentalRouteAndPrice
+    calculateRentalRouteAndPrice,
+    getVehicleRentalRequestById
 } from "../controllers/RideRequestController.js";
 
 import { Router } from "express";
@@ -42,6 +43,7 @@ router.get("/rental/pending", isAuthenticated, isTransporter, getPendingRentalRe
 router.post("/rental/search", isAuthenticated, searchAvailable);
 router.get("/vehicle/:vehicleId",isAuthenticated, isCustomer, getVehicleWithTransporter);
 router.post("/calculate-price",isAuthenticated,isCustomer,calculateRentalRouteAndPrice);
+router.get("/:rentalId",isAuthenticated,isCustomer,getVehicleRentalRequestById);
 
 
 export default router;

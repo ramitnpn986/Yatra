@@ -68,24 +68,14 @@ const LocationPicker = dynamic(
 export default function RentalSearchForm() {
     const [vehicles, setVehicles] = useState<AvailableVehicle[]>([]);
 
-    const [pickupLocation, setPickupLocation] =
-        useState<SelectedLocation | null>(null);
-
-    const [destinationLocation, setDestinationLocation] =
-        useState<SelectedLocation | null>(null);
-
+    const [pickupLocation, setPickupLocation] = useState<SelectedLocation | null>(null);
+    const [destinationLocation, setDestinationLocation] = useState<SelectedLocation | null>(null);
     const [destinationPlaces, setDestinationPlaces] = useState("");
-
     const [vehicleType, setVehicleType] = useState("");
-
     const [passengers, setPassengers] = useState("1");
-
     const [startDate, setStartDate] = useState("");
-
     const [endDate, setEndDate] = useState("");
-
     const [estimatedBudget, setEstimatedBudget] = useState("");
-
     const today = new Date().toISOString().split("T")[0];
 
     const totalDays = useMemo(() => {
@@ -93,14 +83,10 @@ export default function RentalSearchForm() {
 
         const start = new Date(startDate);
         const end = new Date(endDate);
-
         const difference = end.getTime() - start.getTime();
-
         if (difference <= 0) return 0;
 
-        return Math.ceil(
-            difference / (1000 * 60 * 60 * 24)
-        );
+        return Math.ceil( difference / (1000 * 60 * 60 * 24));
     }, [startDate, endDate]);
 
     const handleSearch = async (e: React.FormEvent) => {
@@ -140,8 +126,7 @@ export default function RentalSearchForm() {
         };
 
         try {
-            const res = await fetch(
-                "/api/customer/rental/search",
+            const res = await fetch("/api/customer/rental/search",
                 {
                     method: "POST",
                     headers: {
@@ -156,54 +141,26 @@ export default function RentalSearchForm() {
                 await res.json();
 
             if (!res.ok) {
-                toast.error(
-                    (data as any).message ||
-                    "Failed to search vehicles"
-                );
+                toast.error( (data as any).message ||"Failed to search vehicles");
                 return;
             }
-
-            console.log("Rental search information:", {
-                pickupLocation,
-                destinationLocation,
-                destinationPlaces,
-                passengers,
-                vehicleType,
-                startDate,
-                endDate,
-                estimatedBudget,
-            });
-
-            toast.success("Vehicles found");
-
             setVehicles(data.data);
         } catch (error) {
-            console.error(
-                "Rental search error:",
-                error
-            );
-
-            toast.error(
-                "Something went wrong while searching vehicles"
-            );
+            console.error("Rental search error:", error);
+            toast.error("Something went wrong while searching vehicles");
         }
     };
 
     return (
         <div className="min-h-screen bg-slate-50 pb-12">
 
-            {/* HERO */}
             <div className="relative mx-auto mt-4 min-h-[350px] w-full max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#0a1f39] via-[#0f2d52] to-[#071526] p-10 text-white shadow-2xl">
 
                 <div className="relative z-10 grid h-full items-center gap-8 lg:grid-cols-12">
 
                     <div className="space-y-6 lg:col-span-5">
 
-                        <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest text-gray-400">
-                            <ShieldCheck
-                                size={16}
-                                className="text-[#ee8d39]"
-                            />
+                        <div className="inline-flex items-center gap-2 text-xs font-semibold  text-gray-400">
                             <span>
                                 Seamless Vehicle Rentals
                             </span>
@@ -212,7 +169,6 @@ export default function RentalSearchForm() {
                         <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl">
                             Plan Your Journey
                             <br />
-
                             <span className="bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                                 Fast, Simple & Reliable
                             </span>
@@ -224,21 +180,10 @@ export default function RentalSearchForm() {
                             journey, and send your rental request.
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-300">
-                            <div className="flex items-center gap-1.5">
-                                <ShieldCheck
-                                    size={16}
-                                    className="text-orange-400"
-                                />
-                                <span>
-                                    Verified Vehicles
-                                </span>
-                            </div>
-                        </div>
+                  
 
                         <div className="flex flex-wrap items-center gap-4 pt-2">
-                            <a
-                                href="#rental-form"
+                            <a  href="#rental-form"
                                 className="inline-flex items-center gap-2 rounded-xl bg-[#ee8d39] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-900/30 transition hover:bg-orange-400 active:scale-95"
                             >
                                 Start Rental Search
@@ -261,13 +206,8 @@ export default function RentalSearchForm() {
                             </div>
 
                             <div className="mt-3 px-2 pb-2">
-                                <h3 className="text-sm font-bold text-white">
-                                    Cars
-                                </h3>
-
-                                <p className="text-[10px] text-slate-400">
-                                    Sedans, SUVs & Hatchbacks
-                                </p>
+                                <h3 className="text-sm font-bold text-white"> Cars </h3>
+                                <p className="text-[10px] text-slate-400">  Sedans, SUVs & Hatchbacks </p>
                             </div>
                         </div>
 
@@ -283,13 +223,8 @@ export default function RentalSearchForm() {
                             </div>
 
                             <div className="mt-3 px-2 pb-2">
-                                <h3 className="text-sm font-bold text-white">
-                                    Buses
-                                </h3>
-
-                                <p className="text-[10px] text-slate-400">
-                                    Mini & Luxury Travel
-                                </p>
+                                <h3 className="text-sm font-bold text-white">Buses</h3>
+                                <p className="text-[10px] text-slate-400"> Mini & Luxury Travel </p>
                             </div>
                         </div>
 
@@ -305,13 +240,8 @@ export default function RentalSearchForm() {
                             </div>
 
                             <div className="mt-3 px-2 pb-2">
-                                <h3 className="text-sm font-bold text-white">
-                                    Trucks
-                                </h3>
-
-                                <p className="text-[10px] text-slate-400">
-                                    Cargo & Logistics
-                                </p>
+                                <h3 className="text-sm font-bold text-white"> Trucks </h3>
+                                <p className="text-[10px] text-slate-400"> Cargo & Logistics </p>
                             </div>
                         </div>
 
@@ -319,7 +249,6 @@ export default function RentalSearchForm() {
                 </div>
             </div>
 
-            {/* RENTAL FORM */}
             <form
                 id="rental-form"
                 onSubmit={handleSearch}
@@ -653,7 +582,6 @@ export default function RentalSearchForm() {
 
                 </div>
             )}
-
         </div>
     );
 }

@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { ImagePlus, UserRound } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 
 const ProfileUpdatePage = () => {
     const [name, setName] = useState("");
@@ -9,8 +11,10 @@ const ProfileUpdatePage = () => {
     const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState("");
-    const [success, setSuccess] = useState(false);
+
+
+    const [errName, setNameError] = useState("");
+    const [errProfile, setProfileError] = useState("");
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -28,35 +32,73 @@ const ProfileUpdatePage = () => {
                         setPreview(data.transporter.profileImage.url);
                     }
                 } else {
-                    setMessage(data.message || "Unable to load profile");
+                    toast.info(data.message || "Unable to load profile");
                 }
             } catch {
-                setMessage("Unable to load profile");
+                toast.error("Unable to load profile");
             } finally {
                 setLoading(false);
             }
         };
 
-        loadProfile();
+        void loadProfile();
     }, []);
 
     const handleImageChange = (file: File | null) => {
         setProfileImage(file);
-        setSuccess(false);
-        setMessage("");
-
+        setProfileError("");
         if (file) {
             const imageUrl = URL.createObjectURL(file);
             setPreview(imageUrl);
         }
     };
 
+    const validateForm = () => {
+        let isValid = true;
+        setNameError("");
+        setProfileError("");
+
+        const trimmedName = name.trim();
+
+        if (!trimmedName) {
+            setNameError("Name is required");
+            isValid = false;
+        } else if (trimmedName.length < 3) {
+            setNameError("Name must contain at least 3 characters");
+            isValid = false;
+        } else if (trimmedName.length > 50) {
+            setNameError("Name must not exceed 50 characters");
+            isValid = false;
+        } else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(trimmedName)) {
+            setNameError("Name must contain letters only");
+            isValid = false;
+        }
+
+        if (profileImage) {
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+            ];
+
+            if (!allowedTypes.includes(profileImage.type)) {
+                setProfileError("Only JPEG, PNG, and WebP images are allowed");
+                isValid = false;
+            } else if (profileImage.size > 2 * 1024 * 1024) {
+                setProfileError("Image size must not exceed 2 MB");
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    };
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        if (!validateForm()) return;
+
         setSaving(true);
-        setMessage("");
-        setSuccess(false);
 
         try {
             const formData = new FormData();
@@ -75,13 +117,12 @@ const ProfileUpdatePage = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setSuccess(true);
-                setMessage(data.message || "Profile updated successfully");
+                toast.success(data.message || "Profile updated successfully");
             } else {
-                setMessage(data.message || "Update failed");
+                toast.error(data.message || "Update failed");
             }
         } catch {
-            setMessage("Unable to update profile");
+            toast.error("Unable to update profile");
         } finally {
             setSaving(false);
         }
@@ -104,23 +145,15 @@ const ProfileUpdatePage = () => {
         <div className="min-h-full bg-[#f5f7fa] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl">
                 <div className="overflow-hidden rounded-3xl border border-[#0b2c54]/10 bg-white shadow-sm">
-          
                     <div className="border-b border-[#0b2c54]/10 bg-[#0a1f39] px-6 py-6 sm:px-8">
                         <div className="flex items-center gap-3">
-                            <UserRound
-                                size={22}
-                                className="text-[#ee8d39]"
-                            />
-
-                            <h2 className="font-bold text-white">
-                                Personal Information
-                            </h2>
+                            <UserRound size={22} className="text-[#ee8d39]" />
+                            <h2 className="font-bold text-white">  Personal Information </h2>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-8 p-6 sm:p-8">
-                          
                             <div>
                                 <label className="mb-4 block text-sm font-bold text-[#0a1f39]">
                                     Profile photo
@@ -129,16 +162,15 @@ const ProfileUpdatePage = () => {
                                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                                     <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#f5f7fa] shadow-sm">
                                         {preview ? (
-                                            <img
+                                            <Image
                                                 src={preview}
                                                 alt="Profile preview"
-                                                className="h-full w-full object-cover"
+                                                width={80}
+                                                height={80}
+                                                className="h-20 w-20 rounded-full object-cover"
                                             />
                                         ) : (
-                                            <UserRound
-                                                size={48}
-                                                className="text-[#b0aeae]"
-                                            />
+                                            <UserRound size={48} className="text-slate-300" />
                                         )}
                                     </div>
 
@@ -153,11 +185,8 @@ const ProfileUpdatePage = () => {
 
                                             <div>
                                                 <p className="text-sm font-bold text-[#0a1f39]">
-                                                    {profileImage
-                                                        ? profileImage.name
-                                                        : "Choose a profile photo"}
+                                                    {profileImage ? profileImage.name : "Choose a profile photo"}
                                                 </p>
-
                                                 <p className="mt-1 text-xs leading-5 text-[#b0aeae]">
                                                     PNG, JPG or WEBP
                                                 </p>
@@ -168,24 +197,19 @@ const ProfileUpdatePage = () => {
                                             id="profile-image"
                                             type="file"
                                             accept="image/png,image/jpeg,image/webp"
-                                            onChange={(event) =>
-                                                handleImageChange(
-                                                    event.target.files?.[0] ||
-                                                        null
-                                                )
-                                            }
+                                            onChange={(event) => handleImageChange(event.target.files?.[0] || null)}
                                             className="hidden"
                                         />
                                     </label>
                                 </div>
+
+
+                                {errProfile && (<p className="mt-2 text-xs font-semibold text-red-600">  {errProfile} </p>)}
                             </div>
 
-                            {/* Full Name */}
+
                             <div>
-                                <label
-                                    htmlFor="name"
-                                    className="mb-2 block text-sm font-bold text-[#0a1f39]"
-                                >
+                                <label htmlFor="name" className="mb-2 block text-sm font-bold text-[#0a1f39]">
                                     Full name
                                 </label>
 
@@ -194,27 +218,19 @@ const ProfileUpdatePage = () => {
                                     value={name}
                                     onChange={(event) => {
                                         setName(event.target.value);
-                                        setSuccess(false);
-                                        setMessage("");
+                                        setNameError("");
                                     }}
-                                    minLength={4}
-                                    required
                                     placeholder="Enter your full name"
-                                    className="w-full rounded-xl border border-[#0b2c54]/15 bg-white p-3 text-sm font-medium text-[#1f2937] outline-none transition placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/10"
+                                    className={`w-full rounded-xl border bg-white p-3 text-sm font-medium text-[#1f2937] outline-none transition placeholder:text-[#b0aeae] focus:ring-2 ${errName
+                                            ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                                            : "border-[#0b2c54]/15 focus:border-[#ee8d39] focus:ring-[#ee8d39]/10"
+                                        }`}
                                 />
+
+
+                                {errName && (<p className="mt-2 text-xs font-semibold text-red-600"> {errName} </p>)}
                             </div>
 
-                            {message && (
-                                <div
-                                    className={`rounded-xl px-4 py-3 text-sm font-medium ${
-                                        success
-                                            ? "bg-green-50 text-green-700"
-                                            : "bg-red-50 text-red-700"
-                                    }`}
-                                >
-                                    {message}
-                                </div>
-                            )}
                         </div>
 
                         <div className="flex items-center justify-end border-t border-[#0b2c54]/10 p-4 sm:p-6 lg:p-8">
@@ -223,9 +239,7 @@ const ProfileUpdatePage = () => {
                                 disabled={saving}
                                 className="rounded-xl bg-[#ee8d39] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#f59d50] disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {saving
-                                    ? "Saving changes..."
-                                    : "Save changes"}
+                                {saving? "Saving changes...": "Save changes"}
                             </button>
                         </div>
                     </form>

@@ -173,7 +173,6 @@ export const logout = async (req: Request, res: Response): Promise<Response> => 
 export const getAdminProfile = async (req: Request, res: Response): Promise<Response> => {
 
     try {
-
         const adminId = req.user?.adminId;
         const admin = await Admin.findById(adminId).select('-password');
 
@@ -287,7 +286,7 @@ export const changeAdminPassword = async (req: Request, res: Response): Promise<
 
 }
 
-export const getAllTransportersVerified = async (  req: Request,  res: Response): Promise<Response> => {
+export const getAllTransportersVerified = async (req: Request, res: Response): Promise<Response> => {
     try {
         const transporters = await TransportProvider.find().select("-password").lean();
 
@@ -325,7 +324,7 @@ export const getAllTransportersVerified = async (  req: Request,  res: Response)
 export const getTransportProviderById = async (req: Request, res: Response): Promise<Response> => {
     try {
 
-    const { transporterId } = req.params;
+        const { transporterId } = req.params;
 
         const transporter = await TransportProvider.findById(transporterId).select("-password").lean();
 
@@ -541,20 +540,28 @@ export const blockUnBlockTransportProvider = async (req: Request, res: Response)
 
 }
 
-export const getPendingKYCProviders = async (
-    req: Request,
-    res: Response
-): Promise<Response> => {
+export const getPendingKYCProviders = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const transporters = await TransportProvider.find({
-            verificationStatus: "pending",
-            isKycDataSubmitted: true,
-        })
-            .select("-password")
-            .lean();
+        const transporters = await TransportProvider.find({ verificationStatus: "pending", isKycDataSubmitted: true }).select("-password").lean();
 
-        const transportersWithVehicles =
-            await attachVehiclesToTransporters(transporters);
+        if (transporters.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                transporters: [],
+            });
+        }
+
+        const transporterIds = transporters.map((transporter) => transporter._id);
+
+        const vehicles = await Vehicle.find({ transporter: { $in: transporterIds } }).lean();
+
+        const transportersWithVehicles = transporters.map((transporter) => {
+            const transporterVehicles = vehicles.filter(
+                (vehicle) => vehicle.transporter.toString() === transporter._id.toString()
+            );
+            return { ...transporter, vehicles: transporterVehicles };
+        });
 
         return res.status(200).json({
             success: true,
@@ -571,19 +578,28 @@ export const getPendingKYCProviders = async (
     }
 };
 
-export const getBlockedTransportProviders = async (
-    req: Request,
-    res: Response
-): Promise<Response> => {
+export const getBlockedTransportProviders = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const transporters = await TransportProvider.find({
-            isBlocked: true,
-        })
-            .select("-password")
-            .lean();
+        const transporters = await TransportProvider.find({ isBlocked: true }).select("-password").lean();
 
-        const transportersWithVehicles =
-            await attachVehiclesToTransporters(transporters);
+        if (transporters.length === 0) {
+            return res.status(200).json({
+                success: true,
+                count: 0,
+                transporters: [],
+            });
+        }
+
+        const transporterIds = transporters.map((transporter) => transporter._id);
+
+        const vehicles = await Vehicle.find({ transporter: { $in: transporterIds } }).lean();
+
+        const transportersWithVehicles = transporters.map((transporter) => {
+            const transporterVehicles = vehicles.filter(
+                (vehicle) => vehicle.transporter.toString() === transporter._id.toString()
+            );
+            return { ...transporter, vehicles: transporterVehicles };
+        });
 
         return res.status(200).json({
             success: true,

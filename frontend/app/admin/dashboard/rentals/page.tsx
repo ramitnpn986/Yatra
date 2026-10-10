@@ -55,29 +55,108 @@ export default function AdminRentalsPage() {
   }, []);
 
   return (
-    <div className="min-h-full bg-slate-50">
-      <div className="mb-8 flex items-center justify-between gap-4">
+    <div className="min-h-full bg-slate-50 p-6">
+      <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#ee8d39]">Management</p>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#ee8d39]">
+            Management
+          </p>
           <h1 className="text-3xl font-black text-[#0F172A]">Vehicle Rentals</h1>
-          <p className="mt-2 text-sm text-slate-500">Monitor rental bookings, status, and payment information.</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Monitor rental bookings, status, and payment information.
+          </p>
         </div>
-        <button type="button" onClick={loadRentals} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold">
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Refresh
+        <button
+          type="button"
+          onClick={loadRentals}
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        >
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          Refresh
         </button>
       </div>
 
       {loading ? (
-        <p className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500">Loading rentals...</p>
+        <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
+          Loading rentals...
+        </div>
       ) : error ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700">{error}</p>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-red-700 shadow-sm">
+          {error}
+        </div>
       ) : rentals.length === 0 ? (
-        <p className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500">No rental bookings found.</p>
+        <div className="rounded-2xl bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
+          No rental bookings found.
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left">
-            <thead><tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500"><th className="px-6 py-4">Booking</th><th className="px-6 py-4">Vehicle</th><th className="px-6 py-4">Dates</th><th className="px-6 py-4">Total</th><th className="px-6 py-4">Payment</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Action</th></tr></thead>
-            <tbody>{rentals.map((rental) => <tr key={rental._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50"><td className="px-6 py-4"><div className="flex items-center gap-2 font-semibold text-slate-800"><CalendarDays size={17} className="text-[#ee8d39]" />{rental.bookingNumber || rental._id.slice(-8)}</div></td><td className="px-6 py-4 text-sm text-slate-600">{rental.vehicleType} · {rental.rentalType}</td><td className="px-6 py-4 text-sm text-slate-600">{formatDate(rental.startDate)} - {formatDate(rental.endDate)}<br /><span className="text-xs text-slate-400">{rental.rentalDays || "-"} days</span></td><td className="px-6 py-4 font-semibold text-slate-800">Rs. {rental.totalPrice.toFixed(2)}</td><td className="px-6 py-4"><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold capitalize text-amber-700">{rental.paymentStatus || "unpaid"}</span></td><td className="px-6 py-4"><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">{rental.status}</span></td><td className="px-6 py-4"><Link href={`/admin/dashboard/rentals/${rental._id}`} className="inline-flex items-center gap-1 rounded-lg bg-[#0F172A] px-3 py-2 text-sm font-semibold text-white">View <ArrowRight size={15} /></Link></td></tr>)}</tbody>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-500">
+                <th className="px-6 py-4">Booking</th>
+                <th className="px-6 py-4">Vehicle</th>
+                <th className="px-6 py-4">Dates</th>
+                <th className="px-6 py-4">Total</th>
+                <th className="px-6 py-4">Payment</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {rentals.map((rental) => (
+                <tr key={rental._id} className="transition-colors hover:bg-slate-50/80">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2 font-semibold text-slate-800">
+                      <CalendarDays size={17} className="text-[#ee8d39]" />
+                      {rental.bookingNumber || rental._id.slice(-8)}
+                    </div>
+                  </td>
+
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {rental.vehicleType} · {rental.rentalType}
+                  </td>
+
+
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    <div>
+                      {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
+                    </div>
+                    <span className="text-xs text-slate-400">
+                      {rental.rentalDays || "-"} days
+                    </span>
+                  </td>
+
+
+                  <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+                    Rs. {rental.totalPrice.toFixed(2)}
+                  </td>
+
+
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-block rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold capitalize text-amber-700">
+                      {rental.paymentStatus || "unpaid"}
+                    </span>
+                  </td>
+
+ 
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700">
+                      {rental.status}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link
+                      href={`/admin/dashboard/rentals/${rental._id}`}
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#0F172A] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+                    >
+                      View <ArrowRight size={15} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       )}

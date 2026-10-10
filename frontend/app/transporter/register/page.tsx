@@ -9,7 +9,6 @@ export default function RegisterPage() {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("rider");
-    const [errors, setErrors] = useState<{ name?: string; phone?: string; password?: string }>({});
     const [submitting, setSubmitting] = useState(false);
 
     const [err_name, setNameError] = useState("");
@@ -102,8 +101,7 @@ export default function RegisterPage() {
 
             const data = await res.json();
             if (!res.ok) {
-                console.log(data.message);
-                setErrors({ password: data.message || "Registration failed" });
+                console.log(data.message)
                 return;
             }
             console.log("register success: ", data);

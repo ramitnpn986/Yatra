@@ -26,19 +26,13 @@ const Page = () => {
         confirmPassword: "",
     });
 
-    const validateInput = ({
-        oldPassword,
-        newPassword,
-        confirmPassword,
-    }: PasswordFields): PasswordErrors => {
+    const validateInput = ({ oldPassword, newPassword, confirmPassword}: PasswordFields): PasswordErrors => {
         const errors: PasswordErrors = {};
-        const strongPassRegex =
-            /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+        const strongPassRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
 
         if (!oldPassword.trim()) {
             errors.oldPassword = "Current password is required";
         }
-
         if (!newPassword.trim()) {
             errors.newPassword = "New password is required";
         } else if (oldPassword === newPassword) {
@@ -46,7 +40,6 @@ const Page = () => {
         } else if (!strongPassRegex.test(newPassword)) {
             errors.newPassword = "Weak password complexity";
         }
-
         if (!confirmPassword.trim()) {
             errors.confirmPassword = "Please confirm your password";
         } else if (confirmPassword !== newPassword) {
@@ -59,22 +52,14 @@ const Page = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
-        setPasswords((prev) => ({
-            ...prev,
-            [name as FieldName]: value,
-        }));
+        setPasswords((prev) => ({...prev, [name as FieldName]: value}));
 
         if (errors[name as FieldName]) {
-            setErrors((prev) => ({
-                ...prev,
-                [name as FieldName]: "",
-            }));
+            setErrors((prev) => ({ ...prev, [name as FieldName]: ""}));
         }
     };
 
-    const submitHandler = async (
-        e: React.FormEvent<HTMLFormElement>
-    ) => {
+    const submitHandler = async ( e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (loading) return;
@@ -89,8 +74,7 @@ const Page = () => {
         setLoading(true);
 
         try {
-            const request = await fetch(
-                "/api/transporter/password-change",
+            const request = await fetch("/api/transporter/password-change",
                 {
                     method: "POST",
                     headers: {
@@ -112,22 +96,12 @@ const Page = () => {
             }
 
             if (res.success) {
-                toast.success(
-                    res.message || "Password changed successfully"
-                );
-
-                await fetch("/api/logout", {
-                    method: "POST",
-                    credentials: "include",
-                });
-
+                toast.success( res.message || "Password changed successfully");
+                await fetch("/api/logout", { method: "POST", credentials: "include"});
                 router.push("/transporter/login");
             }
         } catch (error: unknown) {
-            console.error(
-                "Transporter password change error:",
-                error
-            );
+            console.error("Transporter password change error:", error);
         } finally {
             setLoading(false);
         }
@@ -163,7 +137,6 @@ const Page = () => {
         <div className="min-h-screen bg-[#f5f7fa] px-4 py-8 flex items-center justify-center">
             <div className="w-full max-w-lg">
                 <div className="overflow-hidden rounded-3xl border border-[#0b2c54]/10 bg-white shadow-xl">
-                    {/* Header */}
                     <div className="bg-[#0a1f39] px-6 py-7 sm:px-8">
                         <div className="flex items-center gap-4">
                             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ee8d39] text-white">
@@ -171,19 +144,13 @@ const Page = () => {
                             </div>
 
                             <div>
-                                <h2 className="text-xl font-bold text-white sm:text-2xl">
-                                    Change Password
-                                </h2>
+                                <h2 className="text-xl font-bold text-white sm:text-2xl"> Change Password </h2>
                             </div>
                         </div>
                     </div>
 
-                    {/* Form */}
                     <div className="p-6 sm:p-8">
-                        <form
-                            onSubmit={submitHandler}
-                            className="space-y-5"
-                        >
+                        <form onSubmit={submitHandler} className="space-y-5">
                             {fields.map((field) => (
                                 <div key={field.name}>
                                     <label className="mb-2 ml-1 block text-sm font-bold text-[#0a1f39]">
@@ -207,18 +174,10 @@ const Page = () => {
                                         {field.name === "newPassword" && (
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    setShowPassword(
-                                                        (prev) => !prev
-                                                    )
-                                                }
+                                                onClick={() => setShowPassword((prev) => !prev)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-[#b0aeae] transition-colors hover:text-[#ee8d39]"
                                             >
-                                                {showPassword ? (
-                                                    <EyeOff size={18} />
-                                                ) : (
-                                                    <Eye size={18} />
-                                                )}
+                                                {showPassword ? ( <EyeOff size={18} />) : ( <Eye size={18} />)}
                                             </button>
                                         )}
                                     </div>
@@ -226,9 +185,7 @@ const Page = () => {
                                     {errors[field.name] && (
                                         <div className="mt-2 ml-1 flex items-center gap-1.5 text-red-500">
                                             <AlertCircle size={14} />
-                                            <span className="text-xs font-medium">
-                                                {errors[field.name]}
-                                            </span>
+                                            <span className="text-xs font-medium"> {errors[field.name]} </span>
                                         </div>
                                     )}
                                 </div>
@@ -240,9 +197,7 @@ const Page = () => {
                                     disabled={loading}
                                    className="w-full rounded-xl bg-[#0a1f39] py-3.5 font-bold text-white shadow-lg shadow-[#0a1f39]/20 transition-all hover:bg-[#0b2c54] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    {loading
-                                        ? "Processing..."
-                                        : "Update Credentials"}
+                                    {loading ? "Processing..." : "Update Credentials"}
                                 </button>
 
                                 <button

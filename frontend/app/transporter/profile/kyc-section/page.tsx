@@ -5,27 +5,18 @@ import React, { useEffect, useState } from "react";
 import FileUploadField from "@/app/(customer)/components/FileUpload";
 import { toast } from "sonner";
 
-type FileField =
-    | "citizenshipCard"
-    | "drivingLicense"
-    | "vehicleRegistration"
-    | "vehiclePhoto";
+type FileField = | "citizenshipCard" | "drivingLicense" | "vehicleRegistration" | "vehiclePhoto";
 
 interface User {
     isVerified: boolean;
     isKycCompleted: boolean;
     isKycDataSubmitted: boolean;
-    verificationStatus:
-        | "approved"
-        | "pending"
-        | "rejected"
-        | null;
+    verificationStatus:  | "approved"  | "pending"  | "rejected"  | null;
 }
 
 const Page = () => {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
-
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -96,29 +87,17 @@ const Page = () => {
         ];
 
         if (!allowedTypes.includes(file.type)) {
-            setErrors((prev) => ({
-                ...prev, [fieldName]: "Only JPG, PNG or PDF allowed",
-            }));
+            setErrors((prev) => ({ ...prev, [fieldName]: "Only JPG, PNG or PDF allowed"}));
             return;
         }
 
         if (file.size > 3 * 1024 * 1024) {
-            setErrors((prev) => ({
-                ...prev, [fieldName]: "File exceeds 3MB limit",
-            }));
+            setErrors((prev) => ({...prev, [fieldName]: "File exceeds 3MB limit"}));
             return;
         }
 
-        setFormData((prev) => ({
-            ...prev, [fieldName]: file,
-        }));
-
-        setPreviews((prev) => ({
-            ...prev, [fieldName]: file.type.startsWith("image/")
-                ? URL.createObjectURL(file)
-                : "pdf-placeholder",
-        }));
-
+        setFormData((prev) => ({...prev, [fieldName]: file }));
+        setPreviews((prev) => ({...prev, [fieldName]: file.type.startsWith("image/")  ? URL.createObjectURL(file): "pdf-placeholder"}));
         setErrors((prev) => ({ ...prev, [fieldName]: "" }));
     };
 
@@ -150,9 +129,7 @@ const Page = () => {
         setLoading(true);
 
         try {
-            if (!formData.citizenshipCard || !formData.drivingLicense ||
-                !formData.vehicleRegistration || !formData.vehiclePhoto
-            ) {
+            if (!formData.citizenshipCard || !formData.drivingLicense ||  !formData.vehicleRegistration || !formData.vehiclePhoto) {
                 toast.error("Please upload all required documents");
                 return;
             }
@@ -336,8 +313,7 @@ const Page = () => {
                                         placeholder="BA 1 PA 1234"
                                         onChange={handleChange}
                                         className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.numberPlate
-                                            ? "border-red-300"
-                                            : "border-[#0b2c54]/10"
+                                            ? "border-red-300" : "border-[#0b2c54]/10"
                                             }`}
                                     />
 
@@ -358,8 +334,7 @@ const Page = () => {
                                         placeholder="e.g. 1500"
                                         onChange={handleChange}
                                         className={`w-full rounded-xl border bg-[#f5f7fa] px-4 py-3 text-sm text-slate-800 outline-none transition-all placeholder:text-[#b0aeae] focus:border-[#ee8d39] focus:ring-2 focus:ring-[#ee8d39]/15 ${errors.capacityKg
-                                            ? "border-red-300"
-                                            : "border-[#0b2c54]/10"
+                                            ? "border-red-300": "border-[#0b2c54]/10"
                                             }`}
                                     />
 
@@ -376,9 +351,7 @@ const Page = () => {
 
                     <div className="overflow-hidden rounded-2xl border border-[#0b2c54]/10 bg-white shadow-sm">
                         <div className="border-b border-[#0b2c54]/10 px-5 py-4">
-                            <h2 className="font-bold text-[#0a1f39]">
-                                Service Area
-                            </h2>
+                            <h2 className="font-bold text-[#0a1f39]">  Service Area </h2>
                         </div>
 
                         <div className="p-5">
@@ -406,8 +379,6 @@ const Page = () => {
                                         </p>
                                     )}
                                 </div>
-
-
                             </div>
                         </div>
                     </div>

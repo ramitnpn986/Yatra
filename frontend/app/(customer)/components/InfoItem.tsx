@@ -1,12 +1,7 @@
   const formatValue = ( value: string | number | undefined | null) => {
-    if (
-      value === undefined ||
-      value === null ||
-      value === ""
-    ) {
+    if ( value === undefined || value === null || value === "") {
       return "Not provided";
     }
-
     return value;
   };
 

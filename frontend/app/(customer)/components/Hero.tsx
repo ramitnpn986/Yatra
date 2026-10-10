@@ -161,9 +161,7 @@ export default function Hero() {
                 <p className="text-sm font-bold text-white">Safe · Fast · Easy</p>
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
     </section>

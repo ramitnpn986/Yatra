@@ -34,12 +34,9 @@ export default function Footer() {
 
 
           <div>
-            <h3 className="mb-5 text-sm font-semibold text-white"> Company
-              <Link
-                href="/contact"
-                className="transition hover:text-[#ee8d39]"
-              >
-                Contact
+            <h3 className="mb-5 text-sm font-semibold text-white"> 
+              <Link href="/contact" className="transition hover:text-[#ee8d39]">
+               Company  Contact
               </Link>
             </h3>
 
@@ -53,7 +50,6 @@ export default function Footer() {
 
           <div>
             <h3 className="mb-5 text-sm font-semibold  text-white">  Services </h3>
-
             <div className="flex flex-col gap-3 text-sm text-slate-400">
               <Link href="/register" className="transition hover:text-[#ee8d39]">
                 Book a Ride
@@ -99,7 +95,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-sm text-slate-500 md:flex-row md:px-8">
           <p>

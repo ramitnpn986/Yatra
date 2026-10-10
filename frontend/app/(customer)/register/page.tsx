@@ -1,163 +1,239 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { User, Phone, Lock, ArrowRight } from "lucide-react";
 
 export default function RegisterPage() {
-    const [name, setName] = useState("");
-    const [err_name, setNameError] = useState("");
-    const [phone, setPhone] = useState("");
-    const [err_phone, setPhoneError] = useState("");
-    const [password, setPassword] = useState("");
-    const [err_password, setPasswordError] = useState("");
+  const [name, setName] = useState("");
+  const [err_name, setNameError] = useState("");
+  const [phone, setPhone] = useState("");
+  const [err_phone, setPhoneError] = useState("");
+  const [password, setPassword] = useState("");
+  const [err_password, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const router = useRouter();
+  const router = useRouter();
 
-    const validation = () => {
-        let isValid = true;
+  const validation = () => {
+    let isValid = true;
 
-        // Name validation
-        const trimmedName = name.trim();
-
-        if (!trimmedName) {
-            setNameError("Name is required");
-            isValid = false;
-        } else if (trimmedName.length < 3) {
-            setNameError("Name must contain at least 3 characters");
-            isValid = false;
-        } else if (trimmedName.length > 50) {
-            setNameError("Name must not exceed 50 characters");
-            isValid = false;
-        } else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(trimmedName)) {
-            setNameError("Name must contain letters only");
-            isValid = false;
-        } else {
-            setNameError("");
-        }
-
-        // Phone validation
-        const trimmedPhone = phone.trim();
-
-        if (!trimmedPhone) {
-            setPhoneError("Phone number is required");
-            isValid = false;
-        } else if (!/^9\d{9}$/.test(trimmedPhone)) {
-            setPhoneError("Enter a valid 10-digit Nepali mobile number");
-            isValid = false;
-        } else {
-            setPhoneError("");
-        }
-
-        // Password validation
-        if (!password) {
-            setPasswordError("Password is required");
-            isValid = false;
-        } else if (password.length < 8) {
-            setPasswordError("Password must be at least 8 characters long");
-            isValid = false;
-        } else if (!/[A-Z]/.test(password)) {
-            setPasswordError("Password must contain at least one capital letter");
-            isValid = false;
-        } else if (!/\d/.test(password)) {
-            setPasswordError("Password must contain at least one digit");
-            isValid = false;
-        } else if (!/[^a-zA-Z0-9\s]/.test(password)) {
-            setPasswordError("Password must contain at least one special symbol");
-            isValid = false;
-        } else {
-            setPasswordError("");
-        }
-
-        return isValid;
-    };
-
-
-    const handleRegister = async (e: React.FormEvent) => {
-        try {
-            e.preventDefault();
-
-            if (!validation()) return;
-
-            const res = await fetch(`/api/passenger/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name,
-                    phone,
-                    password,
-                })
-            })
-
-            const data = await res.json();
-            if (!res.ok) {
-                console.log(data.message);
-                return
-            }
-
-            router.push("/login")
-
-        } catch (err) {
-            console.log("Error at login logic :", err)
-        }
+    // Name validation
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setNameError("Name is required");
+      isValid = false;
+    } else if (trimmedName.length < 3) {
+      setNameError("Name must contain at least 3 characters");
+      isValid = false;
+    } else if (trimmedName.length > 50) {
+      setNameError("Name must not exceed 50 characters");
+      isValid = false;
+    } else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(trimmedName)) {
+      setNameError("Name must contain letters only");
+      isValid = false;
+    } else {
+      setNameError("");
     }
 
-    return (
+    // Phone validation
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
+      setPhoneError("Phone number is required");
+      isValid = false;
+    } else if (!/^9\d{9}$/.test(trimmedPhone)) {
+      setPhoneError("Enter a valid 10-digit Nepali mobile number");
+      isValid = false;
+    } else {
+      setPhoneError("");
+    }
 
-        <div className="flex min-h-screen items-center justify-center bg-[#0a1f39]">
-            <form onSubmit={handleRegister} className="flex w-full flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-8 shadow-lg md:w-1/2 lg:w-1/3">
-                <Image src="/yatralogo.png" alt="Yatra" width={100} height={35} className="mx-auto mb-2" />
-                <h1 className="text-xl font-semibold text-[#d86d0e]"> Register</h1>
+    // Password validation
+    if (!password) {
+      setPasswordError("Password is required");
+      isValid = false;
+    } else if (password.length < 8) {
+      setPasswordError("Password must be at least 8 characters long");
+      isValid = false;
+    } else if (!/[A-Z]/.test(password)) {
+      setPasswordError("Password must contain at least one capital letter");
+      isValid = false;
+    } else if (!/\d/.test(password)) {
+      setPasswordError("Password must contain at least one digit");
+      isValid = false;
+    } else if (!/[^a-zA-Z0-9\s]/.test(password)) {
+      setPasswordError("Password must contain at least one special symbol");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
 
-                <div>
-                    <input
-                        type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className={`w-full rounded-lg border-2 p-3 text-base text-gray-900 outline-none ${err_name ? "border-red-300" : "border-gray-300"
-                            }`}
-                    />
-                    {err_name && ( <span className="mt-1 block text-sm text-red-400">  {err_name} </span> )}
+    return isValid;
+  };
 
-                </div>
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-                <div>
-                    <input
-                        type="tel"
-                        placeholder="Phone number"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className=" w-full border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                    />
+    if (!validation()) return;
 
-                    { err_phone && (<span className="mt-1 block text-sm text-red-400">{err_phone} </span>) }
+    setLoading(true);
 
-                </div>
+    try {
+      const res = await fetch(`/api/passenger/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          password,
+        }),
+      });
 
-                <div>
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border-2 border-gray-300 focus:border-primary focus:outline-none p-3 rounded-lg text-base text-gray-900 placeholder:text-gray-400"
-                    />
+      const data = await res.json();
 
-                    { err_password && (<span className="mt-1 block text-sm text-red-400">{err_password}</span>) }
+      if (!res.ok) {
+        toast.error(data.message || "Registration failed");
+        return;
+      }
 
-                </div>
+      toast.success("Account created successfully! Please login.");
+      router.push("/login");
+    } catch (err) {
+      console.error("Error at registration logic:", err);
+      toast.error("Unable to connect to server");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-                <button type="submit" className="bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition w-full">
-                    Register
-                </button>
-                <p className="text-sm text-gray-600 text-center">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-primary font-semibold"> Login </Link>
-                </p>
-
-            </form>
+  return (
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-[#071325] via-[#0a1f39] to-[#040d1a] px-4 py-4">
+     
+      <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-[#ee8d39]/10 blur-3xl pointer-events-none" />
+      <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-white/95 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
+        
+  
+        <div className="absolute top-0 right-0 rounded-bl-2xl bg-[#0a1f39] px-5 py-2 text-xs font-bold tracking-wider uppercase text-[#ee8d39] shadow-sm">
+          Passenger
         </div>
-    );
+
+   
+        <div className="mb-6 mt-2 text-center">
+          <Image
+            src="/yatralogo.png"
+            alt="Yatra"
+            width={80}
+            height={22}
+            className="mx-auto mb-4 rounded-3xl object-contain"
+          />
+          <p className="mt-1 text-sm text-slate-500">Sign up to get started with your journeys</p>
+        </div>
+
+        <form onSubmit={handleRegister} className="space-y-4">
+    
+          <div>
+            <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-600">
+              Full Name
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setNameError("");
+                }}
+                className={`w-full rounded-xl border bg-slate-50/50 py-3 pl-5 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                  err_name
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-200 focus:border-[#0a1f39] focus:ring-slate-100"
+                }`}
+              />
+            </div>
+            {err_name && ( <p className="mt-1 text-xs  text-red-500">{err_name}</p>)}
+          </div>
+
+
+          <div>
+            <label className="mb-1.5 block text-xs font-bold  tracking-wide text-slate-600">
+              Phone Number
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type="tel"
+                placeholder="98XXXXXXXX"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  setPhoneError("");
+                }}
+                className={`w-full rounded-xl border bg-slate-50/50 py-3 pl-5 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                  err_phone
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-200 focus:border-[#0a1f39] focus:ring-slate-100"
+                }`}
+              />
+            </div>
+            {err_phone && (
+              <p className="mt-1 text-xs  text-red-500">{err_phone}</p>
+            )}
+          </div>
+
+   
+          <div>
+            <label className="mb-1.5 block text-xs font-bold  tracking-wide text-slate-600">
+              Password
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type="password"
+                placeholder="Create a strong password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError("");
+                }}
+                className={`w-full rounded-xl border bg-slate-50/50 py-3 pl-5 pr-4 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
+                  err_password
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                    : "border-slate-200 focus:border-[#0a1f39] focus:ring-slate-100"
+                }`}
+              />
+            </div>
+            {err_password && (<p className="mt-1 text-xs  text-red-500">{err_password}</p>)}
+          </div>
+
+         
+          <button
+            type="submit"
+            disabled={loading}
+            className="group mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a1f39] py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#122e54] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Registering...
+              </span>
+            ) : (
+              <>
+                Register <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </>
+            )}
+          </button>
+        </form>
+
+   
+        <div className="mt-8 text-center text-sm text-slate-500">
+          Already have an account?{" "}
+          <Link href="/login" className="font-bold text-[#ee8d39] transition hover:underline">
+            Login
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }

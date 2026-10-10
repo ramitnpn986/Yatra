@@ -1,3 +1,5 @@
+"use client"
+
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
@@ -7,19 +9,22 @@ import {
   MapPin,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Home() {
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
       <Hero />
-      <div className={`pointer-events-none relative -mb-px w-full overflow-hidden leading-none ${"bg-white"}`} aria-hidden="true" >
+
+      <div className={`pointer-events-none relative -mb-px w-full overflow-hidden leading-none ${"bg-gray-50"}`} aria-hidden="true" >
         <svg className={`relative block h-[110px] w-full md:h-[120px] ${true ? "rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none" >
           <path d="M0,40 C180,110 360,115 540,70 C760,15 900,5 1080,45 C1230,80 1340,95 1440,50 L1440,120 L0,120 Z" fill={"#0a1f39"} /> </svg>
       </div>
 
 
-      <section className="relative  px-6 py-16">
+      <section className="relative  px-6 py-16 bg-gray-50">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-[#ee8d39] md:text-4xl">
@@ -32,7 +37,43 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-3">
+
+
+            <div  className="group overflow-hidden rounded-3xl bg-white shadow hover:shadow-xl transition-all duration-300 ">
+              <div className="relative h-68 overflow-hidden">
+                <Image
+                  src="/bike-ride.png"
+                  alt="Yatra rides"
+                  fill
+                  className="object-content"
+                />
+
+                <div className="absolute group bottom-2 left-3 rounded-full bg-[#aaa] px-4 py-2 text-sm font-semibold  shadow hover:shadow-xl">
+                  Everyday Rides
+                </div>
+              </div>
+
+              <div className="p-7">
+                <div className="mb-3 flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-slate-900"> Bike rides</h3>
+                </div>
+
+                <p className="max-w-lg text-sm leading-6 text-slate-500">
+                  Book a bike  in minutes. Find nearby transport
+                  providers, track your ride in real time, and travel
+                  comfortably to your destination.
+                </p>
+
+                <Link href="/login"
+                  className="mt-6 inline-flex items-center gap-2 font-semibold text-indigo-600 transition hover:gap-3"
+                >
+                  Book a bike
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
+            </div>
+
             <div className="group overflow-hidden rounded-3xl bg-white shadow hover:shadow-xl transition-all duration-300 ">
               <div className="relative h-64 overflow-hidden">
                 <Image
@@ -42,7 +83,7 @@ export default function Home() {
                   className="object-cover"
                 />
 
-                <div className="absolute bottom-5 group left-5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold  shadow hover:shadow-xl">
+                <div className="absolute  group bottom-2 left-3 rounded-full bg-[#aaa] px-4 py-2 text-sm font-semibold  shadow hover:shadow-xl">
                   Everyday Rides
                 </div>
               </div>
@@ -53,7 +94,7 @@ export default function Home() {
                 </div>
 
                 <p className="max-w-lg text-sm leading-6 text-slate-500">
-                  Book a bike or car in minutes. Find nearby transport
+                  Book a  car in minutes. Find nearby transport
                   providers, track your ride in real time, and travel
                   comfortably to your destination.
                 </p>
@@ -61,7 +102,7 @@ export default function Home() {
                 <Link href="/login"
                   className="mt-6 inline-flex items-center gap-2 font-semibold text-indigo-600 transition hover:gap-3"
                 >
-                  Book a Ride
+                  Book a car
                   <ArrowRight size={18} />
                 </Link>
               </div>
@@ -79,7 +120,7 @@ export default function Home() {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-                <div className="absolute bottom-5 left-5 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-slate-900 shadow">
+                <div className="absolute bottom-2 left-3 rounded-full bg-[#aaa] px-4 py-2 text-sm font-semibold text-slate-900 shadow">
                   Tours & Rentals
                 </div>
               </div>
@@ -265,6 +306,10 @@ export default function Home() {
         </div>
       </section>
 
+      <div className={`pointer-events-none relative -mb-px w-full overflow-hidden leading-none ${"bg-white"}`} aria-hidden="true" >
+        <svg className={`relative block h-[110px] w-full md:h-[120px] ${true ? "rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none" >
+          <path d="M0,40 C180,110 360,115 540,70 C760,15 900,5 1080,45 C1230,80 1340,95 1440,50 L1440,120 L0,120 Z" fill={"#020618"} /> </svg>
+      </div>
 
       <section className="px-6 py-24">
         <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-[#0F172A] px-8 py-14 text-center shadow-xl md:px-16">

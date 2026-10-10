@@ -2,8 +2,39 @@
 
 import Image from "next/image";
 import { ArrowRight, ShieldCheck, Star, MapPin, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+
+const taglines = [
+  "Nepal's All-in-one Mobility Platform",
+  "Your Journey, Our Priority",
+  "Ride, Rent, and Explore Nepal"
+];
+
 
 export default function Hero() {
+
+  const [index, setIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+
+  const transformStyle = isHovered
+    ? `translateX(${1}px) rotateY(${33}deg) translateZ(${39}px)`
+    : `translateX(${0}px) rotateY(${0}deg) translateZ(${0}px)`;
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setIsVisible(false);
+
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % taglines.length);
+        setIsVisible(true);
+      }, 500);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-[#0a1f39] px-5 py-16 sm:px-6 md:py-24">
       <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-[#0b0637] blur-[120px]" />
@@ -13,8 +44,9 @@ export default function Hero() {
         <div className="grid w-full items-center gap-12 lg:grid-cols-12 lg:gap-8">
           <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left">
 
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs sm:text-sm font-medium text-[#ee8d39] backdrop-blur-md">
-              <span className="font-semibold tracking-[0.01rem] italic">Nepal's All-in-One Mobility Platform</span>
+            <div className="mb-6 inline-flex items-center  rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs sm:text-sm font-medium text-[#ee8d39] backdrop-blur-md">
+              <span className={`overflow-hidden shadow-xl p-2 rounded-2xl shadow-black whitespace-nowrap font-semibold italic tracking-[0.01rem] transition-[max-width,opacity] duration-600 ease-in-out ${isVisible
+                ? "max-w-[400px] opacity-100" : "max-w-0 opacity-0"}`}>{taglines[index]}</span>
             </div>
 
             <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.15]">
@@ -71,7 +103,7 @@ export default function Hero() {
 
                 <div className="relative h-[80%] w-1/3 overflow-hidden rounded-2xl border border-white/10 shadow-xl">
                   <Image
-                    src="/ev-nexon.png" 
+                    src="/ev-nexon.png"
                     alt="Yatra Car Rental"
                     fill
                     priority
@@ -84,10 +116,10 @@ export default function Hero() {
                   </span>
                 </div>
 
-          
+
                 <div className="relative h-[100%] w-1/3 overflow-hidden rounded-2xl border border-white/10 shadow-lg">
                   <Image
-                    src="/booking.png" 
+                    src="/booking.png"
                     alt="Yatra Delivery"
                     fill
                     priority
@@ -101,14 +133,26 @@ export default function Hero() {
                 </div>
               </div>
 
-              <div className="absolute top-6 left-2 z-20 flex items-center gap-2 rounded-2xl border border-white/15  p-2 shadow-2xl backdrop-blur-xl">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl">
+              <div
+                className={`absolute inset-0 z-20 bg [perspective:1000px] w-45 h-18 flex items-center gap-2 rounded-2xl border border-white/15 p-3 shadow-2xl backdrop-blur-xl  transition-transform duration-500 ease-out`}
+                style={{
+                  transformStyle: "preserve-3d",
+                  transform: transformStyle,
+                  zIndex: isHovered ? 20 : 3,
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
                   <MapPin className="h-5 w-5 text-[#aaa]" />
                 </div>
+
                 <div>
-                  <p className="text-xs font-semibold text-[#aaa]">Live Tracking</p>
-                  <p className="text-[11px] text-gray-400 font-medium flex items-center gap-1">
-                    Active across 7 Provinces
+                  <p className="text-xs font-semibold text-[#aaa]">
+                    Network sync
+                  </p>
+                  <p className="flex items-center gap-1 text-[11px] font-medium text-gray-400">
+                    Real-time updates
                   </p>
                 </div>
               </div>
@@ -116,7 +160,6 @@ export default function Hero() {
               <div className="absolute top-26 left-2 z-20 flex items-center gap-3 rounded-2xl border border-white/15 bg-slate-900/80 p-4 shadow-2xl backdrop-blur-xl">
                 <p className="text-sm font-bold text-white">Safe · Fast · Easy</p>
               </div>
-
             </div>
 
           </div>

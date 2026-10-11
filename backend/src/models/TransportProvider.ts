@@ -6,14 +6,21 @@ const transportProviderSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            minlength: [4, "Transporter name must consist at least 4 characters"],
-            maxLength: [50, "Transporter name must not exceed 50 characters"],
+            minlength: [
+                4, "Transporter name must consist at least 4 characters",
+            ],
+            maxlength: [
+                50, "Transporter name must not exceed 50 characters",
+            ],
         },
 
         phone: {
             type: String,
             required: true,
-            match: [/^(98|97)\d{8}$/, "Please enter a valid Nepali mobile number"],
+            match: [
+                /^(98|97)\d{8}$/,
+                "Please enter a valid Nepali mobile number",
+            ],
         },
 
         password: {
@@ -40,16 +47,34 @@ const transportProviderSchema = new mongoose.Schema(
             },
         },
 
+
         location: {
             type: {
                 type: String,
                 enum: ["Point"],
                 default: "Point",
             },
+
             coordinates: {
                 type: [Number],
-                required: true,
+                default: undefined,
+                validate: {
+                    validator: (coordinates: number[] | undefined) => {
+                        if (coordinates === undefined) return true;
+
+                        return (
+                            coordinates.length === 2 &&
+                            coordinates.every(Number.isFinite) &&
+                            coordinates[0] >= -180 &&
+                            coordinates[0] <= 180 &&
+                            coordinates[1] >= -90 &&
+                            coordinates[1] <= 90
+                        );
+                    },
+                    message:"Coordinates must be [longitude, latitude] with valid values.",
+                },
             },
+
             address: String,
             province: String,
             district: String,
@@ -57,19 +82,38 @@ const transportProviderSchema = new mongoose.Schema(
             ward: String,
         },
 
+  
         currentLocation: {
             type: {
                 type: String,
                 enum: ["Point"],
                 default: "Point",
             },
+
             coordinates: {
                 type: [Number],
-                default: [85.3240, 27.7172],
+                default: undefined,
+                validate: {
+                    validator: (coordinates: number[] | undefined) => {
+                        if (coordinates === undefined) return true;
+
+                        return (
+                            coordinates.length === 2 &&
+                            coordinates.every(Number.isFinite) &&
+                            coordinates[0] >= -180 &&
+                            coordinates[0] <= 180 &&
+                            coordinates[1] >= -90 &&
+                            coordinates[1] <= 90
+                        );
+                    },
+                    message:
+                        "Coordinates must be [longitude, latitude] with valid values.",
+                },
             },
+
             lastUpdatedAt: {
                 type: Date,
-                default: Date.now,
+                default: undefined,
             },
         },
 
@@ -127,16 +171,34 @@ const transportProviderSchema = new mongoose.Schema(
             default: true,
         },
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+    }
 );
 
-transportProviderSchema.pre("save", async function () {
-    if (this.isNew && this.location?.coordinates) {
+transportProviderSchema.pre("save", function () {
+    if (!this.isNew) return;
+
+    const coordinates = this.location?.coordinates;
+
+    const hasValidCoordinates =
+        Array.isArray(coordinates) &&
+        coordinates.length === 2 &&
+        coordinates.every(Number.isFinite) &&
+        coordinates[0] >= -180 &&
+        coordinates[0] <= 180 &&
+        coordinates[1] >= -90 &&
+        coordinates[1] <= 90;
+
+    if (hasValidCoordinates) {
         this.currentLocation = {
             type: "Point",
-            coordinates: this.location.coordinates,
+            coordinates: [...coordinates],
             lastUpdatedAt: new Date(),
         };
+    } else {
+    
+        this.currentLocation = undefined;
     }
 });
 
@@ -144,7 +206,4 @@ transportProviderSchema.index({
     currentLocation: "2dsphere",
 });
 
-export const TransportProvider = mongoose.model(
-    "TransportProvider",
-    transportProviderSchema
-);
+export const TransportProvider = mongoose.model( "TransportProvider",  transportProviderSchema);

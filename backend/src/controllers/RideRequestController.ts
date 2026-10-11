@@ -1770,7 +1770,6 @@ export const completeRental = async (req: Request, res: Response) => {
             });
         }
 
-        // Make the vehicle available again after rental completion
         await Vehicle.findByIdAndUpdate(
             rental.vehicle,
             {
@@ -1881,7 +1880,6 @@ const calculateRoute = async (locations: RentalLocation[]): Promise<RouteResult>
         estimatedDurationMinutes: data.routes[0].duration / 60,
     };
 };
-
 
 export const searchAvailable = async (req: Request, res: Response) => {
     try {
@@ -2084,7 +2082,6 @@ export const searchAvailable = async (req: Request, res: Response) => {
         });
     }
 };
-
 
 export const getVehicleWithTransporter = async (
     req: Request,
